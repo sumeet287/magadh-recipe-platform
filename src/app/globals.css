@@ -1,0 +1,430 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 45 100% 98%;
+    --foreground: 20 40% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 20 40% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 40% 15%;
+    --primary: 26 67% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 25% 92%;
+    --secondary-foreground: 20 40% 20%;
+    --muted: 30 20% 95%;
+    --muted-foreground: 25 20% 50%;
+    --accent: 40 80% 45%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 75% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 30 20% 88%;
+    --input: 30 20% 88%;
+    --ring: 26 67% 58%;
+    --radius: 0.75rem;
+    --chart-1: 26 67% 58%;
+    --chart-2: 40 80% 45%;
+    --chart-3: 0 75% 50%;
+    --chart-4: 160 50% 40%;
+    --chart-5: 220 70% 55%;
+    --sidebar-background: 20 40% 12%;
+    --sidebar-foreground: 45 30% 90%;
+    --sidebar-primary: 26 67% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 20 30% 20%;
+    --sidebar-accent-foreground: 45 30% 90%;
+    --sidebar-border: 20 25% 22%;
+    --sidebar-ring: 26 67% 58%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-brand-400;
+  }
+
+  /* Hide scrollbar utility */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer components {
+  .container {
+    @apply w-full px-4 sm:px-6 lg:px-8 mx-auto;
+  }
+
+  /* Rich text styles for product descriptions */
+  .prose-brand {
+    @apply text-earth-700 leading-relaxed;
+  }
+  .prose-brand h3 {
+    @apply text-earth-dark font-serif font-semibold text-base mt-6 mb-2;
+  }
+  .prose-brand p {
+    @apply mb-3 text-sm;
+  }
+  .prose-brand ul {
+    @apply list-disc list-inside space-y-1 text-sm;
+  }
+  .prose-brand li {
+    @apply text-earth-700;
+  }
+
+  /* Section divider */
+  .section-divider {
+    @apply w-12 h-1 bg-brand-gradient rounded-full mx-auto my-4;
+  }
+
+  /* Highlight text */
+  .text-highlight {
+    @apply text-transparent bg-clip-text bg-brand-gradient;
+  }
+
+  /* Premium card */
+  .card-premium {
+    @apply bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-0.5 border border-gray-100;
+  }
+}
+
+/* Product image zoom cursor */
+.cursor-zoom-in {
+  cursor: zoom-in;
+}
+.cursor-zoom-out {
+  cursor: zoom-out;
+}
+
+/* Loading skeleton shimmer */
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(240, 236, 228, 0) 0%,
+    rgba(240, 236, 228, 0.8) 50%,
+    rgba(240, 236, 228, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ─── Hero Aurora Orbs ──────────────────────────────────────── */
+@keyframes orb-drift-1 {
+  0%,100% { transform: translate(0px, 0px) scale(1); }
+  33%      { transform: translate(40px, -30px) scale(1.08); }
+  66%      { transform: translate(-20px, 20px) scale(0.95); }
+}
+@keyframes orb-drift-2 {
+  0%,100% { transform: translate(0px, 0px) scale(1); }
+  40%     { transform: translate(-50px, 25px) scale(1.12); }
+  70%     { transform: translate(30px, -15px) scale(0.93); }
+}
+@keyframes orb-drift-3 {
+  0%,100% { transform: translate(0px, 0px) scale(1); }
+  50%     { transform: translate(25px, 40px) scale(1.06); }
+}
+.hero-orb-1 { animation: orb-drift-1 12s ease-in-out infinite; }
+.hero-orb-2 { animation: orb-drift-2 16s ease-in-out infinite; }
+.hero-orb-3 { animation: orb-drift-3 10s ease-in-out infinite; }
+
+/* ─── Hero Ring & Orb ───────────────────────────────────────── */
+@keyframes ring-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes orb-pulse {
+  0%,100% { transform: scale(1);    opacity: 0.7; }
+  50%     { transform: scale(1.18); opacity: 1;   }
+}
+
+/* ─── Film grain overlay ────────────────────────────────────── */
+.hero-grain-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 260px 260px;
+  opacity: 0.038;
+  animation: grain-drift 0.35s steps(1) infinite;
+}
+@keyframes grain-drift {
+  0%  { background-position: 0    0;    }
+  14% { background-position: -26px -26px; }
+  28% { background-position: 26px  13px; }
+  42% { background-position: -13px 26px; }
+  57% { background-position: 13px -13px; }
+  71% { background-position: -26px 0;   }
+  85% { background-position: 0    26px; }
+  100%{ background-position: 26px -26px; }
+}
+
+/* ─── 3D Tilt Card ──────────────────────────────────────────── */
+.tilt-card {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: box-shadow 0.3s ease;
+}
+
+.tilt-shine {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 20;
+  background: radial-gradient(
+    ellipse at var(--shine-x, 50%) var(--shine-y, 50%),
+    rgba(255, 255, 255, 0.13) 0%,
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.group:hover .tilt-shine {
+  opacity: 1;
+}
+
+/* ─── Scroll Reveal ─────────────────────────────────────────── */
+.reveal-up {
+  opacity: 0;
+  transform: translateY(36px);
+  transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-up.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-up.delay-100 { transition-delay: 0.1s; }
+.reveal-up.delay-200 { transition-delay: 0.2s; }
+.reveal-up.delay-300 { transition-delay: 0.3s; }
+.reveal-up.delay-400 { transition-delay: 0.4s; }
+
+/* ─── Category Card 3D ──────────────────────────────────────── */
+.cat-3d {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.45s cubic-bezier(0.03, 0.98, 0.52, 0.99),
+    box-shadow 0.45s ease;
+}
+.cat-3d:hover {
+  transform: perspective(900px) translateZ(18px) scale(1.02);
+  box-shadow: 0 24px 56px rgba(26, 14, 7, 0.45),
+    0 8px 20px rgba(212, 132, 58, 0.2);
+}
+.cat-3d-inner {
+  transition: transform 0.45s cubic-bezier(0.03, 0.98, 0.52, 0.99);
+  transform: translateZ(0);
+}
+.cat-3d:hover .cat-3d-inner {
+  transform: translateZ(28px);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LUXURY DESIGN SYSTEM
+═══════════════════════════════════════════════════════════════ */
+
+/* ─── Marquee / Infinite Scroll ─────────────────────────────── */
+@keyframes marquee-ltr {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes marquee-rtl {
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+.marquee-track     { animation: marquee-ltr 32s linear infinite; }
+.marquee-track-rev { animation: marquee-rtl 26s linear infinite; }
+.marquee-track:hover,
+.marquee-track-rev:hover { animation-play-state: paused; }
+
+/* ─── Shimmer / Gold Text ────────────────────────────────────── */
+@keyframes shimmer-sweep {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    #D4843A 0%,
+    #f5cf7a 28%,
+    #ffe9a0 42%,
+    #f5cf7a 56%,
+    #D4843A 80%,
+    #e8a951 100%
+  );
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer-sweep 5s linear infinite;
+}
+
+/* ─── Luxury Divider ─────────────────────────────────────────── */
+.divider-luxury {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(212, 132, 58, 0.12) 10%,
+    rgba(212, 132, 58, 0.5)  50%,
+    rgba(212, 132, 58, 0.12) 90%,
+    transparent 100%
+  );
+}
+
+/* ─── Luxury Number Label ────────────────────────────────────── */
+.luxury-num {
+  font-family: Georgia, serif;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+  color: rgba(212, 132, 58, 0.45);
+  text-transform: uppercase;
+}
+
+/* ─── Ingredient Card ────────────────────────────────────────── */
+.ingredient-card {
+  transition: transform 0.4s cubic-bezier(0.03, 0.98, 0.52, 0.99),
+              box-shadow 0.4s ease;
+}
+.ingredient-card:hover {
+  transform: translateY(-8px) scale(1.015);
+  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.55),
+              0 6px 18px rgba(212, 132, 58, 0.18);
+}
+
+/* ─── Text glow (hero heading emphasis) ─────────────────────── */
+.text-glow-gold {
+  text-shadow:
+    0 0 40px rgba(212, 132, 58, 0.55),
+    0 0 80px rgba(212, 132, 58, 0.25),
+    0 2px 4px rgba(0, 0, 0, 0.8);
+}
+.text-glow-white {
+  text-shadow:
+    0 0 30px rgba(255, 245, 230, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.9);
+}
+
+/* ─── Process step line ──────────────────────────────────────── */
+.process-line {
+  background: linear-gradient(180deg, rgba(212,132,58,0.6) 0%, transparent 100%);
+}
+
+/* ─── Preloader line ─────────────────────────────────────────── */
+/* Preloader line */
+.page-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #D4843A, #f0c579, #D4843A);
+  background-size: 200%;
+  animation: shimmer 1.2s linear infinite;
+  z-index: 9999;
+}
+
+/* ─── Luxury Glass Morphism ─────────────────────────────────── */
+.glass-dark {
+  background: rgba(15, 8, 5, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(212, 132, 58, 0.12);
+}
+.glass-light {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border: 1px solid rgba(212, 132, 58, 0.1);
+}
+
+/* ─── Premium Nav Link ───────────────────────────────────────── */
+.nav-link-luxury {
+  position: relative;
+  transition: color 0.22s ease;
+}
+.nav-link-luxury::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1.5px;
+  background: linear-gradient(90deg, #D4843A, #f0c579);
+  transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-link-luxury:hover::after,
+.nav-link-luxury.active::after {
+  width: 100%;
+}
+
+/* ─── Quote reveal animation ─────────────────────────────────── */
+@keyframes quote-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.quote-revealed { animation: quote-in 0.7s cubic-bezier(0.22,1,0.36,1) both; }
+
+/* ─── CTA Glow Button ────────────────────────────────────────── */
+.btn-glow {
+  position: relative;
+  overflow: hidden;
+}
+.btn-glow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: conic-gradient(from 0deg, #D4843A, #f0c579, #e8a43f, #D4843A);
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+  animation: conic-spin 3s linear infinite;
+}
+.btn-glow:hover::before { opacity: 1; }
+@keyframes conic-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ─── Section fade-in with stagger ──────────────────────────── */
+.stagger-1 { transition-delay: 0.05s; }
+.stagger-2 { transition-delay: 0.12s; }
+.stagger-3 { transition-delay: 0.19s; }
+.stagger-4 { transition-delay: 0.26s; }
+.stagger-5 { transition-delay: 0.33s; }
+.stagger-6 { transition-delay: 0.40s; }

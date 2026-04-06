@@ -1,0 +1,162 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import { ProductDetailClient } from "./product-detail-client";
+
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
+
+async function getProduct(slug: string) {
+  return prisma.product.findFirst({
+    where: { slug, status: "ACTIVE", isActive: true },
+    include: {
+      category: true,
+      variants: {
+        where: { isActive: true },
+        orderBy: { sortOrder: "asc" },
+      },
+      images: { orderBy: { sortOrder: "asc" } },
+      reviews: {
+        where: { status: "APPROVED" },
+        include: {
+          user: { select: { id: true, name: true, image: true } },
+        },
+        orderBy: { createdAt: "desc" },
+        take: 20,
+      },
+    },
+  });
+}
+
+async function getRelatedProducts(categoryId: string, excludeId: string) {
+  return prisma.product.findMany({
+    where: {
+      categoryId,
+      id: { not: excludeId },
+      status: "ACTIVE",
+      isActive: true,
+    },
+    take: 4,
+    include: {
+      category: { select: { name: true, slug: true } },
+      variants: {
+        where: { isActive: true },
+        orderBy: { sortOrder: "asc" },
+        select: { id: true, name: true, price: true, mrp: true, stock: true, isDefault: true },
+      },
+      images: {
+        orderBy: { sortOrder: "asc" },
+        select: { url: true, altText: true, isPrimary: true },
+      },
+      reviews: { where: { status: "APPROVED" }, select: { rating: true } },
+      _count: { select: { reviews: true } },
+    },
+  });
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getProduct(slug);
+  if (!product) return { title: "Product Not Found" };
+
+  const defaultVariant = product.variants.find((v) => v.isDefault) ?? product.variants[0];
+  const image = product.images.find((i) => i.isPrimary) ?? product.images[0];
+
+  return {
+    title: product.metaTitle ?? `${product.name} — Magadh Recipe`,
+    description:
+      product.metaDesc ??
+      product.shortDescription ??
+      `Buy ${product.name} online. Authentic handcrafted ${product.category.name} from Bihar.`,
+    openGraph: {
+      title: product.name,
+      description: product.shortDescription ?? "",
+      images: image ? [{ url: image.url, alt: product.name }] : [],
+    },
+    other: {
+      "product:price:amount": String(defaultVariant?.price ?? 0),
+      "product:price:currency": "INR",
+    },
+  };
+}
+
+export default async function ProductDetailPage({ params }: PageProps) {
+  const { slug } = await params;
+  const product = await getProduct(slug);
+  if (!product) notFound();
+
+  const relatedProducts = await getRelatedProducts(product.categoryId, product.id);
+
+  const avgRating =
+    product.reviews.length > 0
+      ? product.reviews.reduce((s, r) => s + r.rating, 0) / product.reviews.length
+      : 0;
+
+  // Structured data for product
+  const defaultVariant = product.variants.find((v) => v.isDefault) ?? product.variants[0];
+  const primaryImage = product.images.find((i) => i.isPrimary) ?? product.images[0];
+
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.shortDescription ?? product.description ?? "",
+    image: product.images.map((i) => i.url),
+    brand: { "@type": "Brand", name: "Magadh Recipe" },
+    ...(defaultVariant && {
+      offers: {
+        "@type": "Offer",
+        price: defaultVariant.price,
+        priceCurrency: "INR",
+        availability:
+          defaultVariant.stock > 0
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
+        seller: { "@type": "Organization", name: "Magadh Recipe" },
+      },
+    }),
+    ...(avgRating > 0 && {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: avgRating.toFixed(1),
+        reviewCount: product.reviews.length,
+        bestRating: "5",
+        worstRating: "1",
+      },
+    }),
+  };
+
+  const relatedCardData = relatedProducts.map((p) => ({
+    id: p.id,
+    name: p.name,
+    slug: p.slug,
+    shortDescription: p.shortDescription,
+    spiceLevel: p.spiceLevel,
+    isVeg: p.isVeg,
+    isBestseller: p.isBestseller,
+    isNewArrival: p.isNewArrival,
+    category: p.category,
+    images: p.images,
+    variants: p.variants,
+    avgRating:
+      p.reviews.length > 0
+        ? p.reviews.reduce((s, r) => s + r.rating, 0) / p.reviews.length
+        : 0,
+    reviewCount: p._count.reviews,
+  }));
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <ProductDetailClient
+        product={product}
+        relatedProducts={relatedCardData}
+        avgRating={avgRating}
+      />
+    </>
+  );
+}
