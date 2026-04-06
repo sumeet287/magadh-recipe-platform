@@ -1,14 +1,16 @@
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
-if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-  console.warn("[Razorpay] Missing RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET");
+// Lazy initialize — avoids build-time crash when env vars are absent
+function getRazorpayInstance() {
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    throw new Error("RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are required");
+  }
+  return new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+  });
 }
-
-export const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-});
 
 export async function createRazorpayOrder(
   amount: number, // in INR (we convert to paise)
@@ -25,7 +27,7 @@ export async function createRazorpayOrder(
     },
   };
 
-  return razorpay.orders.create(options);
+  return getRazorpayInstance().orders.create(options);
 }
 
 export function verifyRazorpaySignature(
