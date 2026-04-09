@@ -43,14 +43,14 @@ export function Footer() {
                   {APP_NAME}
                 </div>
                 <div className="text-[10px] text-brand-400 font-medium tracking-wider leading-none mt-0.5">
-                  आचार की असली पहचान
+                  माँ के हाथ का स्वाद
                 </div>
               </div>
             </Link>
 
             <p className="text-sm text-earth-300 leading-relaxed mb-6 max-w-xs">
-              Premium handcrafted pickles and regional food products from the heart of Bihar. 
-              Made with love, tradition, and the finest ingredients.
+              Born from a mother&apos;s kitchen in Bihar — premium handcrafted pickles, achars & masalas. 
+              Every jar carries generations of love, tradition, and the finest ingredients.
             </p>
 
             {/* Social Links */}

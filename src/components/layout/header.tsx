@@ -1,27 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+
+import { usePathname, useRouter } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
 import {
   Search,
   ShoppingCart,
   Heart,
   Menu,
-  X,
   User,
   ChevronDown,
-  Phone,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/store/cart-store";
 import { useUIStore } from "@/store/ui-store";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { CartDrawer } from "./cart-drawer";
 import { SearchModal } from "./search-modal";
+import { FullscreenMenu } from "./fullscreen-menu";
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
@@ -43,6 +40,7 @@ const NAV_LINKS = [
 
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const { data: session } = useSession();
   const { itemCount, setOpen: setCartOpen } = useCartStore();
   const { isSearchOpen, openSearch, isMobileMenuOpen, openMobileMenu, closeMobileMenu } = useUIStore();
@@ -54,6 +52,13 @@ export function Header() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleNavClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (pathname === href) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [pathname]);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -68,12 +73,12 @@ export function Header() {
           {[0,1].map((k) => (
             <span key={k} className="flex items-center gap-0 mr-0">
               {[
-                "✦  Free shipping above ₹499",
-                "✦  Authentic handcrafted pickles from Bihar",
-                "✦  No preservatives · No shortcuts",
-                "✦  12,400+ happy customers",
-                "✦  Call +91 98765 43210",
-                "✦  Traditional Bihar recipes since 1985",
+                "✦  Free Shipping above ₹499",
+                "✦  Born from Maa's Kitchen in Bihar",
+                "✦  Zero Preservatives · Zero Shortcuts",
+                "✦  50,000+ Happy Families",
+                "✦  FSSAI Certified · 100% Natural",
+                "✦  Traditional Recipes · Handcrafted with Love",
               ].map((item, i) => (
                 <span key={i} className="inline-flex items-center gap-6 pr-12">
                   <span className={i % 3 === 1 ? "text-brand-400 font-semibold" : ""}>{item}</span>
@@ -96,7 +101,7 @@ export function Header() {
         <div className="container mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between gap-4">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3 shrink-0 group">
+            <Link href="/" onClick={(e) => handleNavClick(e, "/")} className="flex items-center gap-3 shrink-0 group">
               <div className="relative w-10 h-10">
                 <div className="w-10 h-10 bg-gradient-to-br from-brand-500 via-brand-400 to-turmeric-500 rounded-xl flex items-center justify-center shadow-[0_3px_16px_rgba(212,132,58,0.5)] group-hover:shadow-[0_4px_24px_rgba(212,132,58,0.7)] transition-all duration-300 group-hover:scale-105">
                   <span className="text-white font-black text-lg font-serif">M</span>
@@ -108,7 +113,7 @@ export function Header() {
                   Magadh Recipe
                 </div>
                 <div className="text-[10px] text-brand-400/70 font-medium tracking-[0.18em] leading-none mt-0.5 uppercase">
-                  आचार की असली पहचान
+                  माँ के हाथ का स्वाद
                 </div>
               </div>
             </Link>
@@ -124,6 +129,7 @@ export function Header() {
                 >
                   <Link
                     href={link.href}
+                    onClick={(e) => handleNavClick(e, link.href)}
                     className={cn(
                       "nav-link-luxury flex items-center gap-1 px-4 py-2 text-sm font-medium transition-colors",
                       pathname === link.href || pathname?.startsWith(link.href + "/")
@@ -238,80 +244,22 @@ export function Header() {
                 </Link>
               )}
 
-              {/* Mobile Menu */}
+              {/* Menu Button — mobile/tablet */}
               <button
-                onClick={isMobileMenuOpen ? closeMobileMenu : openMobileMenu}
-                className="lg:hidden p-2 rounded-lg text-white/70 hover:text-white transition-colors"
-                aria-label="Menu"
+                onClick={openMobileMenu}
+                className="lg:hidden p-2 rounded-lg text-white/55 hover:text-white transition-colors ml-1"
+                aria-label="Open menu"
               >
-                {isMobileMenuOpen ? (
-                  <X className="w-5 h-5" />
-                ) : (
-                  <Menu className="w-5 h-5" />
-                )}
+                <Menu className="w-5 h-5" />
               </button>
             </div>
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-white/8 bg-[#0f0802]/98 backdrop-blur-xl animate-slide-in-left">
-            <div className="container mx-auto px-4 py-4 space-y-1">
-              {NAV_LINKS.map((link) => (
-                <div key={link.href}>
-                  <Link
-                    href={link.href}
-                    className={cn(
-                      "block px-4 py-3 text-sm font-medium rounded-xl transition-colors",
-                      pathname === link.href
-                        ? "text-brand-400 bg-brand-500/12"
-                        : "text-white/75 hover:text-white hover:bg-white/6"
-                    )}
-                  >
-                    {link.label}
-                  </Link>
-                  {link.submenu && (
-                    <div className="ml-4 mt-1 space-y-1 border-l-2 border-brand-400/20 pl-4">
-                      {link.submenu.map((sub) => (
-                        <Link
-                          key={sub.href}
-                          href={sub.href}
-                          className="block px-3 py-2 text-sm text-white/45 hover:text-brand-300 rounded-lg hover:bg-brand-500/10 transition-colors"
-                        >
-                          {sub.label}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-
-              {session ? (
-                <div className="pt-3 border-t border-gray-100 space-y-1">
-                  <div className="px-4 py-2">
-                    <p className="text-xs text-gray-500">Signed in as</p>
-                    <p className="text-sm font-medium text-earth-dark">{session.user?.name}</p>
-                  </div>
-                  <Link href="/account" className="block px-4 py-2.5 text-sm text-earth-dark hover:bg-brand-50 rounded-xl">My Account</Link>
-                  <Link href="/account/orders" className="block px-4 py-2.5 text-sm text-earth-dark hover:bg-brand-50 rounded-xl">My Orders</Link>
-                  <Link href="/account/wishlist" className="block px-4 py-2.5 text-sm text-earth-dark hover:bg-brand-50 rounded-xl">Wishlist</Link>
-                  <button onClick={() => signOut({ callbackUrl: "/" })} className="block w-full text-left px-4 py-2.5 text-sm text-spice-600 hover:bg-red-50 rounded-xl">Sign Out</button>
-                </div>
-              ) : (
-                <div className="pt-3 border-t border-gray-100 flex gap-3">
-                  <Link href="/login" className="flex-1">
-                    <Button variant="outline" className="w-full">Login</Button>
-                  </Link>
-                  <Link href="/signup" className="flex-1">
-                    <Button className="w-full">Sign Up</Button>
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </header>
+
+      {/* CRED-style Fullscreen Menu */}
+      <FullscreenMenu />
 
       {/* Cart Drawer */}
       <CartDrawer />

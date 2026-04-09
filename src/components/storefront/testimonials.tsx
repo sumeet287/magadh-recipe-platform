@@ -1,204 +1,135 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { TESTIMONIALS } from "@/lib/constants";
-import { Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 
 export function Testimonials() {
-  const headRef  = useRef<HTMLDivElement>(null);
+  const ref = useScrollReveal<HTMLElement>();
   const [active, setActive] = useState(0);
-  const [direction, setDirection] = useState<"left"|"right">("right");
 
   useEffect(() => {
-    const el = headRef.current; if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { el.classList.add("revealed"); obs.disconnect(); } },
-      { threshold: 0.15 }
-    );
-    obs.observe(el); return () => obs.disconnect();
+    const t = setInterval(() => setActive((c) => (c + 1) % TESTIMONIALS.length), 6000);
+    return () => clearInterval(t);
   }, []);
 
-  const go = (dir: "left"|"right") => {
-    setDirection(dir);
-    setActive((curr) =>
-      dir === "right"
-        ? (curr + 1) % TESTIMONIALS.length
-        : (curr - 1 + TESTIMONIALS.length) % TESTIMONIALS.length
-    );
+  const go = (dir: "left" | "right") => {
+    setActive((c) => dir === "right" ? (c + 1) % TESTIMONIALS.length : (c - 1 + TESTIMONIALS.length) % TESTIMONIALS.length);
   };
 
   const t = TESTIMONIALS[active];
 
   return (
     <section
-      className="relative overflow-hidden py-24 md:py-36"
-      style={{ background: "radial-gradient(ellipse at 50% 100%, #1e0a04 0%, #0a0402 60%, #0f0602 100%)" }}
+      ref={ref}
+                  className="relative overflow-hidden py-16 md:py-20"
+      style={{ background: "linear-gradient(145deg, #2a1208 0%, #1a0c06 40%, #120804 100%)" }}
     >
-      {/* Film grain */}
-      <div className="hero-grain-overlay absolute inset-0 pointer-events-none z-[1]" aria-hidden />
+      <div className="hero-grain-overlay absolute inset-0 pointer-events-none" />
+      <div className="absolute pointer-events-none" style={{ width: 600, height: 300, background: "radial-gradient(circle, rgba(212,132,58,0.06) 0%, transparent 70%)", top: "10%", left: "30%", filter: "blur(100px)" }} />
 
-      {/* Ambient glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] rounded-full blur-[140px] pointer-events-none opacity-[0.08]"
-        style={{ background: "radial-gradient(ellipse, #D4843A, transparent)" }} />
-
-      {/* Top divider */}
-      <div className="divider-luxury mb-24" />
-
-      <div className="relative z-10 container mx-auto max-w-7xl px-6 lg:px-12">
-
+      <div className="relative z-10 max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16">
         {/* Header */}
-        <div ref={headRef} className="reveal-up grid lg:grid-cols-2 gap-12 items-start mb-20">
+        <div className="grid lg:grid-cols-2 gap-10 items-end mb-16">
           <div>
-            <p className="text-brand-500/65 text-[10px] font-bold uppercase tracking-[0.35em] mb-5">
-              Customer Stories
-            </p>
-            <h2 className="font-serif text-4xl md:text-6xl font-bold text-white leading-tight">
-              Real People,{" "}
-              <br />
-              <span className="shimmer-text">Real Love</span>
+            <p className="fade-up section-label text-brand-400/50 mb-5" data-reveal>Customer Stories</p>
+            <h2 className="fade-up font-serif text-3xl md:text-5xl lg:text-[3.5rem] font-bold text-white leading-[1.08]" data-reveal data-delay="1">
+              Loved by <span className="bg-gradient-to-r from-brand-400 to-turmeric-300 bg-clip-text text-transparent">50,000+</span> Families
             </h2>
           </div>
-          <div className="lg:text-right">
-            {/* Big rating */}
-            <div className="inline-flex flex-col items-start lg:items-end gap-2">
-              <div className="flex gap-1">
-                {[1,2,3,4,5].map(i => (
-                  <Star key={i} className="w-5 h-5 fill-turmeric-400 text-turmeric-400" />
-                ))}
+          <div className="lg:text-right" data-reveal data-delay="2">
+            <div className="fade-up inline-flex flex-col items-start lg:items-end gap-3">
+              <div className="flex gap-0.5">
+                {[1,2,3,4,5].map((i) => <Star key={i} className="w-5 h-5 fill-turmeric-400 text-turmeric-400" />)}
               </div>
               <div className="flex items-baseline gap-2">
                 <span className="font-serif font-bold text-7xl text-white leading-none">4.9</span>
-                <span className="text-white/30 text-xl">/ 5</span>
+                <span className="text-white/20 text-xl font-serif">/ 5</span>
               </div>
-              <p className="text-white/30 text-sm">12,400+ verified reviews</p>
+              <p className="text-white/25 text-sm">12,400+ verified reviews</p>
             </div>
           </div>
         </div>
 
-        {/* Testimonials layout: featured large + side list */}
-        <div className="grid lg:grid-cols-[1fr_340px] gap-6">
-
-          {/* Featured quote */}
+        {/* Main testimonial */}
+        <div className="grid lg:grid-cols-[1fr_320px] gap-6">
           <div
             key={active}
-            className="relative rounded-3xl p-10 md:p-12 overflow-hidden"
-            style={{
-              background: "radial-gradient(ellipse at 20% 30%, rgba(212,132,58,0.07) 0%, rgba(15,8,5,0.7) 70%)",
-              border: "1px solid rgba(212,132,58,0.12)",
-            }}
+            className="relative rounded-[2rem] p-8 md:p-12 overflow-hidden"
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}
           >
-            {/* Giant quote mark */}
-            <div
-              className="absolute -top-4 -left-2 font-serif font-black leading-none select-none text-brand-400/10"
-              style={{ fontSize: "clamp(160px, 20vw, 240px)" }}
-              aria-hidden
-            >
-              &ldquo;
+            <Quote className="w-12 h-12 text-brand-400/10 mb-8" />
+
+            <div className="flex gap-1 mb-6">
+              {Array.from({ length: t.rating }).map((_, i) => <Star key={i} className="w-4 h-4 fill-turmeric-400 text-turmeric-400" />)}
             </div>
 
-            {/* Stars */}
-            <div className="flex gap-1 mb-8 relative z-10">
-              {Array.from({ length: t.rating }).map((_, i) => (
-                <Star key={i} className="w-4 h-4 fill-turmeric-400 text-turmeric-400" />
-              ))}
-            </div>
-
-            {/* Quote text */}
-            <p className="relative z-10 font-serif text-xl md:text-2xl lg:text-3xl text-white/85 leading-relaxed mb-10 max-w-2xl">
-              {t.text}
+            <p className="font-serif text-xl md:text-2xl lg:text-3xl text-white/80 leading-[1.4] mb-10 max-w-3xl">
+              &ldquo;{t.text}&rdquo;
             </p>
 
-            {/* Product tag */}
-            <div className="inline-flex items-center gap-2 bg-brand-500/12 border border-brand-400/20 text-brand-300 text-xs font-semibold px-4 py-2 rounded-full mb-8 relative z-10">
+            <div className="inline-flex items-center gap-2 bg-brand-500/8 border border-brand-400/15 text-brand-300/70 text-xs font-semibold px-4 py-2 rounded-full mb-10">
               <span className="w-1.5 h-1.5 rounded-full bg-brand-400" />
               {t.product}
             </div>
 
-            {/* Author */}
-            <div className="flex items-center gap-4 pt-8 border-t border-white/8 relative z-10">
-              <div
-                className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-base shrink-0 shadow-xl"
-                style={{ background: "linear-gradient(135deg, #D4843A, #c0392b)" }}
-              >
+            <div className="flex items-center gap-4 pt-8 border-t border-white/[0.04]">
+              <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold shrink-0 bg-gradient-to-br from-brand-500 to-brand-700 shadow-lg">
                 {t.name[0]}
               </div>
               <div>
-                <p className="text-white font-bold text-base">{t.name}</p>
-                <p className="text-white/35 text-sm">{t.location}</p>
+                <p className="text-white font-bold">{t.name}</p>
+                <p className="text-white/30 text-sm">{t.location}</p>
               </div>
-              <span className="ml-auto text-[11px] font-semibold bg-green-500/15 text-green-400 px-3 py-1.5 rounded-full">
-                ✓ Verified
+              <span className="ml-auto text-[10px] font-bold bg-emerald-500/8 text-emerald-400/80 px-3 py-1.5 rounded-full border border-emerald-500/15">
+                Verified Buyer
               </span>
             </div>
 
-            {/* Navigation */}
-            <div className="flex items-center gap-3 mt-8 relative z-10">
-              <button
-                onClick={() => go("left")}
-                className="w-10 h-10 rounded-full border border-white/12 flex items-center justify-center text-white/50 hover:text-white hover:border-brand-400/50 transition-all"
-              >
+            {/* Nav */}
+            <div className="flex items-center gap-3 mt-10">
+              <button onClick={() => go("left")} className="w-10 h-10 rounded-full border border-white/[0.06] flex items-center justify-center text-white/30 hover:text-white/70 hover:border-white/[0.12] transition-all" aria-label="Previous">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button
-                onClick={() => go("right")}
-                className="w-10 h-10 rounded-full border border-white/12 flex items-center justify-center text-white/50 hover:text-white hover:border-brand-400/50 transition-all"
-              >
+              <button onClick={() => go("right")} className="w-10 h-10 rounded-full border border-white/[0.06] flex items-center justify-center text-white/30 hover:text-white/70 hover:border-white/[0.12] transition-all" aria-label="Next">
                 <ChevronRight className="w-4 h-4" />
               </button>
-              {/* Progress dots */}
-              <div className="flex gap-1.5 ml-2">
+              <div className="flex gap-2 ml-3">
                 {TESTIMONIALS.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActive(i)}
-                    className={cn(
-                      "rounded-full transition-all duration-300",
-                      i === active ? "w-6 h-1.5 bg-brand-400" : "w-1.5 h-1.5 bg-white/20 hover:bg-white/40"
-                    )}
-                    aria-label={`Testimonial ${i + 1}`}
-                  />
+                  <button key={i} onClick={() => setActive(i)} className={cn("rounded-full transition-all duration-500", i === active ? "w-8 h-1.5 bg-brand-400" : "w-1.5 h-1.5 bg-white/15 hover:bg-white/30")} aria-label={`Testimonial ${i + 1}`} />
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Side list — other testimonials */}
+          {/* Side list */}
           <div className="hidden lg:flex flex-col gap-4">
-            {TESTIMONIALS.filter((_, i) => i !== active).slice(0, 3).map((tt, i) => (
+            {TESTIMONIALS.filter((_, i) => i !== active).slice(0, 3).map((tt) => (
               <button
                 key={tt.name}
-                onClick={() => { setDirection("right"); setActive(TESTIMONIALS.indexOf(tt)); }}
-                className="text-left rounded-2xl p-5 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
-                style={{
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                }}
+                onClick={() => setActive(TESTIMONIALS.indexOf(tt))}
+                className="text-left rounded-2xl p-5 transition-all duration-300 hover:scale-[1.02] cursor-pointer group"
+                style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}
               >
-                <div className="flex gap-0.5 mb-2.5">
-                  {Array.from({ length: tt.rating }).map((_, i) => (
-                    <Star key={i} className="w-3 h-3 fill-turmeric-400 text-turmeric-400" />
-                  ))}
+                <div className="flex gap-0.5 mb-3">
+                  {Array.from({ length: tt.rating }).map((_, i) => <Star key={i} className="w-3 h-3 fill-turmeric-400/60 text-turmeric-400/60" />)}
                 </div>
-                <p className="text-white/55 text-sm leading-relaxed line-clamp-3 mb-3">{tt.text}</p>
+                <p className="text-white/40 text-sm leading-relaxed line-clamp-2 mb-3 group-hover:text-white/50 transition-colors">
+                  &ldquo;{tt.text}&rdquo;
+                </p>
                 <div className="flex items-center gap-2">
-                  <div
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                    style={{ background: "linear-gradient(135deg, #D4843A, #c0392b)" }}
-                  >
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-white/60 text-xs font-bold bg-gradient-to-br from-brand-500/50 to-brand-700/50">
                     {tt.name[0]}
                   </div>
-                  <span className="text-white/40 text-xs font-medium">{tt.name}</span>
+                  <span className="text-white/30 text-xs">{tt.name}</span>
                 </div>
               </button>
             ))}
           </div>
         </div>
       </div>
-
-      {/* Bottom divider */}
-      <div className="divider-luxury mt-24" />
     </section>
   );
 }
-

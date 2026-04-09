@@ -2,8 +2,12 @@ import type { Metadata } from "next";
 import { BRAND_STORY, WHY_CHOOSE_US } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "About Us | Magadh Recipe",
-  description: "Learn about Magadh Recipe — authentic Bihar pickles and spices crafted with traditional family recipes.",
+  title: "About Us — A Mother's Kitchen, Your Table | Magadh Recipe",
+  description: "The Magadh Recipe story — born from a mother's kitchen in Patna, Bihar. Discover how authentic family recipes became India's most-loved premium pickle brand. No preservatives, handcrafted with love.",
+  openGraph: {
+    title: "About Magadh Recipe — Born from Maa's Kitchen in Bihar",
+    description: "A mother's treasured recipes, now reaching 50,000+ happy families across India. Discover our story of love, tradition, and authentic flavours.",
+  },
 };
 
 export default function AboutPage() {
@@ -13,12 +17,12 @@ export default function AboutPage() {
       <div className="bg-gradient-to-br from-earth-dark via-brand-900 to-earth-dark text-white py-20 px-4">
         <div className="container mx-auto max-w-3xl text-center">
           <p className="text-brand-300 text-sm font-medium tracking-widest uppercase mb-4">Our Story</p>
-          <h1 className="font-serif text-4xl md:text-5xl font-bold mb-6">
-            Bringing Bihar&apos;s Flavours to Every Home
+          <h1 className="font-serif text-4xl md:text-6xl font-bold mb-6 leading-tight">
+            A Mother&apos;s Love,<br />in Every Jar
           </h1>
           <p className="text-white/75 text-lg leading-relaxed max-w-2xl mx-auto">
-            We&apos;re a family-run food brand based in Patna, Bihar — dedicated to preserving the authentic taste of
-            traditional Bihari pickles, spices, and condiments.
+            We&apos;re a family-run food brand born in Patna, Bihar — carrying forward Maa&apos;s treasured recipes to preserve the
+            authentic taste of traditional Bihari pickles, spices, and heritage condiments.
           </p>
         </div>
       </div>

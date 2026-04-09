@@ -1,9 +1,9 @@
 // ==================== App Constants ====================
 
 export const APP_NAME = "Magadh Recipe";
-export const APP_TAGLINE = "आचार की असली पहचान — The Authentic Taste of Magadh";
+export const APP_TAGLINE = "माँ के हाथ का स्वाद — A Mother's Love, in Every Jar";
 export const APP_DESCRIPTION =
-  "Premium handcrafted pickles, masalas, and regional food products from the heart of Bihar. Pure ingredients, traditional recipes, delivered fresh.";
+  "Born from a mother's kitchen in the heart of Bihar — premium handcrafted pickles, achars, masalas & regional delicacies. No preservatives, cold-pressed mustard oil, authentic family recipes lovingly passed down through generations. Delivered fresh across India.";
 export const APP_URL = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
 export const SUPPORT_EMAIL = "support@magadhrecipe.com";
 export const SUPPORT_PHONE = "+91-9876543210";
@@ -123,33 +123,33 @@ export const TRUST_BADGES = [
 export const WHY_CHOOSE_US = [
   {
     icon: "🏺",
-    title: "Authentic Family Recipes",
-    body: "Every product is crafted from secret family recipes passed down through generations in the heart of Magadh region.",
+    title: "Maa ki Recipe",
+    body: "Every jar carries a mother's secret recipe — lovingly perfected over decades in the Magadh kitchens of Bihar.",
   },
   {
     icon: "🌶️",
-    title: "Premium Ingredients",
-    body: "We source only the finest mustard oil, farm-fresh chilies, and authentic Indian spices directly from Bihar.",
+    title: "Handpicked Ingredients",
+    body: "Only kachi ghani mustard oil, farm-fresh chilies, and stone-ground spices sourced directly from Bihar's fields.",
   },
   {
     icon: "💚",
-    title: "No Artificial Additives",
-    body: "Zero preservatives, zero artificial colors, zero compromise. Just pure, natural goodness in every jar.",
+    title: "Zero Preservatives",
+    body: "No artificial colors, no chemicals, no shortcuts. Just pure, honest, natural goodness — exactly like homemade.",
   },
   {
     icon: "👩‍🍳",
-    title: "Made with Love",
-    body: "Our products are crafted by skilled home cooks who take immense pride in every batch they prepare.",
+    title: "Crafted with Love",
+    body: "Each batch is prepared by skilled home cooks who pour their heart and soul into every jar they seal.",
   },
   {
     icon: "🎁",
     title: "Gift-Worthy Packaging",
-    body: "Premium packaging that makes our pickles and masalas the perfect gift for every occasion.",
+    body: "Beautifully packaged in premium glass jars — perfect for gifting on festivals, weddings, and special occasions.",
   },
   {
     icon: "⚡",
-    title: "Quick Delivery",
-    body: "Fresh batches dispatched within 24 hours of ordering. Delivered pan-India in 3-7 business days.",
+    title: "Farm-Fresh Delivery",
+    body: "Prepared fresh on order and dispatched within 48 hours. Delivered pan-India with care in 3-7 business days.",
   },
 ];
 
@@ -201,17 +201,17 @@ export const TESTIMONIALS = [
 // ==================== Brand Story ====================
 
 export const BRAND_STORY = {
-  title: "The Story of Magadh Recipe",
-  subtitle: "From Dadi's Kitchen to Your Doorstep",
+  title: "A Mother's Kitchen, Your Table",
+  subtitle: "माँ के हाथ का स्वाद — A taste only a mother's hands can create",
   paragraphs: [
-    "Born in the culturally rich land of Magadh — a region that once housed the mighty Mauryan empire — Magadh Recipe carries forward a legacy of flavors that have delighted generations of Bihari families.",
-    "Our journey began in a small kitchen in Patna, where a grandmother's treasured recipes were made with nothing but love, patience, and the finest local ingredients. What started as sharing with neighbors soon became a movement to preserve and share the authentic tastes of Bihar with the world.",
-    "Today, we work with skilled home cooks across Bihar who craft every jar with the same devotion and purity as those original recipes. We use cold-pressed mustard oil, hand-picked spices, and traditional techniques that ensure every product you receive is genuinely homemade.",
-    "We believe Indian pickles are not just condiments — they are memories, culture, and heritage in a jar. With Magadh Recipe, we invite you to taste the authentic flavors of Magadh, crafted for the modern table.",
+    "Magadh Recipe was born from the most honest kitchen in the world — a mother's. In the ancient land of Magadh, where the Mauryan empire once flourished, our Maa has been perfecting these recipes for over three decades, filling our home with aromas that became the flavour of our childhood.",
+    "What began as jars lovingly packed for family and neighbours became something bigger when people simply couldn't stop asking for more. Her mango pickle, her garlic achar, her secret masala blends — each one a masterpiece that no factory could ever replicate.",
+    "Today, every single jar is still made under her watchful eye. We use the same cold-pressed mustard oil, the same hand-ground spices, the same clay vessel marination that she has always insisted upon. No machines. No preservatives. No compromise.",
+    "This isn't just a pickle brand — it's a mother's legacy in a jar. When you open a jar of Magadh Recipe, you're tasting generations of love, tradition, and the unmistakable warmth of a Bihari maa's kitchen.",
   ],
   stats: [
     { value: "25+", label: "Authentic Products" },
-    { value: "50K+", label: "Happy Customers" },
+    { value: "50K+", label: "Happy Families" },
     { value: "100%", label: "Natural Ingredients" },
     { value: "5★", label: "Average Rating" },
   ],

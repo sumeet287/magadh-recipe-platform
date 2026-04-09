@@ -12,17 +12,17 @@ import { ProductGrid } from "@/components/product/product-grid";
 import { ProductGridSkeleton } from "@/components/ui/skeleton";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { ArrowRight, Flame, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import type { ProductCardData } from "@/types";
 
 export const metadata: Metadata = {
-  title: "Magadh Recipe — Premium Handcrafted Pickles & Regional Food",
+  title: "Magadh Recipe — Maa ke Haath ka Swaad | Premium Handcrafted Pickles from Bihar",
   description:
-    "Shop authentic handcrafted pickles, masalas, and regional food products from Bihar. No preservatives, pure ingredients, delivered pan-India.",
+    "Discover Magadh Recipe — born from a mother's kitchen in Bihar. Shop authentic handcrafted pickles, achars, masalas & gift hampers. No preservatives, cold-pressed mustard oil, FSSAI certified. 50,000+ happy families. Free delivery above ₹499.",
   openGraph: {
-    title: "Magadh Recipe — आचार की असली पहचान",
+    title: "Magadh Recipe — माँ के हाथ का स्वाद | Premium Pickles from Bihar",
     description:
-      "Premium handcrafted pickles from Bihar. 50,000+ happy customers. Free shipping above ₹499.",
+      "Born from a mother's kitchen — authentic handcrafted pickles & achars. 50,000+ happy families. No preservatives. Free shipping above ₹499. Shop now!",
   },
 };
 
@@ -190,11 +190,9 @@ async function getNewArrivals(): Promise<ProductCardData[]> {
   }
 }
 
-// Section Wrapper Component — luxury dark edition
 function ProductSection({
   title,
   subtitle,
-  icon,
   href,
   products,
 }: {
@@ -208,28 +206,22 @@ function ProductSection({
 
   return (
     <section
-      className="py-20 md:py-28 relative overflow-hidden"
-      style={{ background: "radial-gradient(ellipse at 50% 0%, #1c0c04 0%, #0f0602 50%, #faf7f2 50%)" }}
+      className="py-16 md:py-20 relative overflow-hidden"
+      style={{ background: "linear-gradient(180deg, #0d0603 0%, #1a0c06 50%, #120804 100%)" }}
     >
-      {/* Dark top band */}
-      <div className="absolute inset-x-0 top-0 h-[38%]" style={{ background: "linear-gradient(180deg, #0f0602 0%, #faf7f2 100%)" }} />
-
-      <div className="relative z-10 container mx-auto max-w-7xl px-4 sm:px-6">
-        {/* Premium section header */}
-        <div className="flex items-end justify-between mb-12">
+      <div className="hero-grain-overlay absolute inset-0 pointer-events-none" />
+      <div className="relative z-10 max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16">
+        <div className="flex items-end justify-between mb-14">
           <div>
-            {subtitle && (
-              <p className="luxury-num mb-4">{subtitle}</p>
-            )}
-            <h2 className="font-serif text-3xl md:text-5xl font-bold text-[#1a0e07] flex items-center gap-2 leading-tight">
-              {icon}
-              <span>{title}</span>
+            {subtitle && <p className="section-label text-brand-400/50 mb-4">{subtitle}</p>}
+            <h2 className="font-serif text-3xl md:text-5xl lg:text-[3.5rem] font-bold text-white leading-[1.08]">
+              {title}
             </h2>
-            <div className="mt-3 w-12 h-0.5 rounded-full" style={{ background: "linear-gradient(90deg, #D4843A, transparent)" }} />
+            <div className="mt-4 w-16 h-[2px] rounded-full bg-gradient-to-r from-brand-400 to-brand-200" />
           </div>
           <Link
             href={href}
-            className="hidden sm:inline-flex items-center gap-2 text-sm font-bold text-brand-600 hover:text-brand-700 border border-brand-300/50 hover:border-brand-500 px-6 py-3 rounded-full transition-all duration-200 group tracking-wide"
+            className="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-white/40 hover:text-brand-300 border border-white/[0.06] hover:border-brand-400/30 px-7 py-3.5 rounded-full transition-all duration-300 group hover:bg-white/[0.02]"
           >
             View All
             <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -238,11 +230,8 @@ function ProductSection({
 
         <ProductGrid products={products} />
 
-        <div className="mt-8 sm:hidden text-center">
-          <Link
-            href={href}
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 border border-brand-200 px-5 py-2.5 rounded-full"
-          >
+        <div className="mt-10 sm:hidden text-center">
+          <Link href={href} className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-300 border border-white/[0.08] px-6 py-3 rounded-full">
             View All <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -251,52 +240,34 @@ function ProductSection({
   );
 }
 
-// Festive Banner
 function FestiveBanner() {
   return (
-    <section className="py-8 px-4 sm:px-6">
-      <div className="container mx-auto max-w-7xl">
-        <div className="relative overflow-hidden rounded-3xl bg-[#1a0e07]">
-          {/* Background image */}
+    <section className="py-4 px-6 sm:px-8 lg:px-16" style={{ background: "#0d0603" }}>
+      <div className="max-w-[1400px] mx-auto">
+        <div className="relative overflow-hidden rounded-[2rem] bg-[#1a0c06]">
           <div className="absolute inset-0">
-            <img
-              src="https://images.unsplash.com/photo-1607532941433-304659e8198a?auto=format&fit=crop&w=1400&q=70"
-              alt=""
-              className="w-full h-full object-cover opacity-20"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#1a0e07] via-[#1a0e07]/80 to-transparent" />
+            <img src="/images/brand/banner.webp" alt="" className="w-full h-full object-cover opacity-15" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#1a0c06] via-[#1a0c06]/85 to-transparent" />
           </div>
-          {/* Dot pattern */}
-          <div
-            className="absolute inset-0 opacity-5"
-            style={{
-              backgroundImage: "radial-gradient(circle, #D4843A 1px, transparent 1px)",
-              backgroundSize: "24px 24px",
-            }}
-          />
-          <div className="relative flex flex-col sm:flex-row items-center justify-between gap-8 p-8 md:p-12">
+          <div className="hero-grain-overlay absolute inset-0 pointer-events-none" />
+          <div className="relative flex flex-col sm:flex-row items-center justify-between gap-8 p-8 md:p-14">
             <div>
-              <span className="inline-flex items-center gap-2 text-brand-400 text-xs font-bold tracking-widest uppercase mb-3">
-                <span className="w-4 h-px bg-brand-500" /> Festival Season Offer
+              <span className="inline-flex items-center gap-2.5 text-brand-400/70 text-[10px] font-bold tracking-[0.2em] uppercase mb-4">
+                <span className="w-5 h-px bg-brand-500" /> Festival Special
               </span>
-              <h3 className="font-serif text-2xl md:text-4xl font-bold leading-tight text-white">
-                10% Off on All
-                <br />
-                <span className="bg-gradient-to-r from-brand-400 to-turmeric-300 bg-clip-text text-transparent">Gift Hampers</span>
+              <h3 className="font-serif text-2xl md:text-4xl font-bold leading-[1.1] text-white">
+                Share Maa&apos;s Love —<br />
+                <span className="bg-gradient-to-r from-brand-400 to-turmeric-300 bg-clip-text text-transparent">10% Off Gift Hampers</span>
               </h3>
-              <p className="text-white/50 text-sm mt-3">
+              <p className="text-white/30 text-sm mt-4">
                 Use code{" "}
-                <strong className="text-brand-400 bg-brand-500/10 border border-brand-500/30 px-2 py-0.5 rounded-lg font-mono">
-                  FESTIVE10
-                </strong>{" "}
+                <strong className="text-brand-400 bg-brand-500/8 border border-brand-500/20 px-2.5 py-1 rounded-lg font-mono text-xs">FESTIVE10</strong>{" "}
                 at checkout
               </p>
             </div>
-            <Link
-              href="/products?category=gift-boxes"
-              className="shrink-0 inline-flex items-center gap-2 bg-gradient-to-r from-brand-500 to-brand-400 hover:from-brand-400 hover:to-brand-300 text-white font-semibold text-sm px-7 py-4 rounded-2xl shadow-[0_4px_24px_rgba(212,132,58,0.4)] hover:shadow-[0_4px_32px_rgba(212,132,58,0.6)] transition-all duration-300 hover:-translate-y-0.5"
-            >
-              Shop Gift Boxes <ArrowRight className="w-4 h-4" />
+            <Link href="/products?category=gift-boxes" className="shrink-0 group inline-flex items-center gap-2.5 bg-gradient-to-r from-brand-500 to-brand-400 hover:from-brand-400 hover:to-brand-300 text-white font-semibold text-sm px-8 py-4 rounded-full shadow-[0_4px_30px_rgba(212,132,58,0.35)] hover:shadow-[0_8px_40px_rgba(212,132,58,0.5)] transition-all duration-300 hover:-translate-y-0.5">
+              Shop Gift Boxes
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
             </Link>
           </div>
         </div>
@@ -304,15 +275,17 @@ function FestiveBanner() {
     </section>
   );
 }
-// JSON-LD Structured Data
 function StructuredData() {
-  const schema = {
+  const orgSchema = {
     "@context": "https://schema.org",
     "@type": "OnlineStore",
     name: "Magadh Recipe",
-    description: "Premium handcrafted pickles and regional food products from Bihar",
+    alternateName: "Magadh Recipe — माँ के हाथ का स्वाद",
+    description: "Premium handcrafted pickles, achars, masalas and regional food products born from a mother's kitchen in Bihar. No preservatives, FSSAI certified, 50,000+ happy families.",
     url: process.env.NEXTAUTH_URL,
     logo: `${process.env.NEXTAUTH_URL}/images/brand/logo.png`,
+    image: `${process.env.NEXTAUTH_URL}/images/og-image.jpg`,
+    priceRange: "₹₹",
     contactPoint: {
       "@type": "ContactPoint",
       telephone: "+91-9876543210",
@@ -330,14 +303,47 @@ function StructuredData() {
     sameAs: [
       "https://instagram.com/magadhrecipe",
       "https://facebook.com/magadhrecipe",
+      "https://twitter.com/magadhrecipe",
+      "https://youtube.com/@magadhrecipe",
+    ],
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "4.9",
+      reviewCount: "12400",
+      bestRating: "5",
+      worstRating: "1",
+    },
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "Magadh Recipe Products",
+      itemListElement: [
+        { "@type": "OfferCatalog", name: "Pickles & Achars" },
+        { "@type": "OfferCatalog", name: "Masalas & Spices" },
+        { "@type": "OfferCatalog", name: "Combo Packs" },
+        { "@type": "OfferCatalog", name: "Gift Hampers" },
+      ],
+    },
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: process.env.NEXTAUTH_URL },
     ],
   };
 
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+    </>
   );
 }
 
@@ -368,7 +374,6 @@ export default async function HomePage() {
       <ProductSection
         title="Featured Products"
         subtitle="Hand-picked for you"
-        icon={<Sparkles className="w-6 h-6 text-brand-500" />}
         href="/products?isFeatured=true"
         products={featuredProducts}
       />
@@ -380,7 +385,6 @@ export default async function HomePage() {
       <ProductSection
         title="Bestsellers"
         subtitle="Customer Favourites"
-        icon={<Flame className="w-6 h-6 text-spice-500" />}
         href="/products?isBestseller=true"
         products={bestsellers}
       />

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Inter, Cormorant_Garamond } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { Providers } from "@/providers/providers";
@@ -10,55 +10,70 @@ const inter = Inter({
   display: "swap",
 });
 
-const playfair = Playfair_Display({
+const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  variable: "--font-playfair",
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-cormorant",
   display: "swap",
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXTAUTH_URL ?? "http://localhost:3000"),
   title: {
-    default: "Magadh Recipe — Premium Pickles & Regional Food",
-    template: "%s | Magadh Recipe",
+    default: "Magadh Recipe — Maa ke Haath ka Swaad | Premium Handcrafted Pickles from Bihar",
+    template: "%s | Magadh Recipe — Premium Pickles & Regional Food",
   },
   description:
-    "Premium handcrafted pickles, masalas, and regional food products from the heart of Bihar. Authentic, natural, and gift-worthy.",
+    "Discover Magadh Recipe — premium handcrafted pickles, achars, masalas & regional food born from a mother's kitchen in Bihar. No preservatives, cold-pressed mustard oil, authentic family recipes passed down through generations. Free delivery across India above ₹499.",
   keywords: [
-    "pickle",
+    "magadh recipe",
+    "premium pickle",
     "achar",
     "mango pickle",
+    "aam ka achar",
+    "bihari pickle",
     "bihari food",
-    "regional food",
+    "homemade pickle online",
+    "traditional indian pickle",
     "masala",
+    "spices",
+    "bihar",
+    "patna",
     "magadh",
-    "india",
-    "homemade pickle",
-    "premium pickle",
+    "handcrafted pickle",
+    "no preservative pickle",
+    "mustard oil pickle",
+    "gift hamper",
+    "diwali gift",
+    "authentic indian food",
+    "buy pickle online india",
+    "mother recipe",
+    "ghar ka achar",
   ],
   authors: [{ name: "Magadh Recipe" }],
   creator: "Magadh Recipe",
+  publisher: "Magadh Recipe",
   openGraph: {
     type: "website",
     locale: "en_IN",
     url: "/",
     siteName: "Magadh Recipe",
-    title: "Magadh Recipe — Premium Pickles & Regional Food",
+    title: "Magadh Recipe — Maa ke Haath ka Swaad | Premium Pickles from Bihar",
     description:
-      "Handcrafted pickles and regional food products from Bihar. Pure ingredients, traditional recipes.",
+      "Born from a mother's kitchen in Bihar — premium handcrafted pickles, achars & masalas. 50,000+ happy customers. No preservatives, pure ingredients, FSSAI certified. Free shipping above ₹499.",
     images: [
       {
         url: "/images/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Magadh Recipe — आचार की असली पहचान",
+        alt: "Magadh Recipe — आचार की असली पहचान | Premium Handcrafted Pickles from Bihar",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Magadh Recipe",
-    description: "Premium handcrafted pickles from Bihar.",
+    title: "Magadh Recipe — Premium Handcrafted Pickles from Bihar",
+    description: "Born from a mother's kitchen — authentic pickles, achars & masalas. 50K+ happy customers. No preservatives. Free shipping above ₹499.",
     images: ["/images/og-image.jpg"],
     creator: "@magadhrecipe",
   },
@@ -73,9 +88,13 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  alternates: {
+    canonical: "/",
+  },
   verification: {
     google: process.env.GOOGLE_SITE_VERIFICATION,
   },
+  category: "food",
 };
 
 export default function RootLayout({
@@ -86,7 +105,7 @@ export default function RootLayout({
   return (
     <html lang="en-IN" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-cream-100 text-earth-dark`}
+        className={`${inter.variable} ${cormorant.variable} font-sans antialiased bg-cream-100 text-earth-dark`}
       >
         <Providers>
           {children}

@@ -1,59 +1,50 @@
-import { WHY_CHOOSE_US, BRAND_STORY } from "@/lib/constants";
+"use client";
+
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
+import { BRAND_STORY } from "@/lib/constants";
+import { Star } from "lucide-react";
+
+const FEATURES = [
+  { num: "01", title: "Maa ki Recipe", body: "Every jar carries a mother's secret recipe — lovingly perfected over three decades in the Magadh kitchens of Bihar." },
+  { num: "02", title: "Handpicked Ingredients", body: "Only kachi ghani mustard oil, farm-fresh chilies, and stone-ground spices sourced directly from Bihar's fields." },
+  { num: "03", title: "Zero Preservatives", body: "No artificial colors, no chemicals, no shortcuts. Pure, honest, natural goodness — exactly like homemade should be." },
+  { num: "04", title: "Crafted with Love", body: "Each batch is prepared by skilled home cooks who pour their heart and soul into every jar they seal." },
+  { num: "05", title: "Gift-Worthy Packaging", body: "Beautifully packaged in premium glass jars — perfect for gifting on festivals, weddings, and special occasions." },
+  { num: "06", title: "Farm-Fresh Delivery", body: "Prepared fresh on order and dispatched within 48 hours. Delivered pan-India with care in 3–7 business days." },
+];
 
 export function WhyChooseUs() {
+  const ref = useScrollReveal<HTMLElement>();
+
   return (
-    <section className="py-20 md:py-28 bg-[#0f0805] relative overflow-hidden">
-      {/* Ambient background glow */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-brand-500/8 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-turmeric-500/6 rounded-full blur-[100px] pointer-events-none" />
+    <section
+      ref={ref}
+      className="relative py-16 md:py-20 overflow-hidden"
+      style={{ background: "linear-gradient(180deg, #1a0c06 0%, #120804 50%, #0d0603 100%)" }}
+    >
+      <div className="hero-grain-overlay absolute inset-0 pointer-events-none" />
+      <div className="absolute pointer-events-none" style={{ width: 500, height: 500, background: "radial-gradient(circle, rgba(212,132,58,0.04) 0%, transparent 70%)", top: "20%", right: "10%", filter: "blur(80px)" }} />
 
-      {/* Dot pattern */}
-      <div
-        className="absolute inset-0 opacity-[0.04] pointer-events-none"
-        style={{
-          backgroundImage: "radial-gradient(circle, #D4843A 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
-        }}
-      />
-
-      <div className="container mx-auto max-w-7xl px-4 sm:px-6 relative">
-        {/* Section Header */}
-        <div className="text-center mb-16">
-          <p className="text-brand-400 text-xs font-bold uppercase tracking-[0.2em] mb-4">
-            Why Magadh Recipe
-          </p>
-          <h2 className="font-serif text-3xl md:text-5xl font-bold text-white mb-5 leading-tight">
-            The{" "}
-            <span className="bg-gradient-to-r from-brand-400 to-turmeric-300 bg-clip-text text-transparent">Magadh</span>{" "}
-            Difference
+      <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16 relative z-10">
+        <div className="mb-20 max-w-xl">
+          <p className="fade-up section-label text-brand-400/50 mb-4" data-reveal>Why Magadh Recipe</p>
+          <h2 className="fade-up font-serif text-3xl md:text-5xl lg:text-[3.5rem] font-bold text-white leading-[1.08] mb-5" data-reveal data-delay="1">
+            The <span className="shimmer-text">Magadh</span> Difference
           </h2>
-          <p className="text-white/50 max-w-xl mx-auto text-base">
-            Our commitment to authenticity and quality sets us apart from every other pickle brand.
-          </p>
+          <div className="line-grow h-[2px] w-16 rounded-full bg-gradient-to-r from-brand-400 to-brand-200" data-reveal data-delay="2" />
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-          {WHY_CHOOSE_US.map((item, idx) => (
-            <div
-              key={item.title}
-              className="group relative bg-white/5 hover:bg-white/8 border border-white/10 hover:border-brand-500/30 rounded-3xl p-7 transition-all duration-300 hover:-translate-y-1"
-            >
-              {/* Glow on hover */}
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-brand-500/0 group-hover:from-brand-500/5 to-transparent transition-all duration-500" />
-
-              {/* Icon */}
-              <div className="relative text-4xl mb-5 transform group-hover:scale-110 transition-transform duration-300 w-fit">
-                {item.icon}
-              </div>
-
-              <h3 className="relative font-serif font-bold text-white text-xl mb-3">
-                {item.title}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14 lg:gap-y-16">
+          {FEATURES.map((f, i) => (
+            <div key={f.num} className="fade-up group relative" data-reveal data-delay={String(i + 1)}>
+              <span className="block font-serif font-bold text-5xl leading-none mb-4 select-none transition-colors duration-500" style={{ color: "rgba(212,132,58,0.08)" }}>
+                {f.num}
+              </span>
+              <h3 className="font-serif font-bold text-white/90 text-xl mb-3 leading-tight group-hover:text-brand-400 transition-colors duration-300">
+                {f.title}
               </h3>
-              <p className="relative text-white/50 text-sm leading-relaxed">{item.body}</p>
-
-              {/* Bottom accent line */}
-              <div className="absolute bottom-0 left-7 right-7 h-px bg-gradient-to-r from-transparent via-brand-500/0 group-hover:via-brand-500/40 to-transparent transition-all duration-500" />
+              <p className="text-white/30 text-sm leading-relaxed">{f.body}</p>
+              <div className="mt-5 h-px bg-white/[0.03] group-hover:bg-brand-400/15 transition-colors duration-500" />
             </div>
           ))}
         </div>
@@ -63,74 +54,53 @@ export function WhyChooseUs() {
 }
 
 export function BrandStory() {
+  const ref = useScrollReveal<HTMLElement>();
+
   return (
-    <section className="relative overflow-hidden bg-[#faf7f2] py-20 md:py-28">
-      {/* Large decorative background text */}
+    <section
+      ref={ref}
+      className="relative overflow-hidden py-16 md:py-20"
+      style={{ background: "linear-gradient(145deg, #1a0c06 0%, #0d0603 40%, #120804 100%)" }}
+    >
+      <div className="hero-grain-overlay absolute inset-0 pointer-events-none" />
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
-        <span className="text-[20vw] font-serif font-bold text-brand-500/[0.04] select-none whitespace-nowrap">
-          Bihar
-        </span>
+        <span className="text-[20vw] font-serif font-bold text-white/[0.015] select-none whitespace-nowrap">माँ</span>
       </div>
 
-      <div className="container mx-auto max-w-7xl px-4 sm:px-6 relative">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-          {/* Left: Story image collage */}
-          <div className="relative order-2 lg:order-1">
-            <div className="relative rounded-3xl overflow-hidden h-[420px] md:h-[520px] shadow-2xl">
-              <img
-                src="https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=700&q=85"
-                alt="Bihar traditional kitchen"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#1a0e07]/60 to-transparent" />
-              {/* Floating stat cards */}
+      <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-24 items-center">
+          <div className="fade-up order-2 lg:order-1 relative" data-reveal>
+            <div className="relative rounded-[2rem] overflow-hidden aspect-[4/5] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.5)]">
+              <img src="/images/brand/poster.webp" alt="Magadh Recipe — Maa ke Haath ka Swaad" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0d0603]/60 via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 grid grid-cols-2 gap-3">
                 {BRAND_STORY.stats.slice(0, 2).map((stat) => (
-                  <div key={stat.label} className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 text-center">
-                    <div className="text-3xl font-bold text-brand-300 font-serif leading-none">{stat.value}</div>
-                    <div className="text-[11px] text-white/60 mt-1 uppercase tracking-wider">{stat.label}</div>
+                  <div key={stat.label} className="backdrop-blur-xl rounded-2xl p-4 text-center" style={{ background: "rgba(13,6,3,0.6)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                    <div className="text-2xl font-bold text-brand-300 font-serif leading-none">{stat.value}</div>
+                    <div className="text-[10px] text-white/35 mt-1.5 uppercase tracking-[0.15em]">{stat.label}</div>
                   </div>
                 ))}
               </div>
             </div>
-
-            {/* Small accent card */}
-            <div className="absolute -right-4 top-10 bg-white rounded-2xl shadow-xl p-4 flex items-center gap-3 hidden lg:flex">
-              <div className="w-12 h-12 bg-brand-50 rounded-xl flex items-center justify-center text-2xl">🏺</div>
-              <div>
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Est.</p>
-                <p className="text-xl font-serif font-bold text-earth-dark">2018</p>
-              </div>
-            </div>
           </div>
 
-          {/* Right: Content */}
           <div className="order-1 lg:order-2">
-            <p className="text-brand-500 text-xs font-bold uppercase tracking-[0.2em] mb-4">
-              Our Story
-            </p>
-            <h2 className="font-serif text-3xl md:text-5xl font-bold text-[#1a0e07] mb-3 leading-tight">
-              {BRAND_STORY.title}
-            </h2>
-            <p className="text-brand-500 font-medium text-lg mb-8">{BRAND_STORY.subtitle}</p>
-
-            <div className="space-y-5 mb-10">
-              {BRAND_STORY.paragraphs.map((p, idx) => (
-                <p key={idx} className="text-gray-600 leading-relaxed">
-                  {p}
-                </p>
+            <p className="fade-up section-label text-brand-400/50 mb-5" data-reveal>Our Story</p>
+            <h2 className="fade-up font-serif text-3xl md:text-5xl font-bold text-white leading-[1.08] mb-5" data-reveal data-delay="1">{BRAND_STORY.title}</h2>
+            <p className="fade-up text-brand-300/60 font-serif text-lg italic mb-10 leading-relaxed" data-reveal data-delay="2">{BRAND_STORY.subtitle}</p>
+            <div className="space-y-5 mb-12">
+              {BRAND_STORY.paragraphs.map((p, i) => (
+                <p key={i} className="fade-up text-white/30 text-sm leading-[1.8]" data-reveal data-delay={String(i + 3)}>{p}</p>
               ))}
             </div>
-
-            {/* Stats row */}
-            <div className="grid grid-cols-2 gap-4">
-              {BRAND_STORY.stats.slice(2).map((stat) => (
-                <div
-                  key={stat.label}
-                  className="bg-brand-50 border border-brand-100 rounded-2xl p-5"
-                >
-                  <div className="text-3xl font-bold text-brand-600 font-serif mb-1">{stat.value}</div>
-                  <div className="text-xs text-gray-500 uppercase tracking-wider">{stat.label}</div>
+            <div className="grid grid-cols-2 gap-4" data-reveal>
+              {BRAND_STORY.stats.slice(2).map((stat, i) => (
+                <div key={stat.label} className="fade-up rounded-2xl p-5" data-delay={String(i + 7)} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
+                  <div className="flex items-center gap-2 mb-1">
+                    {stat.value === "5★" && <Star className="w-4 h-4 fill-turmeric-400 text-turmeric-400" />}
+                    <span className="text-2xl font-bold text-brand-400 font-serif">{stat.value}</span>
+                  </div>
+                  <div className="text-[11px] text-white/25 uppercase tracking-[0.15em]">{stat.label}</div>
                 </div>
               ))}
             </div>

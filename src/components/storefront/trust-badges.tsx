@@ -1,24 +1,49 @@
-import { TRUST_BADGES } from "@/lib/constants";
+"use client";
+
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
+import { FlaskConical, Leaf, Package, Truck, RotateCcw, Award } from "lucide-react";
+
+const BADGES = [
+  { Icon: FlaskConical, label: "100% Homemade" },
+  { Icon: Leaf, label: "No Preservatives" },
+  { Icon: Package, label: "Secure Packaging" },
+  { Icon: Truck, label: "Pan-India Delivery" },
+  { Icon: RotateCcw, label: "Easy Returns" },
+  { Icon: Award, label: "FSSAI Certified" },
+];
 
 export function TrustBadges() {
+  const ref = useScrollReveal<HTMLElement>();
+
   return (
-    <section className="py-0 bg-white">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-y lg:divide-y-0 divide-gray-100 border-y border-gray-100">
-          {TRUST_BADGES.map((badge, idx) => (
-            <div
-              key={badge.title}
-              className="flex flex-col items-center text-center gap-3 px-6 py-8 group hover:bg-brand-50/50 transition-colors duration-200"
-            >
-              <div className="text-3xl transform group-hover:scale-110 transition-transform duration-300">
-                {badge.icon}
+    <section
+      ref={ref}
+      data-reveal
+      className="fade-up relative py-5 overflow-hidden"
+      style={{ background: "#120804", borderTop: "1px solid rgba(212,132,58,0.06)", borderBottom: "1px solid rgba(212,132,58,0.06)" }}
+    >
+      {/* Desktop */}
+      <div className="hidden md:flex items-center justify-center gap-0">
+        {BADGES.map((b, i) => (
+          <div key={b.label} className="flex items-center">
+            {i > 0 && <div className="w-px h-4 bg-white/[0.06]" />}
+            <div className="flex items-center gap-2.5 px-6">
+              <b.Icon className="w-3.5 h-3.5 text-brand-400/50" strokeWidth={1.5} />
+              <span className="text-[11px] font-semibold text-white/30 tracking-wide whitespace-nowrap">{b.label}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* Mobile scroll */}
+      <div className="md:hidden relative">
+        <div className="trust-strip-track flex w-max">
+          {[...BADGES, ...BADGES].map((b, i) => (
+            <div key={i} className="flex items-center">
+              <div className="flex items-center gap-2 px-5">
+                <b.Icon className="w-3.5 h-3.5 text-brand-400/50" strokeWidth={1.5} />
+                <span className="text-[11px] font-semibold text-white/30 tracking-wide whitespace-nowrap">{b.label}</span>
               </div>
-              <div>
-                <p className="font-bold text-sm text-[#1a0e07] leading-tight">{badge.title}</p>
-                <p className="text-[11px] text-gray-400 leading-snug mt-1 hidden sm:block">
-                  {badge.description}
-                </p>
-              </div>
+              <div className="w-px h-3 bg-white/[0.06]" />
             </div>
           ))}
         </div>

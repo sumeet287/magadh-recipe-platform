@@ -4,11 +4,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { newsletterSchema, type NewsletterInput } from "@/lib/validations/review";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { CheckCircle, Mail } from "lucide-react";
+import { CheckCircle, ArrowRight } from "lucide-react";
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 
 export function NewsletterSignup() {
+  const ref = useScrollReveal<HTMLElement>();
   const [success, setSuccess] = useState(false);
   const {
     register,
@@ -21,137 +21,62 @@ export function NewsletterSignup() {
 
   const onSubmit = async (data: NewsletterInput) => {
     try {
-      const res = await fetch("/api/newsletter", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (res.ok) {
-        setSuccess(true);
-        reset();
-      }
-    } catch {
-      // Silent error
-    }
+      const res = await fetch("/api/newsletter", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+      if (res.ok) { setSuccess(true); reset(); }
+    } catch { /* silent */ }
   };
 
   return (
     <section
-      className="relative overflow-hidden py-24 md:py-36"
-      style={{ background: "radial-gradient(ellipse at 30% 70%, #1c0a03 0%, #0a0402 55%, #0d0503 100%)" }}
+      ref={ref}
+                  className="relative overflow-hidden py-16 md:py-20"
+      style={{ background: "linear-gradient(180deg, #120804 0%, #1a0c06 50%, #0d0603 100%)" }}
     >
-      {/* Film grain */}
-      <div className="hero-grain-overlay absolute inset-0 pointer-events-none z-[1]" aria-hidden />
+      <div className="hero-grain-overlay absolute inset-0 pointer-events-none" />
+      <div className="absolute pointer-events-none" style={{ width: 500, height: 400, background: "radial-gradient(circle, rgba(212,132,58,0.04) 0%, transparent 70%)", top: "30%", left: "40%", filter: "blur(80px)" }} />
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-400/10 to-transparent" />
 
-      {/* Dot grid */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: "radial-gradient(circle, rgba(212,132,58,0.08) 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
-        }}
-      />
+      <div className="relative z-10 max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16">
+        <div className="max-w-3xl mx-auto text-center">
+          <p className="fade-up section-label text-brand-400/50 mb-5" data-reveal>Join the Family</p>
+          <h2 className="fade-up font-serif text-3xl md:text-5xl lg:text-[3.5rem] font-bold text-white leading-[1.08] mb-6" data-reveal data-delay="1">
+            Get a Taste of <span className="shimmer-text">Magadh</span>
+          </h2>
+          <p className="fade-up text-white/30 text-base md:text-lg max-w-lg mx-auto leading-relaxed mb-12" data-reveal data-delay="2">
+            25,000+ families get early access, Maa&apos;s secret recipes & exclusive festival offers. Join free.
+          </p>
 
-      {/* Ambient glow left */}
-      <div className="absolute -left-32 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[160px] pointer-events-none opacity-[0.06]"
-        style={{ background: "#D4843A" }} />
-
-      {/* Ambient glow right */}
-      <div className="absolute -right-32 top-1/4 w-[400px] h-[400px] rounded-full blur-[130px] pointer-events-none opacity-[0.05]"
-        style={{ background: "#c0392b" }} />
-
-      {/* Top divider */}
-      <div className="divider-luxury mb-0" />
-
-      <div className="relative z-10 container mx-auto max-w-7xl px-6 lg:px-12 pt-20">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-
-          {/* Left: Editorial headline */}
-          <div>
-            <p className="text-brand-500/65 text-[10px] font-bold uppercase tracking-[0.35em] mb-6">
-              Join the Circle
-            </p>
-            <h2 className="font-serif font-bold leading-[0.92] mb-8 text-white"
-              style={{ fontSize: "clamp(48px, 7vw, 88px)" }}
-            >
-              Taste it
-              <br />
-              <span className="shimmer-text">before</span>
-              <br />
-              they sell out.
-            </h2>
-            <p className="text-white/35 text-base md:text-lg max-w-sm leading-relaxed">
-              25,000+ food lovers get early access, secret recipes & exclusive offers. Join free — unsubscribe anytime.
-            </p>
-
-            {/* Benefits row */}
-            <div className="flex flex-wrap gap-4 mt-8">
-              {["10% off first order", "Early access drops", "Free recipes"].map((b) => (
-                <span key={b} className="flex items-center gap-2 text-white/45 text-xs font-medium">
-                  <span className="w-1 h-1 rounded-full bg-brand-400" />
-                  {b}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Right: Form */}
-          <div>
+          <div className="fade-up max-w-md mx-auto" data-reveal data-delay="3">
             {success ? (
-              <div
-                className="rounded-3xl p-10 flex flex-col items-start gap-4"
-                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(212,132,58,0.15)" }}
-              >
-                <div className="w-12 h-12 rounded-full bg-green-500/15 border border-green-500/30 flex items-center justify-center">
-                  <CheckCircle className="w-6 h-6 text-green-400" />
+              <div className="flex flex-col items-center gap-4 py-8">
+                <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                  <CheckCircle className="w-7 h-7 text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-white font-bold text-xl font-serif mb-2">You&apos;re in.</p>
+                  <p className="text-white font-bold text-xl font-serif mb-1">You&apos;re in!</p>
                   <p className="text-white/40 text-sm">Check your inbox — your 10% off coupon is waiting.</p>
                 </div>
               </div>
             ) : (
-              <div
-                className="rounded-3xl p-8 md:p-10"
-                style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.07)" }}
-              >
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                  <div>
-                    <label className="block text-white/35 text-xs font-semibold uppercase tracking-[0.15em] mb-3">
-                      Your email address
-                    </label>
-                    <input
-                      {...register("email")}
-                      type="email"
-                      placeholder="hello@youremail.com"
-                      className="w-full px-5 py-4 rounded-2xl text-white placeholder:text-white/25 text-sm transition-all duration-200 focus:outline-none"
-                      style={{
-                        background: "rgba(255,255,255,0.06)",
-                        border: "1px solid rgba(255,255,255,0.1)",
-                      }}
-                      onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(212,132,58,0.5)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(212,132,58,0.08)"; }}
-                      onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.boxShadow = "none"; }}
-                    />
-                    {errors.email && (
-                      <p className="text-brand-400 text-xs mt-2">{errors.email.message}</p>
-                    )}
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="btn-glow w-full flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-white font-bold text-sm px-7 py-4 rounded-2xl transition-all duration-300 hover:-translate-y-0.5"
-                  >
-                    <Mail className="w-4 h-4" />
-                    {isSubmitting ? "Subscribing..." : "Subscribe & Get 10% Off"}
-                  </button>
-                </form>
-
-                <p className="text-white/20 text-xs mt-5 text-center">
-                  No spam. No noise. Pure pickle love.
-                </p>
-              </div>
+              <form onSubmit={handleSubmit(onSubmit)} className="relative">
+                <input
+                  {...register("email")}
+                  type="email"
+                  placeholder="Enter your email"
+                  className="w-full px-6 py-4 pr-36 rounded-full text-white placeholder:text-white/20 text-sm bg-white/[0.04] border border-white/[0.06] focus:border-brand-400/40 focus:ring-2 focus:ring-brand-400/10 transition-all duration-200 outline-none backdrop-blur-sm"
+                />
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-2 bg-gradient-to-r from-brand-500 to-brand-400 hover:from-brand-400 hover:to-brand-300 disabled:opacity-50 text-white font-bold text-sm px-6 py-3 rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(212,132,58,0.3)]"
+                >
+                  {isSubmitting ? "..." : "Subscribe"}
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </form>
             )}
+            {errors.email && <p className="text-red-400 text-xs mt-3">{errors.email.message}</p>}
+            <p className="text-white/15 text-xs mt-5">No spam. Unsubscribe anytime. Get 10% off your first order.</p>
           </div>
         </div>
       </div>

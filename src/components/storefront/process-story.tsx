@@ -1,204 +1,84 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 
 const STEPS = [
-  {
-    num: "01",
-    title: "Sourced from Farms",
-    body: "Every raw mango, chilli, and spice is handpicked directly from trusted Bihar farms. No middlemen. No cold storage. Just fresh.",
-    accent: "#D4843A",
-    symbol: "◎",
-  },
-  {
-    num: "02",
-    title: "Sun-Dried & Sorted",
-    body: "Ingredients are laid out under the Bihar sun for days. The traditional drying process concentrates flavour and ensures zero moisture.",
-    accent: "#e8a43f",
-    symbol: "◇",
-  },
-  {
-    num: "03",
-    title: "Hand-Ground Masalas",
-    body: "Our spice blends are stone-ground by hand — the same way it was done in 1985. Machines would kill the texture and aroma.",
-    accent: "#c0392b",
-    symbol: "◆",
-  },
-  {
-    num: "04",
-    title: "Marinated in Mustard Oil",
-    body: "Only kachi ghani cold-pressed mustard oil. The pickle rests in clay vessels for 7-21 days, absorbing every layer of spice.",
-    accent: "#D4AC0D",
-    symbol: "◑",
-  },
-  {
-    num: "05",
-    title: "Sealed & Shipped Fresh",
-    body: "Each jar is hand-filled, vacuum-sealed, and dispatched within 48 hours of an order. Zero preservatives, maximum freshness.",
-    accent: "#27ae60",
-    symbol: "◉",
-  },
+  { num: "01", title: "Sourced from Farms", body: "Every raw mango, chilli, and spice is handpicked directly from trusted Bihar farms. No middlemen, no cold storage — just farm-fresh goodness.", image: "/images/products/kuccha-aam.webp" },
+  { num: "02", title: "Sun-Dried & Sorted", body: "Ingredients are laid out under the Bihar sun for days. Traditional sun-drying concentrates flavour and ensures zero moisture — nature's own preservation.", image: "/images/products/mango-ingredients.webp" },
+  { num: "03", title: "Hand-Ground Masalas", body: "Spice blends are stone-ground by hand — the same way Maa has done it for decades. Machines would kill the texture and aroma she insists on.", image: "/images/products/garlic.webp" },
+  { num: "04", title: "Marinated in Mustard Oil", body: "Only kachi ghani cold-pressed mustard oil. The pickle rests for 7–21 days in clay vessels, absorbing every layer of spice and tradition.", image: "/images/products/chilli-kuccha.webp" },
+  { num: "05", title: "Sealed & Shipped Fresh", body: "Each jar is hand-filled, sealed in premium glass, and dispatched within 48 hours. Zero preservatives, maximum freshness, pure love.", image: "/images/products/lemon.webp" },
 ];
 
-function StepCard({ step, index }: { step: typeof STEPS[0]; index: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { el.classList.add("revealed"); obs.disconnect(); } },
-      { threshold: 0.2 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  const isEven = index % 2 === 1;
-
-  return (
-    <div
-      ref={ref}
-      className="reveal-up grid lg:grid-cols-2 gap-10 lg:gap-20 items-center"
-      style={{ transitionDelay: `${index * 0.08}s` }}
-    >
-      {/* Number side */}
-      <div className={cn("order-1", isEven ? "lg:order-2" : "lg:order-1")}>
-        {/* Giant step number */}
-        <div
-          className="font-serif font-black leading-none mb-6 select-none"
-          style={{
-            fontSize: "clamp(96px, 14vw, 160px)",
-            color: step.accent,
-            opacity: 0.12,
-            lineHeight: 0.85,
-          }}
-          aria-hidden
-        >
-          {step.num}
-        </div>
-        {/* Symbol */}
-        <div
-          className="font-serif text-4xl mb-5 leading-none"
-          style={{ color: step.accent }}
-          aria-hidden
-        >
-          {step.symbol}
-        </div>
-        <h3 className="font-serif text-3xl md:text-4xl font-bold text-white mb-5 leading-tight">
-          {step.title}
-        </h3>
-        <p className="text-white/45 text-base leading-relaxed max-w-sm">{step.body}</p>
-      </div>
-
-      {/* Visual side — abstract art panel */}
-      <div className={cn("order-2", isEven ? "lg:order-1" : "lg:order-2")}>
-        <div
-          className="relative h-56 lg:h-72 rounded-3xl overflow-hidden"
-          style={{ background: `radial-gradient(ellipse at 35% 40%, ${step.accent}22 0%, rgba(15,8,5,0.9) 70%)`, border: `1px solid ${step.accent}18` }}
-        >
-          {/* Concentric circles */}
-          {[0.85, 0.65, 0.45, 0.28].map((r, i) => (
-            <div
-              key={i}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
-              style={{
-                width: `${r * 100}%`,
-                height: `${r * 100}%`,
-                border: `1px solid ${step.accent}${Math.round((0.25 - i * 0.05) * 255).toString(16).padStart(2,"0")}`,
-              }}
-            />
-          ))}
-          {/* Center glow */}
-          <div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full"
-            style={{
-              background: `radial-gradient(circle, ${step.accent}55, transparent 70%)`,
-              boxShadow: `0 0 40px ${step.accent}44`,
-            }}
-          />
-          {/* Step glyph center */}
-          <div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-serif font-bold text-4xl z-10"
-            style={{ color: step.accent }}
-            aria-hidden
-          >
-            {step.symbol}
-          </div>
-          {/* Step number watermark */}
-          <div
-            className="absolute bottom-4 right-5 font-serif font-black text-[80px] leading-none select-none"
-            style={{ color: step.accent, opacity: 0.07 }}
-            aria-hidden
-          >
-            {step.num}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function ProcessStory() {
-  const headRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = headRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { el.classList.add("revealed"); obs.disconnect(); } },
-      { threshold: 0.2 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
+  const ref = useScrollReveal<HTMLElement>();
 
   return (
     <section
-      className="py-24 md:py-36 relative overflow-hidden"
-      style={{ background: "#0a0402" }}
+      ref={ref}
+      className="relative py-16 md:py-20 overflow-hidden"
+      style={{ background: "linear-gradient(180deg, #1a0c06 0%, #120804 50%, #0d0603 100%)" }}
     >
-      {/* Ambient glow */}
-      <div className="absolute top-1/3 left-1/4 w-[600px] h-[600px] rounded-full blur-[160px] pointer-events-none opacity-[0.04]"
-        style={{ background: "radial-gradient(circle, #D4843A, transparent)" }} />
-      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full blur-[120px] pointer-events-none opacity-[0.03]"
-        style={{ background: "radial-gradient(circle, #c0392b, transparent)" }} />
+      <div className="hero-grain-overlay absolute inset-0 pointer-events-none" />
+      <div className="absolute pointer-events-none" style={{ width: 500, height: 500, background: "radial-gradient(circle, rgba(212,132,58,0.05) 0%, transparent 70%)", top: "15%", left: "5%", filter: "blur(80px)" }} />
 
-      <div className="container mx-auto max-w-6xl px-6 lg:px-12">
+      <div className="relative z-10 max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16">
         {/* Header */}
-        <div ref={headRef} className="reveal-up text-center mb-24 lg:mb-32">
-          <p className="text-brand-500/65 text-[10px] font-bold uppercase tracking-[0.35em] mb-5">
-            Our Process
-          </p>
-          <h2 className="font-serif text-4xl md:text-6xl font-bold text-white leading-[1.05] mb-6">
-            From{" "}
-            <span className="shimmer-text">Earth</span>
-            {" "}to Your Table
+        <div className="mb-20 max-w-xl">
+          <p className="fade-up section-label text-brand-400/50 mb-4" data-reveal>Our Process</p>
+          <h2 className="fade-up font-serif text-3xl md:text-5xl lg:text-[3.5rem] font-bold text-white leading-[1.08] mb-5" data-reveal data-delay="1">
+            From Maa&apos;s Kitchen <span className="shimmer-text">to Yours</span>
           </h2>
-          <p className="text-white/35 max-w-lg mx-auto text-base leading-relaxed">
-            No machines. No shortcuts. Five deliberate steps, unchanged since our grandfather&apos;s kitchen.
-          </p>
-          {/* Decorative line */}
-          <div className="mx-auto mt-8 w-px h-16 process-line" aria-hidden />
+          <div className="line-grow h-[2px] w-16 rounded-full bg-gradient-to-r from-brand-400 to-brand-200" data-reveal data-delay="2" />
         </div>
 
         {/* Steps */}
-        <div className="relative space-y-24 lg:space-y-32">
-          {/* Vertical timeline line (desktop) */}
-          <div className="hidden lg:block absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-px process-line" aria-hidden />
-
-          {STEPS.map((step, i) => (
-            <div key={step.num} className="relative">
-              {/* Timeline dot (desktop) */}
+        <div className="space-y-14 lg:space-y-20">
+          {STEPS.map((step, i) => {
+            const isEven = i % 2 === 1;
+            return (
               <div
-                className="hidden lg:block absolute left-1/2 -translate-x-1/2 top-8 w-3 h-3 rounded-full z-10 ring-4 ring-[#0a0402]"
-                style={{ background: step.accent, boxShadow: `0 0 16px ${step.accent}88` }}
-                aria-hidden
-              />
-              <StepCard step={step} index={i} />
-            </div>
-          ))}
+                key={step.num}
+                className="fade-up grid lg:grid-cols-2 gap-10 lg:gap-16 items-center"
+                data-reveal
+                data-delay={String((i % 3) + 1)}
+              >
+                {/* Image */}
+                <div className={cn("order-1", isEven ? "lg:order-2" : "lg:order-1")}>
+                  <div className="relative rounded-[2rem] overflow-hidden aspect-[4/3] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] group">
+                    <img
+                      src={step.image}
+                      alt={step.title}
+                      className="w-full h-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0d0603]/50 via-transparent to-transparent" />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 50%)" }} />
+                    <div className="absolute top-5 left-5 backdrop-blur-xl rounded-xl px-4 py-2" style={{ background: "rgba(13,6,3,0.6)", border: "1px solid rgba(212,132,58,0.1)" }}>
+                      <span className="text-brand-400 font-serif font-bold text-sm">Step {step.num}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Text */}
+                <div className={cn("order-2", isEven ? "lg:order-1" : "lg:order-2")}>
+                  <span
+                    className="block font-serif font-bold text-[6rem] sm:text-[8rem] leading-none tracking-tighter select-none mb-4"
+                    style={{ background: "linear-gradient(180deg, rgba(212,132,58,0.1) 0%, rgba(212,132,58,0.02) 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+                  >
+                    {step.num}
+                  </span>
+                  <h3 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-[1.1] mb-5">
+                    {step.title}
+                  </h3>
+                  <p className="text-white/35 text-base leading-relaxed max-w-md">
+                    {step.body}
+                  </p>
+                  <div className="mt-6 h-px bg-white/[0.04] max-w-xs" />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

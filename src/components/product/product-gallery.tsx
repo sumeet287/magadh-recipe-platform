@@ -17,7 +17,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
 
   const safeImages = images.length > 0
     ? images
-    : [{ url: "https://placehold.co/600x600/FDF8F0/D4843A?text=Magadh+Recipe", altText: productName }];
+    : [{ url: "/images/brand/logo.png", altText: productName }];
 
   const currentImage = safeImages[selectedIdx];
 
