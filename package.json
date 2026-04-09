@@ -5,7 +5,7 @@
   "description": "Magadh Recipe — Premium Pickle & Regional Food Ecommerce Platform",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && prisma db push && tsx prisma/seed.ts && next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
