@@ -11,8 +11,8 @@ const POPULAR_SEARCHES = [
   "Garlic Pickle",
   "Mixed Pickle",
   "Lemon Pickle",
-  "Masala Mix",
-  "Gift Hamper",
+  "Green Chilli",
+  "Karonda",
 ];
 
 export function SearchModal() {
@@ -65,7 +65,7 @@ export function SearchModal() {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search for pickles, masalas, gift boxes..."
+              placeholder="Search for pickles, achars, flavours..."
               className="flex-1 px-4 text-base text-earth-dark placeholder:text-gray-400 focus:outline-none bg-transparent"
             />
             {query && (
@@ -113,9 +113,9 @@ export function SearchModal() {
           <div className="grid grid-cols-2 gap-2">
             {[
               { label: "🥒 All Pickles", href: "/products?category=pickles" },
-              { label: "🌶️ Masalas", href: "/products?category=masalas-spices" },
-              { label: "🎁 Gift Boxes", href: "/products?category=gift-boxes" },
+              { label: "🏺 Regional Specials", href: "/products?category=regional-specials" },
               { label: "⭐ Bestsellers", href: "/products?isBestseller=true" },
+              { label: "🆕 New Arrivals", href: "/products?isNewArrival=true" },
             ].map(({ label, href }) => (
               <a
                 key={href}

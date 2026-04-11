@@ -11,10 +11,10 @@ const footerLinks = {
     { label: "Track Order", href: "/account/orders" },
   ],
   "Products": [
+    { label: "All Pickles", href: "/products" },
     { label: "Pickles", href: "/products?category=pickles" },
-    { label: "Masalas & Spices", href: "/products?category=masalas-spices" },
-    { label: "Combo Packs", href: "/products?category=combo-packs" },
-    { label: "Gift Boxes", href: "/products?category=gift-boxes" },
+    { label: "Regional Specials", href: "/products?category=regional-specials" },
+    { label: "Bestsellers", href: "/products?isBestseller=true" },
     { label: "New Arrivals", href: "/products?isNewArrival=true" },
   ],
   "Policies": [
@@ -49,7 +49,7 @@ export function Footer() {
             </Link>
 
             <p className="text-sm text-earth-300 leading-relaxed mb-6 max-w-xs">
-              Born from a mother&apos;s kitchen in Bihar — premium handcrafted pickles, achars & masalas. 
+              Born from a mother&apos;s kitchen in Bihar — premium handcrafted pickles & achars. 
               Every jar carries generations of love, tradition, and the finest ingredients.
             </p>
 

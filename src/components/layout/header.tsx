@@ -28,10 +28,9 @@ const NAV_LINKS = [
     submenu: [
       { label: "All Products", href: "/products" },
       { label: "Pickles", href: "/products?category=pickles" },
-      { label: "Masalas & Spices", href: "/products?category=masalas-spices" },
-      { label: "Combo Packs", href: "/products?category=combo-packs" },
-      { label: "Gift Boxes", href: "/products?category=gift-boxes" },
       { label: "Regional Specials", href: "/products?category=regional-specials" },
+      { label: "Bestsellers", href: "/products?isBestseller=true" },
+      { label: "New Arrivals", href: "/products?isNewArrival=true" },
     ],
   },
   { label: "About", href: "/about" },
@@ -150,18 +149,20 @@ export function Header() {
 
                   {/* Luxury Dropdown */}
                   {link.submenu && activeSubmenu === link.label && (
-                    <div className="absolute top-full left-0 mt-2 bg-[#1a0e07]/95 backdrop-blur-xl rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_0_1px_rgba(212,132,58,0.15)] py-2.5 min-w-[210px] animate-fade-in overflow-hidden">
-                      <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-brand-400/50 to-transparent" />
-                      {link.submenu.map((sub) => (
-                        <Link
-                          key={sub.href}
-                          href={sub.href}
-                          className="flex items-center gap-3 px-5 py-2.5 text-sm text-white/65 hover:text-brand-300 hover:bg-brand-500/10 transition-all duration-150 group/sub"
-                        >
-                          <span className="w-1 h-1 rounded-full bg-brand-400/40 group-hover/sub:bg-brand-500 transition-colors" />
-                          {sub.label}
-                        </Link>
-                      ))}
+                    <div className="absolute top-full left-0 pt-2">
+                      <div className="bg-[#1a0e07]/95 backdrop-blur-xl rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_0_1px_rgba(212,132,58,0.15)] py-2.5 min-w-[210px] animate-fade-in overflow-hidden">
+                        <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-brand-400/50 to-transparent" />
+                        {link.submenu.map((sub) => (
+                          <Link
+                            key={sub.href}
+                            href={sub.href}
+                            className="flex items-center gap-3 px-5 py-2.5 text-sm text-white/65 hover:text-brand-300 hover:bg-brand-500/10 transition-all duration-150 group/sub"
+                          >
+                            <span className="w-1 h-1 rounded-full bg-brand-400/40 group-hover/sub:bg-brand-500 transition-colors" />
+                            {sub.label}
+                          </Link>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

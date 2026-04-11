@@ -350,8 +350,9 @@ async function main() {
       tags: ["garlic", "lahsun", "spicy", "bold"],
       variants: [
         { name: "200g", sku: "GRP-200", mrp: 225, price: 200, stock: 50, unit: "g", sortOrder: 1 },
-        { name: "250g", sku: "GRP-250", mrp: 250, price: 225, stock: 70, unit: "g", sortOrder: 2, isDefault: true },
-        { name: "450g", sku: "GRP-450", mrp: 475, price: 425, stock: 40, unit: "g", sortOrder: 3 },
+        { name: "225g", sku: "GRP-225", mrp: 250, price: 225, stock: 60, unit: "g", sortOrder: 2 },
+        { name: "250g", sku: "GRP-250", mrp: 275, price: 250, stock: 70, unit: "g", sortOrder: 3, isDefault: true },
+        { name: "450g", sku: "GRP-450", mrp: 475, price: 425, stock: 40, unit: "g", sortOrder: 4 },
       ],
       images: [
         { url: "/images/products/garlic.webp", altText: "Garlic Pickle", isPrimary: true, sortOrder: 1 },

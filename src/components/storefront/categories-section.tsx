@@ -5,11 +5,8 @@ import { ArrowUpRight } from "lucide-react";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 
 const CATEGORIES = [
-  { name: "Pickles", slug: "pickles", hindi: "आचार", desc: "Traditional achars slow-marinated in cold-pressed mustard oil", count: "12+", image: "/images/products/lal-mirch-bharua.png" },
-  { name: "Masalas & Spices", slug: "masalas-spices", hindi: "मसाले", desc: "Hand-ground spice blends from Bihar's kitchens", count: "8+", image: "/images/products/garlic.webp" },
-  { name: "Combo Packs", slug: "combo-packs", hindi: "कॉम्बो", desc: "Curated multi-product packs for maximum value", count: "6+", image: "/images/products/mixed-vegetable.webp" },
-  { name: "Gift Boxes", slug: "gift-boxes", hindi: "उपहार", desc: "Premium hampers for Diwali, weddings & celebrations", count: "5+", image: "/images/products/khatta-meetha-lemon.webp" },
-  { name: "Regional Specials", slug: "regional-specials", hindi: "विशेष", desc: "Rare recipes from Bihar's culinary traditions", count: "4+", image: "/images/products/kathal.webp" },
+  { name: "Pickles", slug: "pickles", hindi: "आचार", desc: "Traditional achars slow-marinated in cold-pressed mustard oil with Maa's secret spice blends", count: "10+", image: "/images/products/lal-mirch-bharua.png" },
+  { name: "Regional Specials", slug: "regional-specials", hindi: "विशेष", desc: "Rare and exotic pickles from Bihar's culinary traditions — Badhal, Kathal, Oal & more", count: "4+", image: "/images/products/kathal.webp" },
 ];
 
 export function CategoriesSection() {
@@ -32,13 +29,13 @@ export function CategoriesSection() {
           </h2>
           <div className="line-grow h-[2px] w-16 rounded-full bg-gradient-to-r from-brand-400 to-brand-200 mb-5" data-reveal data-delay="2" />
           <p className="fade-up text-white/30 text-base leading-relaxed" data-reveal data-delay="3">
-            Five handcrafted collections. One philosophy — pure ingredients, traditional process, zero shortcuts.
+            Two curated collections. One philosophy — pure ingredients, traditional process, zero shortcuts.
           </p>
         </div>
 
-        {/* 2 large cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          {CATEGORIES.slice(0, 2).map((cat, i) => (
+        {/* Category cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {CATEGORIES.map((cat, i) => (
             <Link key={cat.slug} href={`/products?category=${cat.slug}`} className="fade-up group relative rounded-[1.5rem] overflow-hidden h-80 md:h-[420px]" data-reveal data-delay={String(i + 1)}>
               <div className="absolute inset-0 overflow-hidden">
                 <img src={cat.image} alt={cat.name} className="w-full h-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-110" />
@@ -54,23 +51,6 @@ export function CategoriesSection() {
                     <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" />
                   </div>
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* 3 smaller cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {CATEGORIES.slice(2).map((cat, i) => (
-            <Link key={cat.slug} href={`/products?category=${cat.slug}`} className="fade-up group relative rounded-[1.5rem] overflow-hidden h-64 sm:h-72" data-reveal data-delay={String(i + 3)}>
-              <div className="absolute inset-0 overflow-hidden">
-                <img src={cat.image} alt={cat.name} className="w-full h-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-110" />
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0d0603] via-[#0d0603]/15 to-transparent" />
-              <div className="absolute inset-0 flex flex-col justify-end p-7">
-                <span className="font-serif text-xl text-white/10 mb-1">{cat.hindi}</span>
-                <h3 className="font-serif font-bold text-white text-xl leading-tight mb-1 group-hover:text-brand-200 transition-colors duration-500">{cat.name}</h3>
-                <span className="text-white/20 text-xs">{cat.count} varieties</span>
               </div>
             </Link>
           ))}
