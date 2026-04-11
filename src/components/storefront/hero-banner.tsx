@@ -69,9 +69,10 @@ export function HeroBanner() {
   const glowRef = useRef<HTMLDivElement>(null);
   const raf = useRef(0);
 
-  useEffect(() => { setTimeout(() => { setLoaded(true); setCountersOn(true); }, 200); }, []);
+  useEffect(() => { requestAnimationFrame(() => { setLoaded(true); setCountersOn(true); }); }, []);
 
   const handleMouse = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    if (window.innerWidth < 1024) return;
     cancelAnimationFrame(raf.current);
     raf.current = requestAnimationFrame(() => {
       const el = sectionRef.current;
@@ -137,13 +138,11 @@ export function HeroBanner() {
               </span>
             </div>
 
-            <h1 className="font-serif mb-5 sm:mb-8">
-              <span className={cn("block text-white/90 text-4xl sm:text-5xl lg:text-6xl xl:text-[4.25rem] font-bold leading-[1.08] tracking-tight transition-all duration-700 delay-200", loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8")} style={{ textShadow: "0 4px 30px rgba(0,0,0,0.4)" }}>
+            <h1 className="font-serif mb-5 sm:mb-8 hero-initial-reveal">
+              <span className="block text-white/90 text-4xl sm:text-5xl lg:text-6xl xl:text-[4.25rem] font-bold leading-[1.08] tracking-tight" style={{ textShadow: "0 4px 30px rgba(0,0,0,0.4)" }}>
                 {s.line1}
               </span>
-              <span
-                className={cn("block mt-2 text-5xl sm:text-6xl lg:text-7xl xl:text-[5.5rem] font-bold leading-[1.05] shimmer-text transition-all duration-700 delay-300", loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8")}
-              >
+              <span className="block mt-2 text-5xl sm:text-6xl lg:text-7xl xl:text-[5.5rem] font-bold leading-[1.05] shimmer-text">
                 {s.accent}
               </span>
             </h1>
@@ -182,7 +181,7 @@ export function HeroBanner() {
 
             <div ref={imgRef} className="relative will-change-transform" style={{ width: "min(460px, 92%)", transformStyle: "preserve-3d" }}>
               <div className="relative rounded-[2.5rem] overflow-hidden aspect-[3/4]" style={{ boxShadow: "0 50px 100px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,132,58,0.06), 0 0 80px -20px rgba(212,132,58,0.12)" }}>
-                <Image src={s.img} alt="Magadh Recipe premium pickles" fill className="object-cover" priority sizes="(max-width: 1024px) 0px, 460px" />
+                <Image src={s.img} alt="Magadh Recipe premium pickles" fill className="object-cover" sizes="460px" loading="eager" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0d0603]/70 via-transparent to-[#0d0603]/10" />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 40%)" }} />
 

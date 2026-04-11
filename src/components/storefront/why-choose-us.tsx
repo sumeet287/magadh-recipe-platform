@@ -72,7 +72,7 @@ export function BrandStory() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-24 items-center">
           <div className="fade-up order-2 lg:order-1 relative" data-reveal>
             <div className="relative rounded-[2rem] overflow-hidden aspect-[4/5] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.5)]">
-              <Image src="/images/brand/poster.webp" alt="Magadh Recipe — Maa ke Haath ka Swaad" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 50vw" loading="lazy" />
+              <Image src="/images/brand/poster.webp" alt="Magadh Recipe — Maa ke Haath ka Swaad" fill className="object-cover" sizes="(max-width: 768px) calc(100vw - 48px), (max-width: 1024px) calc(100vw - 64px), 560px" loading="lazy" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0d0603]/60 via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 grid grid-cols-2 gap-3">
                 {BRAND_STORY.stats.slice(0, 2).map((stat) => (

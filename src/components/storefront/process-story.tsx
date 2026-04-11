@@ -53,7 +53,7 @@ export function ProcessStory() {
                       alt={step.title}
                       fill
                       className="object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-105"
-                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      sizes="(max-width: 768px) calc(100vw - 48px), (max-width: 1024px) calc(100vw - 64px), 600px"
                       loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0d0603]/50 via-transparent to-transparent" />

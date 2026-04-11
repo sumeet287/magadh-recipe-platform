@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes hero-fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero-initial-reveal {
+  animation: hero-fade-in 0.6s ease-out 0.1s both;
+}
+
 @layer base {
   :root {
     --background: 45 100% 98%;
@@ -231,8 +239,10 @@
   66%      { border-radius: 45% 55% 50% 50% / 60% 40% 55% 45%; transform: rotate(-90deg) scale(0.96); }
 }
 
-.blob-1 { animation: blob-morph-1 12s ease-in-out infinite; }
-.blob-2 { animation: blob-morph-2 15s ease-in-out infinite 2s; }
+@media (min-width: 1024px) {
+  .blob-1 { animation: blob-morph-1 12s ease-in-out infinite; }
+  .blob-2 { animation: blob-morph-2 15s ease-in-out infinite 2s; }
+}
 
 /* ─── Staggered Reveal ──────────────────────────────────────── */
 .reveal-scale {
@@ -313,7 +323,11 @@
   background-repeat: repeat;
   background-size: 260px 260px;
   opacity: 0.038;
-  animation: grain-drift 0.35s steps(1) infinite;
+}
+@media (min-width: 1024px) {
+  .hero-grain-overlay {
+    animation: grain-drift 0.35s steps(1) infinite;
+  }
 }
 @keyframes grain-drift {
   0%  { background-position: 0    0;    }
@@ -400,10 +414,12 @@
   0%   { transform: translateX(-50%); }
   100% { transform: translateX(0); }
 }
-.marquee-track     { animation: marquee-ltr 32s linear infinite; }
-.marquee-track-rev { animation: marquee-rtl 26s linear infinite; }
-.marquee-track:hover,
-.marquee-track-rev:hover { animation-play-state: paused; }
+@media (min-width: 768px) {
+  .marquee-track     { animation: marquee-ltr 32s linear infinite; }
+  .marquee-track-rev { animation: marquee-rtl 26s linear infinite; }
+  .marquee-track:hover,
+  .marquee-track-rev:hover { animation-play-state: paused; }
+}
 
 /* ─── Shimmer / Gold Text ────────────────────────────────────── */
 @keyframes shimmer-sweep {
@@ -424,7 +440,9 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: shimmer-sweep 5s linear infinite;
+}
+@media (min-width: 1024px) {
+  .shimmer-text { animation: shimmer-sweep 5s linear infinite; }
 }
 
 /* ─── Luxury Divider ─────────────────────────────────────────── */
@@ -549,7 +567,9 @@
   opacity: 0;
   transition: opacity 0.3s ease;
   z-index: -1;
-  animation: conic-spin 3s linear infinite;
+}
+@media (min-width: 1024px) {
+  .btn-glow::before { animation: conic-spin 3s linear infinite; }
 }
 .btn-glow:hover::before { opacity: 1; }
 @keyframes conic-spin {
@@ -742,11 +762,13 @@
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
-.trust-strip-track {
-  animation: trust-scroll 30s linear infinite;
-}
-.trust-strip-track:hover {
-  animation-play-state: paused;
+@media (min-width: 768px) {
+  .trust-strip-track {
+    animation: trust-scroll 30s linear infinite;
+  }
+  .trust-strip-track:hover {
+    animation-play-state: paused;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════
