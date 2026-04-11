@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Plus, Trash2, Save, GripVertical, Image } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Save, GripVertical, Image, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { useUIStore } from "@/store/ui-store";
@@ -194,6 +194,47 @@ export default function ProductForm({ initialData }: { initialData?: ProductForm
   };
 
   // --- Image helpers ---
+  const [uploading, setUploading] = useState(false);
+
+  const uploadFile = async (file: File) => {
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+      const json = await res.json();
+      if (!res.ok) {
+        addToast({ type: "error", message: json.error ?? "Upload failed" });
+        return;
+      }
+      const isPrimary = form.images.length === 0;
+      setForm((prev) => ({
+        ...prev,
+        images: [
+          ...prev.images,
+          { url: json.data.url, altText: form.name || "", isPrimary, sortOrder: prev.images.length },
+        ],
+      }));
+      addToast({ type: "success", message: "Image uploaded!" });
+    } catch {
+      addToast({ type: "error", message: "Upload failed. Try again." });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file?.type.startsWith("image/")) uploadFile(file);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) uploadFile(file);
+    e.target.value = "";
+  };
+
   const addImage = () => {
     setForm((prev) => ({
       ...prev,
@@ -521,59 +562,75 @@ export default function ProductForm({ initialData }: { initialData?: ProductForm
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-white">Images</h2>
               <Button type="button" variant="outline" size="sm" onClick={addImage} className="gap-1.5 border-gray-700 text-gray-300 hover:bg-gray-800">
-                <Image className="w-3.5 h-3.5" /> Add Image
+                <Image className="w-3.5 h-3.5" /> Add URL
               </Button>
             </div>
 
-            {form.images.length === 0 && (
-              <p className="text-sm text-gray-500 text-center py-6">No images added yet.</p>
-            )}
+            {/* Upload zone */}
+            <div
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={handleFileDrop}
+              className="border-2 border-dashed border-gray-700 hover:border-brand-500/50 rounded-xl p-6 text-center transition-colors mb-4 cursor-pointer"
+              onClick={() => document.getElementById("img-upload")?.click()}
+            >
+              <input id="img-upload" type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
+              {uploading ? (
+                <div className="flex items-center justify-center gap-2 text-brand-400">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span className="text-sm">Uploading...</span>
+                </div>
+              ) : (
+                <>
+                  <Upload className="w-8 h-8 text-gray-600 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400">Drag & drop image here or click to browse</p>
+                  <p className="text-xs text-gray-600 mt-1">Max 5MB. JPG, PNG, WebP supported.</p>
+                </>
+              )}
+            </div>
 
-            <div className="space-y-3">
-              {form.images.map((img, idx) => (
-                <div key={idx} className="bg-gray-800/50 border border-gray-700 rounded-xl p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <GripVertical className="w-4 h-4 text-gray-600" />
-                      <span className="text-sm font-medium text-gray-300">Image {idx + 1}</span>
-                      {img.isPrimary && (
-                        <span className="text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded">Primary</span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <label className="flex items-center gap-1.5 text-xs text-gray-400 cursor-pointer">
+            {/* Image list */}
+            {form.images.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {form.images.map((img, idx) => (
+                  <div key={idx} className="relative bg-gray-800/50 border border-gray-700 rounded-xl overflow-hidden group">
+                    {img.url ? (
+                      <img src={img.url} alt={img.altText} className="w-full aspect-square object-cover" />
+                    ) : (
+                      <div className="w-full aspect-square flex items-center justify-center bg-gray-800">
+                        <Image className="w-8 h-8 text-gray-600" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                      <label className="flex items-center gap-1.5 text-xs text-white cursor-pointer bg-white/10 px-2 py-1 rounded">
                         <input
                           type="checkbox"
                           checked={img.isPrimary}
                           onChange={(e) => updateImage(idx, "isPrimary", e.target.checked)}
-                          className="rounded border-gray-600 bg-gray-700 text-brand-500 focus:ring-brand-500/30"
+                          className="rounded border-gray-600 bg-gray-700 text-brand-500 w-3 h-3"
                         />
                         Primary
                       </label>
-                      <button type="button" onClick={() => removeImage(idx)} className="text-gray-500 hover:text-red-400 p-1">
-                        <Trash2 className="w-3.5 h-3.5" />
+                      <button type="button" onClick={() => removeImage(idx)} className="text-red-400 hover:text-red-300 bg-white/10 px-2 py-1 rounded text-xs flex items-center gap-1">
+                        <Trash2 className="w-3 h-3" /> Remove
                       </button>
                     </div>
+                    {img.isPrimary && (
+                      <div className="absolute top-2 left-2 text-[9px] bg-green-500/90 text-white px-1.5 py-0.5 rounded font-bold">PRIMARY</div>
+                    )}
+                    {!img.url && (
+                      <div className="p-2">
+                        <Input
+                          placeholder="Paste image URL..."
+                          value={img.url}
+                          onChange={(e) => updateImage(idx, "url", e.target.value)}
+                          className={inputClass + " h-8 text-xs"}
+                        />
+                      </div>
+                    )}
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="sm:col-span-2">
-                      <Input
-                        placeholder="Image URL"
-                        value={img.url}
-                        onChange={(e) => updateImage(idx, "url", e.target.value)}
-                        className={inputClass + " h-9 text-sm"}
-                      />
-                    </div>
-                    <Input
-                      placeholder="Alt text"
-                      value={img.altText}
-                      onChange={(e) => updateImage(idx, "altText", e.target.value)}
-                      className={inputClass + " h-9 text-sm"}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </section>
 
           {/* SEO */}
