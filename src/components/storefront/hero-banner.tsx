@@ -114,7 +114,7 @@ export function HeroBanner() {
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden min-h-[85vh] sm:min-h-[90vh] lg:min-h-[100vh] flex items-center"
+      className="relative overflow-hidden lg:min-h-[100vh] flex items-end lg:items-center"
       style={{ background: "linear-gradient(145deg, #2a1208 0%, #1a0c06 35%, #120804 70%, #0d0603 100%)" }}
       onMouseMove={handleMouse}
       onMouseLeave={handleLeave}
@@ -125,18 +125,18 @@ export function HeroBanner() {
       <div className="hero-grain-overlay absolute inset-0 pointer-events-none z-[2]" aria-hidden />
       <div className="absolute inset-0 pointer-events-none opacity-[0.015]" style={{ backgroundImage: "radial-gradient(circle, #D4843A 0.8px, transparent 0.8px)", backgroundSize: "48px 48px" }} />
 
-      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16 py-12 sm:py-16 lg:py-0">
+      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16 pt-6 pb-6 sm:pt-10 sm:pb-10 lg:py-0">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-8 items-center min-h-0 lg:min-h-[80vh]">
 
           {/* LEFT */}
           <div className={cn("transition-all duration-500", transitioning ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0")}>
-            <div className={cn("flex items-center gap-3 mb-8 transition-all duration-700 delay-100", loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
+            <div className={cn("flex items-center gap-3 mb-5 sm:mb-8 transition-all duration-700 delay-100", loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
               <span className="inline-flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.06] text-brand-300/80 text-[10px] font-bold tracking-[0.2em] uppercase px-4 py-2 rounded-full backdrop-blur-sm">
                 <Star className="w-3 h-3 fill-brand-400 text-brand-400" />{s.tag}
               </span>
             </div>
 
-            <h1 className="font-serif mb-8">
+            <h1 className="font-serif mb-5 sm:mb-8">
               <span className={cn("block text-white/90 text-4xl sm:text-5xl lg:text-6xl xl:text-[4.25rem] font-bold leading-[1.08] tracking-tight transition-all duration-700 delay-200", loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8")} style={{ textShadow: "0 4px 30px rgba(0,0,0,0.4)" }}>
                 {s.line1}
               </span>
@@ -147,9 +147,9 @@ export function HeroBanner() {
               </span>
             </h1>
 
-            <div className={cn("w-16 h-[2px] rounded-full mb-8 transition-all duration-700 delay-[400ms]", loaded ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0")} style={{ background: "linear-gradient(90deg, #D4843A, #f0c579, transparent)", transformOrigin: "left" }} />
+            <div className={cn("w-16 h-[2px] rounded-full mb-5 sm:mb-8 transition-all duration-700 delay-[400ms]", loaded ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0")} style={{ background: "linear-gradient(90deg, #D4843A, #f0c579, transparent)", transformOrigin: "left" }} />
 
-            <p className={cn("text-white/40 text-base sm:text-lg leading-relaxed mb-10 max-w-[480px] transition-all duration-700 delay-500", loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6")}>
+            <p className={cn("text-white/40 text-sm sm:text-lg leading-relaxed mb-6 sm:mb-10 max-w-[480px] transition-all duration-700 delay-500", loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6")}>
               {s.sub}
             </p>
 
