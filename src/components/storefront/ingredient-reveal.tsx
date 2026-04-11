@@ -34,7 +34,7 @@ export function IngredientReveal() {
   return (
     <section
       ref={ref}
-      className="py-14 md:py-18 overflow-hidden relative"
+      className="py-10 md:py-18 overflow-hidden relative"
       style={{ background: "linear-gradient(180deg, #120804 0%, #0d0603 50%, #1a0c06 100%)" }}
     >
       <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-400/10 to-transparent" />

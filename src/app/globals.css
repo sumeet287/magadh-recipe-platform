@@ -414,12 +414,14 @@
   0%   { transform: translateX(-50%); }
   100% { transform: translateX(0); }
 }
+.marquee-track     { animation: marquee-ltr 40s linear infinite; will-change: transform; }
+.marquee-track-rev { animation: marquee-rtl 34s linear infinite; will-change: transform; }
 @media (min-width: 768px) {
-  .marquee-track     { animation: marquee-ltr 32s linear infinite; }
-  .marquee-track-rev { animation: marquee-rtl 26s linear infinite; }
-  .marquee-track:hover,
-  .marquee-track-rev:hover { animation-play-state: paused; }
+  .marquee-track     { animation-duration: 32s; }
+  .marquee-track-rev { animation-duration: 26s; }
 }
+.marquee-track:hover,
+.marquee-track-rev:hover { animation-play-state: paused; }
 
 /* ─── Shimmer / Gold Text ────────────────────────────────────── */
 @keyframes shimmer-sweep {
@@ -762,13 +764,15 @@
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+.trust-strip-track {
+  animation: trust-scroll 40s linear infinite;
+  will-change: transform;
+}
 @media (min-width: 768px) {
-  .trust-strip-track {
-    animation: trust-scroll 30s linear infinite;
-  }
-  .trust-strip-track:hover {
-    animation-play-state: paused;
-  }
+  .trust-strip-track { animation-duration: 30s; }
+}
+.trust-strip-track:hover {
+  animation-play-state: paused;
 }
 
 /* ═══════════════════════════════════════════════════════════════

@@ -153,7 +153,7 @@ export function HeroBanner() {
               {s.sub}
             </p>
 
-            <div className={cn("flex flex-wrap gap-4 mb-16 transition-all duration-700 delay-[600ms]", loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6")}>
+            <div className={cn("flex flex-wrap gap-4 mb-8 sm:mb-16 transition-all duration-700 delay-[600ms]", loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6")}>
               <Link href={s.cta.href} className="group inline-flex items-center gap-2.5 bg-gradient-to-r from-brand-500 to-brand-400 hover:from-brand-400 hover:to-brand-300 text-white font-semibold text-sm px-8 py-4 rounded-full shadow-[0_4px_30px_rgba(212,132,58,0.35)] hover:shadow-[0_8px_40px_rgba(212,132,58,0.5)] transition-all duration-300 hover:-translate-y-0.5">
                 {s.cta.label}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
@@ -170,6 +170,15 @@ export function HeroBanner() {
                   <Counter value={st.value} label={st.label} run={countersOn} />
                 </div>
               ))}
+            </div>
+
+            {/* Mobile slide nav */}
+            <div className="flex lg:hidden items-center gap-3 mt-6">
+              <button onClick={() => goTo((cur - 1 + SLIDES.length) % SLIDES.length)} className="w-9 h-9 rounded-full border border-white/[0.08] flex items-center justify-center text-white/40 hover:text-white/80 transition-all" aria-label="Previous"><ChevronLeft className="w-4 h-4" /></button>
+              <div className="flex gap-1.5">
+                {SLIDES.map((_, i) => <button key={i} onClick={() => goTo(i)} className={cn("rounded-full transition-all duration-500", i === cur ? "w-8 h-1.5 bg-brand-400" : "w-2 h-1.5 bg-white/15")} aria-label={`Slide ${i + 1}`} />)}
+              </div>
+              <button onClick={() => goTo((cur + 1) % SLIDES.length)} className="w-9 h-9 rounded-full border border-white/[0.08] flex items-center justify-center text-white/40 hover:text-white/80 transition-all" aria-label="Next"><ChevronRight className="w-4 h-4" /></button>
             </div>
           </div>
 
@@ -217,7 +226,7 @@ export function HeroBanner() {
         </div>
       </div>
 
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 z-10">
+      <div className="hidden lg:flex absolute bottom-8 left-1/2 -translate-x-1/2 items-center gap-4 z-10">
         <button onClick={() => goTo((cur - 1 + SLIDES.length) % SLIDES.length)} className="w-10 h-10 rounded-full border border-white/[0.06] flex items-center justify-center text-white/40 hover:text-white/80 hover:border-white/[0.15] transition-all duration-300 backdrop-blur-sm" aria-label="Previous"><ChevronLeft className="w-4 h-4" /></button>
         <div className="flex gap-2">
           {SLIDES.map((_, i) => <button key={i} onClick={() => goTo(i)} className={cn("rounded-full transition-all duration-500", i === cur ? "w-10 h-1.5 bg-brand-400" : "w-2 h-1.5 bg-white/15 hover:bg-white/30")} aria-label={`Slide ${i + 1}`} />)}
