@@ -1,19 +1,23 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import dynamic from "next/dynamic";
 import { HeroBanner } from "@/components/storefront/hero-banner";
 import { TrustBadges } from "@/components/storefront/trust-badges";
 import { CategoriesSection } from "@/components/storefront/categories-section";
-import { IngredientReveal } from "@/components/storefront/ingredient-reveal";
-import { ProcessStory } from "@/components/storefront/process-story";
-import { WhyChooseUs, BrandStory } from "@/components/storefront/why-choose-us";
-import { Testimonials } from "@/components/storefront/testimonials";
-import { NewsletterSignup } from "@/components/storefront/newsletter-signup";
 import { ProductGrid } from "@/components/product/product-grid";
 import { ProductGridSkeleton } from "@/components/ui/skeleton";
 import { prisma } from "@/lib/prisma";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import type { ProductCardData } from "@/types";
+
+const IngredientReveal = dynamic(() => import("@/components/storefront/ingredient-reveal").then(m => m.IngredientReveal));
+const ProcessStory = dynamic(() => import("@/components/storefront/process-story").then(m => m.ProcessStory));
+const WhyChooseUs = dynamic(() => import("@/components/storefront/why-choose-us").then(m => m.WhyChooseUs));
+const BrandStory = dynamic(() => import("@/components/storefront/why-choose-us").then(m => m.BrandStory));
+const Testimonials = dynamic(() => import("@/components/storefront/testimonials").then(m => m.Testimonials));
+const NewsletterSignup = dynamic(() => import("@/components/storefront/newsletter-signup").then(m => m.NewsletterSignup));
 
 export const revalidate = 60;
 
@@ -248,7 +252,7 @@ function FestiveBanner() {
       <div className="max-w-[1400px] mx-auto">
         <div className="relative overflow-hidden rounded-[2rem] bg-[#1a0c06]">
           <div className="absolute inset-0">
-            <img src="/images/brand/banner.webp" alt="" className="w-full h-full object-cover opacity-15" />
+            <Image src="/images/brand/banner.webp" alt="" fill className="object-cover opacity-15" sizes="100vw" loading="lazy" />
             <div className="absolute inset-0 bg-gradient-to-r from-[#1a0c06] via-[#1a0c06]/85 to-transparent" />
           </div>
           <div className="hero-grain-overlay absolute inset-0 pointer-events-none" />

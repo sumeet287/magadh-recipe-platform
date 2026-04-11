@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 
 const CATEGORIES = [
-  { name: "Pickles", slug: "pickles", hindi: "आचार", desc: "Traditional achars slow-marinated in cold-pressed mustard oil with Maa's secret spice blends", count: "10+", image: "/images/products/lal-mirch-bharua.png" },
+  { name: "Pickles", slug: "pickles", hindi: "आचार", desc: "Traditional achars slow-marinated in cold-pressed mustard oil with Maa's secret spice blends", count: "10+", image: "/images/products/lal-mirch-bharua.jpg" },
   { name: "Regional Specials", slug: "regional-specials", hindi: "विशेष", desc: "Rare and exotic pickles from Bihar's culinary traditions — Badhal, Kathal, Oal & more", count: "4+", image: "/images/products/kathal.webp" },
 ];
 
@@ -38,7 +39,7 @@ export function CategoriesSection() {
           {CATEGORIES.map((cat, i) => (
             <Link key={cat.slug} href={`/products?category=${cat.slug}`} className="fade-up group relative rounded-[1.5rem] overflow-hidden h-80 md:h-[420px]" data-reveal data-delay={String(i + 1)}>
               <div className="absolute inset-0 overflow-hidden">
-                <img src={cat.image} alt={cat.name} className="w-full h-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-110" />
+                <Image src={cat.image} alt={cat.name} fill className="object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-110" sizes="(max-width: 768px) 100vw, 50vw" loading="lazy" />
               </div>
               <div className="absolute inset-0 bg-gradient-to-t from-[#0d0603] via-[#0d0603]/30 to-transparent" />
               <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-10">

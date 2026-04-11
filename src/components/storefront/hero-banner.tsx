@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { ArrowRight, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -42,7 +43,7 @@ const SLIDES = [
     sub: "A mother's love, sealed in every jar. Premium handcrafted pickles from Bihar — no preservatives, no shortcuts, no compromise.",
     cta: { label: "Explore Collection", href: "/products" },
     cta2: { label: "Our Story", href: "/about" },
-    img: "/images/products/lal-mirch-bharua.png",
+    img: "/images/products/lal-mirch-bharua.jpg",
     stats: [{ value: "50K+", label: "Happy Families" }, { value: "15+", label: "Pickles" }, { value: "0%", label: "Preservatives" }],
   },
   {
@@ -181,7 +182,7 @@ export function HeroBanner() {
 
             <div ref={imgRef} className="relative will-change-transform" style={{ width: "min(460px, 92%)", transformStyle: "preserve-3d" }}>
               <div className="relative rounded-[2.5rem] overflow-hidden aspect-[3/4]" style={{ boxShadow: "0 50px 100px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,132,58,0.06), 0 0 80px -20px rgba(212,132,58,0.12)" }}>
-                <img src={s.img} alt="Magadh Recipe premium pickles" className="w-full h-full object-cover" loading="eager" />
+                <Image src={s.img} alt="Magadh Recipe premium pickles" fill className="object-cover" priority sizes="(max-width: 1024px) 0px, 460px" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0d0603]/70 via-transparent to-[#0d0603]/10" />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 40%)" }} />
 

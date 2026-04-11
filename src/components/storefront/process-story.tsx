@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 
@@ -47,10 +48,13 @@ export function ProcessStory() {
                 {/* Image */}
                 <div className={cn("order-1", isEven ? "lg:order-2" : "lg:order-1")}>
                   <div className="relative rounded-[2rem] overflow-hidden aspect-[4/3] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] group">
-                    <img
+                    <Image
                       src={step.image}
                       alt={step.title}
-                      className="w-full h-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-105"
+                      fill
+                      className="object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-105"
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0d0603]/50 via-transparent to-transparent" />
                     <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 50%)" }} />

@@ -16,9 +16,10 @@ import { useSession, signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/store/cart-store";
 import { useUIStore } from "@/store/ui-store";
-import { CartDrawer } from "./cart-drawer";
-import { SearchModal } from "./search-modal";
-import { FullscreenMenu } from "./fullscreen-menu";
+import dynamic from "next/dynamic";
+const CartDrawer = dynamic(() => import("./cart-drawer").then(m => m.CartDrawer), { ssr: false });
+const SearchModal = dynamic(() => import("./search-modal").then(m => m.SearchModal), { ssr: false });
+const FullscreenMenu = dynamic(() => import("./fullscreen-menu").then(m => m.FullscreenMenu), { ssr: false });
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
