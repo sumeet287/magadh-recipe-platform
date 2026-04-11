@@ -262,81 +262,82 @@ export function ProductDetailClient({ product, relatedProducts, avgRating }: Pro
 
             {/* Quantity + Actions */}
             <div className="space-y-3">
-              {/* Quantity */}
-              <div className="flex items-center gap-4">
-                <p className="text-sm font-medium text-earth-dark">Quantity:</p>
-                <div className="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-10 flex items-center justify-center text-earth-dark hover:bg-gray-50 transition-colors"
-                  >
-                    −
-                  </button>
-                  <span className="w-12 text-center font-medium text-earth-dark">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() =>
-                      setQuantity(Math.min(10, selectedVariant?.stock ?? 10, quantity + 1))
-                    }
-                    className="w-10 h-10 flex items-center justify-center text-earth-dark hover:bg-gray-50 transition-colors"
-                  >
-                    +
-                  </button>
+              {isOutOfStock ? (
+                <div className="bg-red-50 border border-red-100 rounded-xl p-4 text-center">
+                  <p className="text-red-600 font-semibold text-sm mb-1">Currently Out of Stock</p>
+                  <p className="text-gray-500 text-xs">We&apos;ll notify you when this product is back in stock.</p>
                 </div>
-              </div>
+              ) : (
+                <>
+                  {/* Quantity */}
+                  <div className="flex items-center gap-4">
+                    <p className="text-sm font-medium text-earth-dark">Quantity:</p>
+                    <div className="flex items-center border-2 border-gray-200 rounded-xl overflow-hidden">
+                      <button
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        className="w-10 h-10 flex items-center justify-center text-earth-dark hover:bg-gray-50 transition-colors"
+                      >
+                        −
+                      </button>
+                      <span className="w-12 text-center font-medium text-earth-dark">
+                        {quantity}
+                      </span>
+                      <button
+                        onClick={() =>
+                          setQuantity(Math.min(10, selectedVariant?.stock ?? 10, quantity + 1))
+                        }
+                        className="w-10 h-10 flex items-center justify-center text-earth-dark hover:bg-gray-50 transition-colors"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
 
-              {/* CTA Buttons */}
-              <div className="flex gap-3">
-                <Button
-                  size="lg"
-                  className="flex-1"
-                  onClick={handleAddToCart}
-                  disabled={isOutOfStock}
-                  variant="outline"
-                >
-                  <ShoppingCart className="w-4 h-4" />
-                  Add to Cart
-                </Button>
-                <Button
-                  size="lg"
-                  className="flex-1"
-                  onClick={handleBuyNow}
-                  disabled={isOutOfStock}
-                  variant="premium"
-                >
-                  Buy Now
-                </Button>
-                <Button
-                  size="lg"
-                  variant={inWishlist ? "default" : "outline"}
-                  onClick={() => {
-                    toggleWishlist(product.id);
-                    addToast({
-                      type: inWishlist ? "info" : "success",
-                      message: inWishlist
-                        ? "Removed from wishlist"
-                        : "Added to wishlist!",
-                    });
-                  }}
-                  className="shrink-0"
-                  aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
-                >
-                  <Heart
-                    className={cn("w-4 h-4", inWishlist && "fill-current")}
-                  />
-                </Button>
-              </div>
-
-              {isOutOfStock && (
-                <p className="text-center text-sm text-gray-400">
-                  Currently out of stock. We&apos;ll notify you when available.
-                </p>
+                  {/* CTA Buttons */}
+                  <div className="flex gap-3">
+                    <Button
+                      size="lg"
+                      className="flex-1"
+                      onClick={handleAddToCart}
+                      variant="outline"
+                    >
+                      <ShoppingCart className="w-4 h-4" />
+                      Add to Cart
+                    </Button>
+                    <Button
+                      size="lg"
+                      className="flex-1"
+                      onClick={handleBuyNow}
+                      variant="premium"
+                    >
+                      Buy Now
+                    </Button>
+                    <Button
+                      size="lg"
+                      variant={inWishlist ? "default" : "outline"}
+                      onClick={() => {
+                        toggleWishlist(product.id);
+                        addToast({
+                          type: inWishlist ? "info" : "success",
+                          message: inWishlist
+                            ? "Removed from wishlist"
+                            : "Added to wishlist!",
+                        });
+                      }}
+                      className="shrink-0"
+                      aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+                    >
+                      <Heart
+                        className={cn("w-4 h-4", inWishlist && "fill-current")}
+                      />
+                    </Button>
+                  </div>
+                </>
               )}
             </div>
 
-            {/* Pincode Checker */}
-            <div className="bg-cream-100 rounded-xl p-4 border border-cream-300">
+            {/* Pincode Checker — only show when in stock */}
+            {!isOutOfStock && <div className="bg-cream-100 rounded-xl p-4 border border-cream-300">
               <p className="text-sm font-medium text-earth-dark mb-2.5 flex items-center gap-1.5">
                 <MapPin className="w-4 h-4 text-brand-500" />
                 Check Delivery Availability
@@ -372,7 +373,7 @@ export function ProductDetailClient({ product, relatedProducts, avgRating }: Pro
                   {pincodeMsg.msg}
                 </p>
               )}
-            </div>
+            </div>}
 
             {/* Delivery Info */}
             <div className="grid grid-cols-3 gap-3">
