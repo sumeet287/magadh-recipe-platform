@@ -122,7 +122,7 @@ export function ProductCard({ product, className, compact = false }: ProductCard
       <div className="tilt-shine" aria-hidden />
 
       {/* Image */}
-      <div className="relative overflow-hidden aspect-[4/5] bg-gradient-to-b from-cream-100 to-cream-200">
+      <div className="relative overflow-hidden aspect-[5/4] sm:aspect-square bg-gradient-to-b from-cream-100 to-cream-200">
         {/* Main Image */}
         <Image
           src={primaryImage?.url ?? "/images/brand/logo.png"}
@@ -208,7 +208,7 @@ export function ProductCard({ product, className, compact = false }: ProductCard
       </div>
 
       {/* Content */}
-      <div className="p-4 sm:p-5 flex-1 flex flex-col">
+      <div className="p-3 sm:p-5 flex-1 flex flex-col">
         {/* Category + Veg */}
         <div className="flex items-center justify-between mb-2">
           <span className="text-[10px] text-brand-500/80 font-semibold uppercase tracking-[0.15em]">
@@ -218,7 +218,7 @@ export function ProductCard({ product, className, compact = false }: ProductCard
         </div>
 
         {/* Name */}
-        <h3 className="font-serif font-bold text-earth-dark text-base leading-snug mb-2 line-clamp-2 group-hover:text-brand-600 transition-colors duration-300">
+        <h3 className="font-serif font-bold text-earth-dark text-sm sm:text-base leading-snug mb-2 line-clamp-1 sm:line-clamp-2 group-hover:text-brand-600 transition-colors duration-300">
           {product.name}
         </h3>
 
@@ -248,7 +248,7 @@ export function ProductCard({ product, className, compact = false }: ProductCard
 
         {/* Variant selector */}
         {product.variants.length > 1 && !compact && (
-          <div className="flex gap-1.5 mb-3 flex-wrap">
+          <div className="flex gap-1 sm:gap-1.5 mb-2 sm:mb-3 flex-wrap">
             {product.variants.map((v, i) => (
               <button
                 key={v.id}
@@ -257,7 +257,7 @@ export function ProductCard({ product, className, compact = false }: ProductCard
                   setSelectedVariantIdx(i);
                 }}
                 className={cn(
-                  "text-[11px] px-2.5 py-1 rounded-full border transition-all duration-200",
+                  "text-[10px] sm:text-[11px] px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border transition-all duration-200",
                   i === selectedVariantIdx
                     ? "border-brand-500 bg-brand-50 text-brand-700 font-semibold"
                     : "border-gray-200 text-gray-400 hover:border-brand-300 hover:text-brand-500"
@@ -270,9 +270,9 @@ export function ProductCard({ product, className, compact = false }: ProductCard
         )}
 
         {/* Price */}
-        <div className="mt-auto pt-3 border-t border-brand-100/40 flex items-center justify-between">
-          <div className="flex items-baseline gap-2">
-            <span className="font-serif font-bold text-earth-dark text-lg">
+        <div className="mt-auto pt-2 sm:pt-3 border-t border-brand-100/40 flex items-center justify-between">
+          <div className="flex items-baseline gap-1.5">
+            <span className="font-serif font-bold text-earth-dark text-base sm:text-lg">
               {formatCurrency(selectedVariant?.price ?? 0)}
             </span>
             {discount > 0 && (

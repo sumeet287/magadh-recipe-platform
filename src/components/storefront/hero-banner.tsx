@@ -43,18 +43,18 @@ const SLIDES = [
     cta: { label: "Explore Collection", href: "/products" },
     cta2: { label: "Our Story", href: "/about" },
     img: "/images/products/lal-mirch-bharua.png",
-    stats: [{ value: "50K+", label: "Happy Families" }, { value: "25+", label: "Products" }, { value: "0%", label: "Preservatives" }],
+    stats: [{ value: "50K+", label: "Happy Families" }, { value: "15+", label: "Pickles" }, { value: "0%", label: "Preservatives" }],
   },
   {
     id: 2,
-    tag: "Festival Special",
-    line1: "Gift the Taste of",
-    accent: "Bihar",
-    sub: "Curated gift hampers packed with bestselling pickles & masalas. Make every occasion special with flavours that feel like home.",
-    cta: { label: "Shop Gift Boxes", href: "/products?category=gift-boxes" },
-    cta2: { label: "Combo Packs", href: "/products?category=combo-packs" },
+    tag: "Bihar's Finest",
+    line1: "Taste the Legacy of",
+    accent: "Magadh",
+    sub: "From rare Badhal pickle to fiery Lal Mirch Bharua — every jar is a tribute to Bihar's rich culinary heritage. Handcrafted, sun-dried, unforgettable.",
+    cta: { label: "Shop Bestsellers", href: "/products?isBestseller=true" },
+    cta2: { label: "New Arrivals", href: "/products?isNewArrival=true" },
     img: "/images/products/green-chilli.webp",
-    stats: [{ value: "5★", label: "Avg Rating" }, { value: "12K+", label: "Reviews" }, { value: "100%", label: "Natural" }],
+    stats: [{ value: "5★", label: "Avg Rating" }, { value: "15+", label: "Varieties" }, { value: "100%", label: "Natural" }],
   },
 ];
 
@@ -114,7 +114,7 @@ export function HeroBanner() {
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden min-h-[100vh] flex items-center"
+      className="relative overflow-hidden min-h-[85vh] sm:min-h-[90vh] lg:min-h-[100vh] flex items-center"
       style={{ background: "linear-gradient(145deg, #2a1208 0%, #1a0c06 35%, #120804 70%, #0d0603 100%)" }}
       onMouseMove={handleMouse}
       onMouseLeave={handleLeave}
@@ -125,8 +125,8 @@ export function HeroBanner() {
       <div className="hero-grain-overlay absolute inset-0 pointer-events-none z-[2]" aria-hidden />
       <div className="absolute inset-0 pointer-events-none opacity-[0.015]" style={{ backgroundImage: "radial-gradient(circle, #D4843A 0.8px, transparent 0.8px)", backgroundSize: "48px 48px" }} />
 
-      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16 py-20 lg:py-0">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center min-h-[80vh]">
+      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16 py-12 sm:py-16 lg:py-0">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-8 items-center min-h-0 lg:min-h-[80vh]">
 
           {/* LEFT */}
           <div className={cn("transition-all duration-500", transitioning ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0")}>
