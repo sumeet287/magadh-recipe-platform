@@ -243,19 +243,17 @@ export function ProductDetailClient({ product, relatedProducts, avgRating }: Pro
                     <button
                       key={v.id}
                       onClick={() => setSelectedVariantIdx(i)}
+                      disabled={v.stock === 0}
                       className={cn(
                         "px-4 py-2 rounded-xl border-2 text-sm font-medium transition-all",
-                        i === selectedVariantIdx
+                        i === selectedVariantIdx && v.stock > 0
                           ? "border-brand-500 bg-brand-50 text-brand-700"
                           : v.stock === 0
-                            ? "border-gray-100 text-gray-300 bg-gray-50 relative overflow-hidden"
+                            ? "border-gray-100 text-gray-300 bg-gray-50 cursor-not-allowed opacity-50 line-through"
                             : "border-gray-200 text-earth-dark hover:border-brand-300 hover:bg-brand-50"
                       )}
                     >
                       {v.name}
-                      {v.stock === 0 && (
-                        <span className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-gray-300 rotate-[140deg]" />
-                      )}
                     </button>
                   ))}
                 </div>
