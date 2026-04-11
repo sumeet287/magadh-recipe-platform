@@ -209,6 +209,65 @@ export function otpEmailHtml(otp: string, name?: string): string {
 </html>`;
 }
 
+// ---- Email Verification ----
+
+export function verificationEmailHtml(data: { name?: string; verifyUrl: string }): string {
+  const { name, verifyUrl } = data;
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Verify Your Email – Magadh Recipe</title></head>
+<body style="margin:0;padding:0;background:#FDF8F0;font-family:Georgia,serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FDF8F0;padding:32px 16px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(44,24,16,0.10);">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#2C1810,#5C2E15);padding:32px 40px;text-align:center;">
+            <h1 style="color:#D4843A;margin:0;font-size:28px;letter-spacing:2px;">MAGADH RECIPE</h1>
+            <p style="color:#f0c579;margin:8px 0 0;font-size:14px;letter-spacing:1px;">आचार की असली पहचान</p>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="padding:40px;">
+            <h2 style="color:#2C1810;margin:0 0 8px;font-size:22px;">Verify Your Email Address</h2>
+            ${name ? `<p style="color:#5C3D2E;margin:0 0 24px;">Hi ${name},</p>` : ""}
+            <p style="color:#5C3D2E;margin:0 0 24px;">Thanks for creating an account with Magadh Recipe! Please verify your email address by clicking the button below.</p>
+
+            <div style="text-align:center;margin:32px 0;">
+              <a href="${verifyUrl}"
+                 style="display:inline-block;background:#D4843A;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:14px;font-weight:bold;letter-spacing:1px;">
+                VERIFY EMAIL
+              </a>
+            </div>
+
+            <p style="color:#5C3D2E;margin:0 0 16px;font-size:14px;">Or copy and paste this link into your browser:</p>
+            <p style="color:#D4843A;margin:0 0 24px;font-size:13px;word-break:break-all;">${verifyUrl}</p>
+
+            <div style="background:#FDF8F0;border-radius:8px;padding:16px;border-left:4px solid #D4843A;">
+              <p style="margin:0;color:#5C3D2E;font-size:13px;">This link expires in <strong>24 hours</strong>. If you didn't create an account, you can safely ignore this email.</p>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:#2C1810;padding:24px 40px;text-align:center;">
+            <p style="color:#f0c579;margin:0 0 8px;font-size:13px;">Questions? Contact us at <a href="mailto:support@magadhrecipe.com" style="color:#D4843A;">support@magadhrecipe.com</a></p>
+            <p style="color:#8B6040;margin:0;font-size:12px;">&copy; ${new Date().getFullYear()} Magadh Recipe. All rights reserved.</p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
 // ---- Admin New Order Notification ----
 
 export function newOrderAdminHtml(data: {

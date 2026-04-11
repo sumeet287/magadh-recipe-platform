@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
@@ -15,6 +15,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
+  const verified = searchParams.get("verified") === "true";
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -34,7 +35,11 @@ function LoginForm() {
     });
 
     if (res?.error) {
-      setAuthError("Invalid email or password. Please try again.");
+      if (res.error.includes("EMAIL_NOT_VERIFIED")) {
+        setAuthError("Please verify your email first. Check your inbox for a verification link.");
+      } else {
+        setAuthError("Invalid email or password. Please try again.");
+      }
     } else {
       router.push(callbackUrl);
       router.refresh();
@@ -52,6 +57,13 @@ function LoginForm() {
         <h1 className="font-serif text-2xl font-bold text-earth-dark">Welcome back!</h1>
         <p className="text-gray-500 text-sm mt-1">Sign in to your Magadh Recipe account</p>
       </div>
+
+      {verified && (
+        <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-6">
+          <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+          <span>Email verified successfully! You can now sign in.</span>
+        </div>
+      )}
 
       {/* Google Sign In */}
       <Button

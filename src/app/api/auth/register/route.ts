@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { signUpSchema } from "@/lib/validations/auth";
 import { handleApiError, ConflictError, ValidationError } from "@/lib/errors";
 import { successResponse } from "@/lib/api-response";
 import { rateLimiter, RATE_LIMITS } from "@/lib/rate-limit";
+import { sendMail, verificationEmailHtml } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,8 +20,9 @@ export async function POST(req: NextRequest) {
     if (!parsed.success) throw new ValidationError(parsed.error.errors[0].message);
 
     const { name, email, password, phone } = parsed.data;
+    const normalizedEmail = email.toLowerCase();
 
-    const existing = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+    const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (existing) throw new ConflictError("An account with this email already exists.");
 
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -27,15 +30,33 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.create({
       data: {
         name,
-        email: email.toLowerCase(),
+        email: normalizedEmail,
         passwordHash: hashedPassword,
         phone: phone ?? null,
         role: "CUSTOMER",
       },
     });
 
+    const token = crypto.randomBytes(32).toString("hex");
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    await prisma.verificationToken.deleteMany({ where: { identifier: normalizedEmail } });
+    await prisma.verificationToken.create({
+      data: { identifier: normalizedEmail, token, expires },
+    });
+
+    const verifyUrl = `${process.env.NEXTAUTH_URL}/verify-email?token=${token}&email=${encodeURIComponent(normalizedEmail)}`;
+    sendMail({
+      to: normalizedEmail,
+      subject: "Verify your email – Magadh Recipe",
+      html: verificationEmailHtml({ name: user.name ?? undefined, verifyUrl }),
+    }).catch((e) => console.error("[Email] Verification email failed:", e));
+
     return NextResponse.json(
-      successResponse({ id: user.id, name: user.name, email: user.email }),
+      successResponse(
+        { id: user.id, email: user.email },
+        "Registration successful. Please check your email to verify your account."
+      ),
       { status: 201 }
     );
   } catch (err) {

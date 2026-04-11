@@ -2,21 +2,22 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Mail, Lock, User, Phone } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Phone, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { signUpSchema, type SignUpInput } from "@/lib/validations/auth";
 
 export default function SignupPage() {
-  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
 
   const {
     register,
@@ -35,24 +36,78 @@ export default function SignupPage() {
     const json = await res.json();
 
     if (!res.ok) {
-      setServerError(json.message ?? "Registration failed. Please try again.");
+      setServerError(json.message ?? json.error ?? "Registration failed. Please try again.");
       return;
     }
 
-    // Auto sign in after registration
-    const signInRes = await signIn("credentials", {
-      redirect: false,
-      email: data.email,
-      password: data.password,
-    });
+    setRegisteredEmail(data.email);
+  };
 
-    if (signInRes?.ok) {
-      router.push("/");
-      router.refresh();
-    } else {
-      router.push("/login");
+  const handleResend = async () => {
+    if (!registeredEmail || resendLoading) return;
+    setResendLoading(true);
+    setResendSuccess(false);
+
+    try {
+      const res = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: registeredEmail }),
+      });
+
+      if (res.ok) {
+        setResendSuccess(true);
+      }
+    } catch {
+      // Silently fail — the user can try again
+    } finally {
+      setResendLoading(false);
     }
   };
+
+  if (registeredEmail) {
+    return (
+      <div className="w-full max-w-sm mx-auto text-center">
+        <div className="mb-6">
+          <CheckCircle2 className="w-12 h-12 text-green-600 mx-auto mb-4" />
+          <h1 className="font-serif text-2xl font-bold text-earth-dark">Check your email!</h1>
+          <p className="text-gray-500 text-sm mt-2">
+            We&apos;ve sent a verification link to{" "}
+            <span className="font-medium text-earth-dark">{registeredEmail}</span>
+          </p>
+        </div>
+
+        <div className="bg-brand-50 border border-brand-200 rounded-xl px-4 py-4 mb-6">
+          <p className="text-sm text-earth-dark">
+            Click the link in your email to verify your account. The link expires in 24 hours.
+          </p>
+        </div>
+
+        {resendSuccess && (
+          <div className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-4">
+            Verification email resent successfully!
+          </div>
+        )}
+
+        <Button
+          variant="outline"
+          size="lg"
+          className="w-full mb-3"
+          onClick={handleResend}
+          loading={resendLoading}
+        >
+          Resend verification email
+        </Button>
+
+        <p className="text-center text-sm text-gray-500 mt-4">
+          Already verified?{" "}
+          <Link href="/login" className="text-brand-600 font-medium hover:text-brand-700">
+            Sign in
+          </Link>
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-sm mx-auto">
