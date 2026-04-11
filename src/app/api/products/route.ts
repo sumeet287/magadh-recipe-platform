@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { handleApiError, ValidationError } from "@/lib/errors";
-import { successResponse, paginatedResponse } from "@/lib/api-response";
+import { paginatedResponse } from "@/lib/api-response";
 import { productQuerySchema } from "@/lib/validations/product";
 
 export async function GET(req: NextRequest) {
@@ -52,8 +52,8 @@ export async function GET(req: NextRequest) {
         where,
         include: {
           category: { select: { name: true, slug: true } },
-          variants: { orderBy: { price: "asc" }, take: 1 },
-          images: { where: { isPrimary: true }, take: 1 },
+          variants: { orderBy: { price: "asc" }, select: { id: true, name: true, price: true, mrp: true, stock: true, isDefault: true } },
+          images: { orderBy: { sortOrder: "asc" }, select: { url: true, altText: true, isPrimary: true } },
           reviews: { select: { rating: true } },
         },
         orderBy,
@@ -64,7 +64,6 @@ export async function GET(req: NextRequest) {
     ]);
 
     const mapped = products.map((p) => {
-      const variant = p.variants[0];
       const avgRating =
         p.reviews.length > 0
           ? p.reviews.reduce((s, r) => s + r.rating, 0) / p.reviews.length
@@ -73,24 +72,19 @@ export async function GET(req: NextRequest) {
         id: p.id,
         name: p.name,
         slug: p.slug,
-        image: p.images[0]?.url,
-        price: variant?.price ?? 0,
-        mrp: variant?.mrp ?? 0,
-        stock: variant?.stock ?? 0,
         isVeg: p.isVeg,
         spiceLevel: p.spiceLevel,
         isBestseller: p.isBestseller,
         isNewArrival: p.isNewArrival,
-        category: { name: p.category.name, slug: p.category.slug },
-        variantId: variant?.id,
+        category: p.category,
+        variants: p.variants,
+        images: p.images,
         avgRating,
         reviewCount: p.reviews.length,
       };
     });
 
-    return NextResponse.json(
-      paginatedResponse(mapped, total, page, limit)
-    );
+    return paginatedResponse(mapped, total, page, limit);
   } catch (err) {
     return handleApiError(err);
   }

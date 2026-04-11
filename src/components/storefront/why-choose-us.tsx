@@ -37,7 +37,7 @@ export function WhyChooseUs() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14 lg:gap-y-16">
           {FEATURES.map((f, i) => (
             <div key={f.num} className="fade-up group relative" data-reveal data-delay={String(i + 1)}>
-              <span className="block font-serif font-bold text-5xl leading-none mb-4 select-none transition-colors duration-500" style={{ color: "rgba(212,132,58,0.08)" }}>
+              <span className="block font-serif font-bold text-5xl leading-none mb-4 select-none transition-colors duration-500 group-hover:text-brand-400/30" style={{ color: "rgba(212,132,58,0.2)" }}>
                 {f.num}
               </span>
               <h3 className="font-serif font-bold text-white/90 text-xl mb-3 leading-tight group-hover:text-brand-400 transition-colors duration-300">

@@ -69,10 +69,10 @@ function calculateCartTotals(
         ? 0
         : STANDARD_SHIPPING_FEE;
 
-  const taxableAmount = afterCoupon + shippingCharge;
-  const taxAmount = Math.round((taxableAmount * GST_RATE) / 100);
+  // Tax is inclusive (extracted from taxable amount) — matches server calculation
+  const taxAmount = Math.round(((afterCoupon * GST_RATE) / (100 + GST_RATE)) * 100) / 100;
 
-  const total = afterCoupon + shippingCharge + taxAmount;
+  const total = afterCoupon + shippingCharge;
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   return {

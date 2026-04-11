@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
       prisma.product.count({ where }),
     ]);
 
-    return NextResponse.json(paginatedResponse(products, total, page, limit));
+    return paginatedResponse(products, total, page, limit);
   } catch (err) {
     return handleApiError(err);
   }

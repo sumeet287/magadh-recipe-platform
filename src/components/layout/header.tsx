@@ -28,7 +28,7 @@ const NAV_LINKS = [
     submenu: [
       { label: "All Products", href: "/products" },
       { label: "Pickles", href: "/products?category=pickles" },
-      { label: "Masalas & Spices", href: "/products?category=masalas" },
+      { label: "Masalas & Spices", href: "/products?category=masalas-spices" },
       { label: "Combo Packs", href: "/products?category=combo-packs" },
       { label: "Gift Boxes", href: "/products?category=gift-boxes" },
       { label: "Regional Specials", href: "/products?category=regional-specials" },

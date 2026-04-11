@@ -11,7 +11,7 @@ const LINKS = [
   { label: "Home", href: "/" },
   { label: "Products", href: "/products", sub: [
     { label: "Pickles", href: "/products?category=pickles" },
-    { label: "Masalas & Spices", href: "/products?category=masalas" },
+    { label: "Masalas & Spices", href: "/products?category=masalas-spices" },
     { label: "Combo Packs", href: "/products?category=combo-packs" },
     { label: "Gift Boxes", href: "/products?category=gift-boxes" },
   ]},

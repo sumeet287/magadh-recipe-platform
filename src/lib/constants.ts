@@ -42,6 +42,8 @@ export const ORDER_STATUS_CONFIG = {
   SHIPPED: { label: "Shipped", color: "blue", description: "Out for delivery" },
   OUT_FOR_DELIVERY: { label: "Out for Delivery", color: "blue", description: "With delivery partner" },
   DELIVERED: { label: "Delivered", color: "green", description: "Delivered successfully" },
+  RETURN_REQUESTED: { label: "Return Requested", color: "orange", description: "Customer requested a return" },
+  RETURNED: { label: "Returned", color: "orange", description: "Product returned to seller" },
   CANCELLED: { label: "Cancelled", color: "red", description: "Order cancelled" },
   REFUND_INITIATED: { label: "Refund Initiated", color: "orange", description: "Refund in process" },
   REFUNDED: { label: "Refunded", color: "purple", description: "Amount refunded" },

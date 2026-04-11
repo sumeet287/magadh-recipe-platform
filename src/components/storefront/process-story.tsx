@@ -64,7 +64,7 @@ export function ProcessStory() {
                 <div className={cn("order-2", isEven ? "lg:order-1" : "lg:order-2")}>
                   <span
                     className="block font-serif font-bold text-[6rem] sm:text-[8rem] leading-none tracking-tighter select-none mb-4"
-                    style={{ background: "linear-gradient(180deg, rgba(212,132,58,0.1) 0%, rgba(212,132,58,0.02) 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+                    style={{ color: "rgba(212,132,58,0.18)" }}
                   >
                     {step.num}
                   </span>

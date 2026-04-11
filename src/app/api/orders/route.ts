@@ -5,7 +5,8 @@ import { handleApiError, UnauthorizedError, ValidationError } from "@/lib/errors
 import { successResponse } from "@/lib/api-response";
 import { checkoutSchema } from "@/lib/validations/order";
 import { generateOrderNumber } from "@/lib/utils";
-import { GST_RATE, FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_FEE } from "@/lib/constants";
+import { GST_RATE, FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_FEE, COD_FEE } from "@/lib/constants";
+import { sendOrderNotifications } from "@/lib/email";
 
 // POST /api/orders — create order
 export async function POST(req: NextRequest) {
@@ -21,7 +22,6 @@ export async function POST(req: NextRequest) {
 
     if (!address) throw new ValidationError("Delivery address is required");
 
-    // Validate all items and variants, lock stock
     const variantIds = items.map((i) => i.variantId);
     const variants = await prisma.productVariant.findMany({
       where: { id: { in: variantIds } },
@@ -30,16 +30,14 @@ export async function POST(req: NextRequest) {
 
     if (variants.length !== items.length) throw new ValidationError("One or more products are unavailable");
 
-    // Check stock
     for (const item of items) {
       const variant = variants.find((v) => v.id === item.variantId);
-      if (!variant) throw new ValidationError(`Product variant not found`);
+      if (!variant) throw new ValidationError("Product variant not found");
       if (variant.stock < item.quantity) {
         throw new ValidationError(`Insufficient stock for "${variant.product.name}"`);
       }
     }
 
-    // Validate coupon if provided
     let coupon = null;
     let couponDiscount = 0;
     if (couponCode) {
@@ -57,7 +55,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Calculate amounts
     let subtotal = 0;
     let totalMrp = 0;
     for (const item of items) {
@@ -81,20 +78,20 @@ export async function POST(req: NextRequest) {
 
     const isFreeShipping = coupon?.type === "FREE_SHIPPING" || subtotal >= FREE_SHIPPING_THRESHOLD;
     const shippingCharge = isFreeShipping ? 0 : STANDARD_SHIPPING_FEE;
-    const codFee = paymentMethod === "COD" ? 30 : 0;
+    const codFee = paymentMethod === "COD" ? COD_FEE : 0;
     const taxableAmount = subtotal - couponDiscount;
-    const taxAmount = Math.round((taxableAmount * GST_RATE) / (100 + GST_RATE) * 100) / 100;
+    const taxAmount = Math.round(((taxableAmount * GST_RATE) / (100 + GST_RATE)) * 100) / 100;
     const totalAmount = taxableAmount + shippingCharge + codFee;
 
+    const isCod = paymentMethod === "COD";
     const orderNumber = generateOrderNumber();
 
-    // Create order in transaction
     const order = await prisma.$transaction(async (tx) => {
       const newOrder = await tx.order.create({
         data: {
           orderNumber,
           userId: session.user.id,
-          status: paymentMethod === "COD" ? "CONFIRMED" : "PENDING",
+          status: isCod ? "CONFIRMED" : "PENDING",
           subtotalAmount: subtotal,
           discountAmount: productDiscount + couponDiscount,
           shippingAmount: shippingCharge,
@@ -132,29 +129,32 @@ export async function POST(req: NextRequest) {
             },
           },
         },
+        include: { items: true, shipping: true, user: { select: { name: true, email: true } } },
       });
 
-      // Decrement stock
-      for (const item of items) {
-        await tx.productVariant.update({
-          where: { id: item.variantId },
-          data: { stock: { decrement: item.quantity } },
-        });
+      // Only decrement stock for COD (confirmed immediately).
+      // Razorpay orders decrement stock on payment verification to avoid holding inventory for unpaid orders.
+      if (isCod) {
+        for (const item of items) {
+          await tx.productVariant.update({
+            where: { id: item.variantId },
+            data: { stock: { decrement: item.quantity } },
+          });
+        }
       }
 
-      // Increment coupon usage
       if (coupon) {
-        await tx.coupon.update({
-          where: { id: coupon.id },
-          data: { usedCount: { increment: 1 } },
-        });
-        await tx.couponUsage.create({
-          data: { couponId: coupon.id, userId: session.user.id, orderId: newOrder.id },
-        });
+        await tx.coupon.update({ where: { id: coupon.id }, data: { usedCount: { increment: 1 } } });
+        await tx.couponUsage.create({ data: { couponId: coupon.id, userId: session.user.id, orderId: newOrder.id } });
       }
 
       return newOrder;
     });
+
+    // Send confirmation + admin notification for COD orders (Razorpay orders send on verify)
+    if (isCod) {
+      sendOrderNotifications(order, session.user.email ?? undefined).catch(() => {});
+    }
 
     return NextResponse.json(successResponse(order), { status: 201 });
   } catch (err) {

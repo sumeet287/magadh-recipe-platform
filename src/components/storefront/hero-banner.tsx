@@ -179,37 +179,37 @@ export function HeroBanner() {
               <div className="w-[420px] h-[420px] rounded-full" style={{ background: "radial-gradient(circle, rgba(212,132,58,0.12) 0%, rgba(212,132,58,0.03) 50%, transparent 70%)", filter: "blur(40px)" }} />
             </div>
 
-            <div ref={imgRef} className="relative will-change-transform" style={{ width: "min(440px, 90%)", transformStyle: "preserve-3d" }}>
-              <div className="relative rounded-[2rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.6),0_0_0_1px_rgba(212,132,58,0.08)] aspect-[3/4]">
+            <div ref={imgRef} className="relative will-change-transform" style={{ width: "min(460px, 92%)", transformStyle: "preserve-3d" }}>
+              <div className="relative rounded-[2.5rem] overflow-hidden aspect-[3/4]" style={{ boxShadow: "0 50px 100px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,132,58,0.06), 0 0 80px -20px rgba(212,132,58,0.12)" }}>
                 <img src={s.img} alt="Magadh Recipe premium pickles" className="w-full h-full object-cover" loading="eager" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0d0603]/60 via-transparent to-[#0d0603]/20" />
-                <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 50%)" }} />
-                <div className="absolute bottom-0 inset-x-0 p-5">
-                  <div className="backdrop-blur-xl rounded-2xl px-5 py-3.5 flex items-center justify-between" style={{ background: "rgba(13,6,3,0.7)", border: "1px solid rgba(212,132,58,0.1)" }}>
-                    <div>
-                      <p className="text-white font-serif font-bold text-sm tracking-wide">Magadh Recipe</p>
-                      <p className="text-brand-400/60 text-[10px] tracking-[0.15em] uppercase mt-0.5">माँ के हाथ का स्वाद</p>
-                    </div>
-                    <div className="flex items-center gap-1.5 bg-white/[0.06] rounded-full px-3 py-1.5">
-                      <Star className="w-3 h-3 fill-turmeric-400 text-turmeric-400" />
-                      <span className="text-white text-xs font-bold">4.9</span>
-                    </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0d0603]/70 via-transparent to-[#0d0603]/10" />
+                <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 40%)" }} />
+
+                {/* FSSAI badge — inside card, top-right */}
+                <div className="absolute top-5 right-5 z-10">
+                  <div className="flex items-center gap-1.5 backdrop-blur-xl rounded-full px-3 py-1.5" style={{ background: "rgba(13,6,3,0.6)", border: "1px solid rgba(212,132,58,0.12)" }}>
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    <span className="text-[10px] font-semibold text-white/70 tracking-wide">FSSAI Certified</span>
                   </div>
                 </div>
-              </div>
 
-              <div className="absolute -top-4 -right-4 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl px-4 py-2.5 z-10" style={{ border: "1px solid rgba(212,132,58,0.08)" }}>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[11px] font-bold text-[#1a0e07] tracking-wide">FSSAI Certified</span>
-                </div>
-              </div>
-
-              <div className="absolute -bottom-5 -left-5 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl px-4 py-3 z-10 flex items-center gap-3" style={{ border: "1px solid rgba(212,132,58,0.08)" }}>
-                <div className="w-11 h-11 rounded-xl bg-brand-50 flex items-center justify-center text-lg">🏺</div>
-                <div>
-                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.15em]">Made with</p>
-                  <p className="text-sm font-serif font-bold text-[#1a0e07]">Maa&apos;s Love</p>
+                {/* Bottom info bar — inside card */}
+                <div className="absolute bottom-0 inset-x-0 p-5">
+                  <div className="backdrop-blur-xl rounded-2xl px-5 py-3 flex items-center justify-between" style={{ background: "rgba(13,6,3,0.65)", border: "1px solid rgba(212,132,58,0.08)" }}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(212,132,58,0.1)" }}>
+                        <span className="text-sm">🏺</span>
+                      </div>
+                      <div>
+                        <p className="text-white/90 font-serif font-bold text-[13px] tracking-wide leading-none">Magadh Recipe</p>
+                        <p className="text-brand-400/50 text-[9px] tracking-[0.12em] uppercase mt-1 leading-none">Maa ke Haath ka Swaad</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 bg-white/[0.05] rounded-full px-2.5 py-1">
+                      <Star className="w-2.5 h-2.5 fill-turmeric-400 text-turmeric-400" />
+                      <span className="text-white/80 text-[11px] font-bold">4.9</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

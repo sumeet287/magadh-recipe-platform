@@ -113,7 +113,7 @@ export function SearchModal() {
           <div className="grid grid-cols-2 gap-2">
             {[
               { label: "🥒 All Pickles", href: "/products?category=pickles" },
-              { label: "🌶️ Masalas", href: "/products?category=masalas" },
+              { label: "🌶️ Masalas", href: "/products?category=masalas-spices" },
               { label: "🎁 Gift Boxes", href: "/products?category=gift-boxes" },
               { label: "⭐ Bestsellers", href: "/products?isBestseller=true" },
             ].map(({ label, href }) => (

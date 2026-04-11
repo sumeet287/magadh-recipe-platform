@@ -6,7 +6,7 @@ import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 
 const CATEGORIES = [
   { name: "Pickles", slug: "pickles", hindi: "आचार", desc: "Traditional achars slow-marinated in cold-pressed mustard oil", count: "12+", image: "/images/products/lal-mirch-bharua.png" },
-  { name: "Masalas & Spices", slug: "masalas", hindi: "मसाले", desc: "Hand-ground spice blends from Bihar's kitchens", count: "8+", image: "/images/products/garlic.webp" },
+  { name: "Masalas & Spices", slug: "masalas-spices", hindi: "मसाले", desc: "Hand-ground spice blends from Bihar's kitchens", count: "8+", image: "/images/products/garlic.webp" },
   { name: "Combo Packs", slug: "combo-packs", hindi: "कॉम्बो", desc: "Curated multi-product packs for maximum value", count: "6+", image: "/images/products/mixed-vegetable.webp" },
   { name: "Gift Boxes", slug: "gift-boxes", hindi: "उपहार", desc: "Premium hampers for Diwali, weddings & celebrations", count: "5+", image: "/images/products/khatta-meetha-lemon.webp" },
   { name: "Regional Specials", slug: "regional-specials", hindi: "विशेष", desc: "Rare recipes from Bihar's culinary traditions", count: "4+", image: "/images/products/kathal.webp" },

@@ -1,10 +1,10 @@
 import nodemailer from "nodemailer";
 
-// Resend or SMTP transport — configure via env
+const smtpPort = Number(process.env.SMTP_PORT ?? 465);
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST ?? "smtp.resend.com",
-  port: Number(process.env.SMTP_PORT ?? 465),
-  secure: true,
+  port: smtpPort,
+  secure: smtpPort === 465,
   auth: {
     user: process.env.SMTP_USER ?? "resend",
     pass: process.env.SMTP_PASS ?? process.env.RESEND_API_KEY ?? "",
@@ -34,6 +34,58 @@ export async function sendMail(options: SendMailOptions) {
     console.error("[Email] Failed to send email:", error);
     return { success: false, error };
   }
+}
+
+// ---- Helpers ----
+
+interface PrismaOrderForEmail {
+  orderNumber: string;
+  subtotalAmount: number;
+  shippingAmount: number;
+  discountAmount: number;
+  totalAmount: number;
+  paymentMethod: string;
+  items: Array<{
+    productName: string;
+    variantName: string;
+    quantity: number;
+    unitPrice: number;
+  }>;
+  shipping?: {
+    recipientName: string;
+    phone: string;
+    addressLine1: string;
+    addressLine2?: string | null;
+    city: string;
+    state: string;
+    pincode: string;
+  } | null;
+  user?: { name?: string | null; email?: string | null } | null;
+}
+
+export function mapOrderToEmailData(order: PrismaOrderForEmail, customerName?: string) {
+  const shipping = order.shipping;
+  const deliveryAddress = shipping
+    ? [shipping.addressLine1, shipping.addressLine2, `${shipping.city}, ${shipping.state} ${shipping.pincode}`]
+        .filter(Boolean)
+        .join(", ")
+    : "N/A";
+
+  return {
+    orderNumber: order.orderNumber,
+    customerName: customerName ?? shipping?.recipientName ?? order.user?.name ?? "Customer",
+    items: order.items.map((item) => ({
+      name: item.productName,
+      variant: item.variantName,
+      qty: item.quantity,
+      price: item.unitPrice,
+    })),
+    subtotal: order.subtotalAmount,
+    shipping: order.shippingAmount,
+    discount: order.discountAmount,
+    total: order.totalAmount,
+    deliveryAddress,
+  };
 }
 
 // ---- Email Templates ----
@@ -155,4 +207,219 @@ export function otpEmailHtml(otp: string, name?: string): string {
   </div>
 </body>
 </html>`;
+}
+
+// ---- Admin New Order Notification ----
+
+export function newOrderAdminHtml(data: {
+  orderNumber: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  items: Array<{ name: string; variant: string; qty: number; price: number }>;
+  total: number;
+  paymentMethod: string;
+  deliveryAddress: string;
+}): string {
+  const { orderNumber, customerName, customerEmail, customerPhone, items, total, paymentMethod, deliveryAddress } = data;
+
+  const itemRows = items
+    .map(
+      (item) =>
+        `<tr><td style="padding:6px 8px;border-bottom:1px solid #eee;">${item.name} (${item.variant})</td><td style="padding:6px 8px;text-align:center;border-bottom:1px solid #eee;">${item.qty}</td><td style="padding:6px 8px;text-align:right;border-bottom:1px solid #eee;">₹${item.price * item.qty}</td></tr>`
+    )
+    .join("");
+
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>New Order – Magadh Recipe</title></head>
+<body style="margin:0;padding:0;background:#f4f4f5;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:24px;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden;">
+        <tr><td style="background:#2C1810;padding:20px 24px;">
+          <h1 style="color:#D4843A;margin:0;font-size:20px;">NEW ORDER RECEIVED</h1>
+        </td></tr>
+        <tr><td style="padding:24px;">
+          <p style="margin:0 0 16px;font-size:15px;"><strong>Order #${orderNumber}</strong> &mdash; <strong style="color:#D4843A;">₹${total}</strong> via ${paymentMethod}</p>
+          <h3 style="margin:0 0 8px;font-size:14px;color:#666;">Customer</h3>
+          <p style="margin:0 0 16px;font-size:14px;">${customerName}<br/>${customerEmail}<br/>${customerPhone}</p>
+          <h3 style="margin:0 0 8px;font-size:14px;color:#666;">Items</h3>
+          <table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;margin-bottom:16px;">
+            <thead><tr style="background:#f9f9f9;"><th style="padding:6px 8px;text-align:left;">Item</th><th style="padding:6px 8px;text-align:center;">Qty</th><th style="padding:6px 8px;text-align:right;">Total</th></tr></thead>
+            <tbody>${itemRows}</tbody>
+          </table>
+          <h3 style="margin:0 0 8px;font-size:14px;color:#666;">Delivery Address</h3>
+          <p style="margin:0;font-size:14px;">${deliveryAddress}</p>
+        </td></tr>
+        <tr><td style="background:#f9f9f9;padding:16px 24px;text-align:center;">
+          <a href="${process.env.NEXTAUTH_URL}/admin/orders" style="color:#D4843A;font-size:13px;">View in Admin Panel</a>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+// ---- Order Status Change Emails ----
+
+export function orderShippedHtml(data: {
+  orderNumber: string;
+  customerName: string;
+  trackingNumber?: string;
+  trackingUrl?: string;
+  courier?: string;
+}): string {
+  const { orderNumber, customerName, trackingNumber, trackingUrl, courier } = data;
+  const trackingBlock = trackingNumber
+    ? `<div style="background:#FDF8F0;border-radius:8px;padding:16px;margin:16px 0;border-left:4px solid #D4843A;">
+        <p style="margin:0;font-size:14px;color:#2C1810;"><strong>Tracking Number:</strong> ${trackingNumber}</p>
+        ${courier ? `<p style="margin:4px 0 0;font-size:13px;color:#5C3D2E;">Courier: ${courier}</p>` : ""}
+        ${trackingUrl ? `<p style="margin:8px 0 0;"><a href="${trackingUrl}" style="color:#D4843A;font-size:13px;">Track your package →</a></p>` : ""}
+       </div>`
+    : "";
+
+  return `
+<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#FDF8F0;font-family:Georgia,serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FDF8F0;padding:32px 16px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(44,24,16,0.10);">
+        <tr><td style="background:linear-gradient(135deg,#2C1810,#5C2E15);padding:24px 40px;text-align:center;">
+          <h1 style="color:#D4843A;margin:0;font-size:24px;letter-spacing:2px;">MAGADH RECIPE</h1>
+        </td></tr>
+        <tr><td style="padding:40px;">
+          <h2 style="color:#2C1810;margin:0 0 8px;">Your Order Has Been Shipped! 📦</h2>
+          <p style="color:#5C3D2E;margin:0 0 16px;">Hi ${customerName}, great news — your order <strong>#${orderNumber}</strong> is on its way!</p>
+          ${trackingBlock}
+          <p style="color:#5C3D2E;margin:16px 0;">Expected delivery: 3-7 business days.</p>
+          <div style="text-align:center;margin-top:24px;">
+            <a href="${process.env.NEXTAUTH_URL}/account/orders" style="display:inline-block;background:#D4843A;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:bold;">TRACK ORDER</a>
+          </div>
+        </td></tr>
+        <tr><td style="background:#2C1810;padding:16px 40px;text-align:center;">
+          <p style="color:#8B6040;margin:0;font-size:12px;">&copy; ${new Date().getFullYear()} Magadh Recipe. All rights reserved.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+export function orderDeliveredHtml(data: { orderNumber: string; customerName: string }): string {
+  return `
+<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#FDF8F0;font-family:Georgia,serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FDF8F0;padding:32px 16px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(44,24,16,0.10);">
+        <tr><td style="background:linear-gradient(135deg,#2C1810,#5C2E15);padding:24px 40px;text-align:center;">
+          <h1 style="color:#D4843A;margin:0;font-size:24px;letter-spacing:2px;">MAGADH RECIPE</h1>
+        </td></tr>
+        <tr><td style="padding:40px;">
+          <h2 style="color:#2C1810;margin:0 0 8px;">Order Delivered! 🎉</h2>
+          <p style="color:#5C3D2E;margin:0 0 16px;">Hi ${data.customerName}, your order <strong>#${data.orderNumber}</strong> has been delivered successfully.</p>
+          <p style="color:#5C3D2E;">We hope you enjoy Maa ke Haath ka Swaad! If you love it, please leave us a review.</p>
+          <div style="text-align:center;margin-top:24px;">
+            <a href="${process.env.NEXTAUTH_URL}/account/orders" style="display:inline-block;background:#D4843A;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:bold;">LEAVE A REVIEW</a>
+          </div>
+        </td></tr>
+        <tr><td style="background:#2C1810;padding:16px 40px;text-align:center;">
+          <p style="color:#8B6040;margin:0;font-size:12px;">&copy; ${new Date().getFullYear()} Magadh Recipe. All rights reserved.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+export function orderCancelledHtml(data: { orderNumber: string; customerName: string; reason?: string }): string {
+  return `
+<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#FDF8F0;font-family:Georgia,serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FDF8F0;padding:32px 16px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(44,24,16,0.10);">
+        <tr><td style="background:linear-gradient(135deg,#2C1810,#5C2E15);padding:24px 40px;text-align:center;">
+          <h1 style="color:#D4843A;margin:0;font-size:24px;letter-spacing:2px;">MAGADH RECIPE</h1>
+        </td></tr>
+        <tr><td style="padding:40px;">
+          <h2 style="color:#2C1810;margin:0 0 8px;">Order Cancelled</h2>
+          <p style="color:#5C3D2E;margin:0 0 16px;">Hi ${data.customerName}, your order <strong>#${data.orderNumber}</strong> has been cancelled.</p>
+          ${data.reason ? `<p style="color:#5C3D2E;">Reason: ${data.reason}</p>` : ""}
+          <p style="color:#5C3D2E;">If you paid online, the refund will be processed within 5-7 business days.</p>
+          <div style="text-align:center;margin-top:24px;">
+            <a href="${process.env.NEXTAUTH_URL}" style="display:inline-block;background:#D4843A;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:bold;">SHOP AGAIN</a>
+          </div>
+        </td></tr>
+        <tr><td style="background:#2C1810;padding:16px 40px;text-align:center;">
+          <p style="color:#8B6040;margin:0;font-size:12px;">&copy; ${new Date().getFullYear()} Magadh Recipe. All rights reserved.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+// ---- Helper to send admin + WhatsApp notification for new orders ----
+
+export async function sendOrderNotifications(order: PrismaOrderForEmail, customerEmail?: string) {
+  const emailData = mapOrderToEmailData(order);
+  const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL ?? process.env.FROM_EMAIL ?? "magadhrecipe@gmail.com";
+  const customerPhone = order.shipping?.phone ?? "";
+
+  // Customer confirmation email
+  if (customerEmail) {
+    sendMail({
+      to: customerEmail,
+      subject: `Order Confirmed – #${order.orderNumber}`,
+      html: orderConfirmationHtml(emailData),
+    }).catch((e) => console.error("[Email] Customer confirmation failed:", e));
+  }
+
+  // Admin notification email
+  sendMail({
+    to: adminEmail,
+    subject: `🛒 New Order #${order.orderNumber} — ₹${order.totalAmount}`,
+    html: newOrderAdminHtml({
+      ...emailData,
+      customerEmail: customerEmail ?? order.user?.email ?? "N/A",
+      customerPhone,
+      paymentMethod: order.paymentMethod,
+    }),
+  }).catch((e) => console.error("[Email] Admin notification failed:", e));
+
+  // WhatsApp notification (if configured)
+  sendWhatsAppOrderNotification(order).catch((e) => console.error("[WhatsApp] Notification failed:", e));
+}
+
+// ---- WhatsApp Integration ----
+
+export async function sendWhatsAppOrderNotification(order: PrismaOrderForEmail) {
+  const apiKey = process.env.WHATSAPP_API_KEY;
+  const apiUrl = process.env.WHATSAPP_API_URL;
+  const phone = process.env.WHATSAPP_PHONE_NUMBER;
+
+  if (!apiKey || !apiUrl || !phone) return;
+
+  const itemsSummary = order.items.map((i) => `${i.productName} (${i.variantName}) x${i.quantity}`).join(", ");
+  const message = `🛒 *New Order #${order.orderNumber}*\n💰 Amount: ₹${order.totalAmount}\n💳 Payment: ${order.paymentMethod}\n📦 Items: ${itemsSummary}\n👤 ${order.shipping?.recipientName ?? "Customer"}\n📍 ${order.shipping?.city ?? ""}, ${order.shipping?.state ?? ""} ${order.shipping?.pincode ?? ""}\n📞 ${order.shipping?.phone ?? "N/A"}`;
+
+  try {
+    await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({ phone, message }),
+    });
+  } catch (error) {
+    console.error("[WhatsApp] Failed to send notification:", error);
+  }
 }

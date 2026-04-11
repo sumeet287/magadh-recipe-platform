@@ -22,7 +22,7 @@ import type { ProductCardData, PaginationMeta } from "@/types";
 const CATEGORIES = [
   { label: "All", value: "" },
   { label: "Pickles", value: "pickles" },
-  { label: "Masalas & Spices", value: "masalas" },
+  { label: "Masalas & Spices", value: "masalas-spices" },
   { label: "Combo Packs", value: "combo-packs" },
   { label: "Gift Boxes", value: "gift-boxes" },
   { label: "Regional Specials", value: "regional-specials" },
