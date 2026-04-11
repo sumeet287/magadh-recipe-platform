@@ -15,6 +15,8 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import type { ProductCardData } from "@/types";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Magadh Recipe — Maa ke Haath ka Swaad | Premium Handcrafted Pickles from Bihar",
   description:

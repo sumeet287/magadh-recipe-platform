@@ -535,7 +535,7 @@ async function main() {
     { key: "free_shipping_threshold", value: "499", group: "shipping" },
     { key: "standard_shipping_fee", value: "60", group: "shipping" },
     { key: "cod_fee", value: "30", group: "shipping" },
-    { key: "gst_rate", value: "5", group: "tax" },
+    { key: "gst_rate", value: "12", group: "tax" },
     { key: "maintenance_mode", value: "false", group: "general" },
   ];
 

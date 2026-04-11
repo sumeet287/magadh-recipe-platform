@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import {
   LayoutDashboard, Package, FolderOpen, ShoppingBag, Users,
-  Tag, Image, Star, BarChart3, Settings, ChevronRight,
+  Tag, Image, Star, BarChart3, Settings, ChevronRight, MessageSquare,
 } from "lucide-react";
 
 const navGroups = [
@@ -35,6 +35,7 @@ const navGroups = [
     items: [
       { href: "/admin/banners", label: "Banners", icon: Image },
       { href: "/admin/reviews", label: "Reviews", icon: Star },
+      { href: "/admin/inquiries", label: "Contact Inquiries", icon: MessageSquare },
     ],
   },
   {

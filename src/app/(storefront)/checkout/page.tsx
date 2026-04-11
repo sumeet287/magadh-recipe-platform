@@ -453,7 +453,7 @@ export default function CheckoutPage() {
                 </div>
               )}
               <div className="flex justify-between text-gray-500">
-                <span>GST</span><span>{formatCurrency(taxAmount)}</span>
+                <span>GST (12% incl.)</span><span>{formatCurrency(taxAmount)}</span>
               </div>
               <div className="border-t border-gray-100 pt-2 flex justify-between font-bold text-earth-dark">
                 <span>Total</span>

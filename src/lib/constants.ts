@@ -3,18 +3,18 @@
 export const APP_NAME = "Magadh Recipe";
 export const APP_TAGLINE = "माँ के हाथ का स्वाद — A Mother's Love, in Every Jar";
 export const APP_DESCRIPTION =
-  "Born from a mother's kitchen in the heart of Bihar — premium handcrafted pickles, achars, masalas & regional delicacies. No preservatives, cold-pressed mustard oil, authentic family recipes lovingly passed down through generations. Delivered fresh across India.";
+  "Born from a mother's kitchen in the heart of Bihar — premium handcrafted pickles & achars. No preservatives, cold-pressed mustard oil, authentic family recipes lovingly passed down through generations. Delivered fresh across India.";
 export const APP_URL = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
-export const SUPPORT_EMAIL = "support@magadhrecipe.com";
-export const SUPPORT_PHONE = "+91-9876543210";
-export const BRAND_ADDRESS = "Patna, Bihar, India - 800001";
+export const SUPPORT_EMAIL = "magadhrecipe@gmail.com";
+export const SUPPORT_PHONE = "+91-6207197364";
+export const BRAND_ADDRESS = "Patna, Bihar, India";
 
 // ==================== Commerce ====================
 
 export const FREE_SHIPPING_THRESHOLD = 499; // INR
 export const STANDARD_SHIPPING_FEE = 60;    // INR
 export const COD_FEE = 30;                  // INR
-export const GST_RATE = 5;                  // Percentage
+export const GST_RATE = 12;                 // Percentage — branded packaged pickles HSN 2001/2005
 
 export const PAGINATION = {
   DEFAULT_LIMIT: 12,
@@ -78,11 +78,11 @@ export const SORT_OPTIONS = [
 // ==================== Social Links ====================
 
 export const SOCIAL_LINKS = {
-  instagram: "https://instagram.com/magadhrecipe",
-  facebook: "https://facebook.com/magadhrecipe",
+  instagram: "https://www.instagram.com/magadh_recipe",
+  facebook: "https://www.facebook.com/magadhrecipe/",
   twitter: "https://twitter.com/magadhrecipe",
   youtube: "https://youtube.com/@magadhrecipe",
-  whatsapp: "https://wa.me/919876543210",
+  whatsapp: "https://wa.me/916207197364",
 };
 
 // ==================== Trust Badges ====================
@@ -207,12 +207,12 @@ export const BRAND_STORY = {
   subtitle: "माँ के हाथ का स्वाद — A taste only a mother's hands can create",
   paragraphs: [
     "Magadh Recipe was born from the most honest kitchen in the world — a mother's. In the ancient land of Magadh, where the Mauryan empire once flourished, our Maa has been perfecting these recipes for over three decades, filling our home with aromas that became the flavour of our childhood.",
-    "What began as jars lovingly packed for family and neighbours became something bigger when people simply couldn't stop asking for more. Her mango pickle, her garlic achar, her secret masala blends — each one a masterpiece that no factory could ever replicate.",
+    "What began as jars lovingly packed for family and neighbours became something bigger when people simply couldn't stop asking for more. Her mango pickle, her garlic achar, her legendary lemon pickle — each one a masterpiece that no factory could ever replicate.",
     "Today, every single jar is still made under her watchful eye. We use the same cold-pressed mustard oil, the same hand-ground spices, the same clay vessel marination that she has always insisted upon. No machines. No preservatives. No compromise.",
     "This isn't just a pickle brand — it's a mother's legacy in a jar. When you open a jar of Magadh Recipe, you're tasting generations of love, tradition, and the unmistakable warmth of a Bihari maa's kitchen.",
   ],
   stats: [
-    { value: "25+", label: "Authentic Products" },
+    { value: "15+", label: "Authentic Pickles" },
     { value: "50K+", label: "Happy Families" },
     { value: "100%", label: "Natural Ingredients" },
     { value: "5★", label: "Average Rating" },

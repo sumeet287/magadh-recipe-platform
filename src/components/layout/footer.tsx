@@ -10,12 +10,13 @@ const footerLinks = {
     { label: "Contact Us", href: "/contact" },
     { label: "Track Order", href: "/account/orders" },
   ],
-  "Products": [
-    { label: "All Pickles", href: "/products" },
-    { label: "Pickles", href: "/products?category=pickles" },
-    { label: "Regional Specials", href: "/products?category=regional-specials" },
-    { label: "Bestsellers", href: "/products?isBestseller=true" },
-    { label: "New Arrivals", href: "/products?isNewArrival=true" },
+  "Our Pickles": [
+    { label: "Mango Pickle", href: "/products/aam-kuccha-pickle" },
+    { label: "Lemon Pickle", href: "/products/lemon-pickle" },
+    { label: "Green Chilli", href: "/products/green-chilli-pickle" },
+    { label: "Garlic Pickle", href: "/products/garlic-pickle" },
+    { label: "Karonda Pickle", href: "/products/karonda-pickle" },
+    { label: "Khatta Meetha", href: "/products/khatta-meetha-lemon-pickle" },
   ],
   "Policies": [
     { label: "Privacy Policy", href: "/legal/privacy" },

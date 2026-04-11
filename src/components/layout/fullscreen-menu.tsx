@@ -10,10 +10,14 @@ import { useUIStore } from "@/store/ui-store";
 const LINKS = [
   { label: "Home", href: "/" },
   { label: "Products", href: "/products", sub: [
-    { label: "Pickles", href: "/products?category=pickles" },
-    { label: "Regional Specials", href: "/products?category=regional-specials" },
-    { label: "Bestsellers", href: "/products?isBestseller=true" },
-    { label: "New Arrivals", href: "/products?isNewArrival=true" },
+    { label: "Mango", href: "/products?tags=mango" },
+    { label: "Lemon", href: "/products?tags=lemon" },
+    { label: "Green Chilli", href: "/products?tags=green-chilli" },
+    { label: "Garlic", href: "/products?tags=garlic" },
+    { label: "Karonda", href: "/products?tags=karonda" },
+    { label: "Kathal", href: "/products?tags=kathal" },
+    { label: "Mixed Pickle", href: "/products?tags=mixed" },
+    { label: "Oal Pickle", href: "/products?tags=oal" },
   ]},
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },

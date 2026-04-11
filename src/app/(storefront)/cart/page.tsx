@@ -201,7 +201,7 @@ export default function CartPage() {
                   <span>{shippingCharge === 0 ? "FREE" : formatCurrency(shippingCharge)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
-                  <span>Tax (GST 5%)</span>
+                  <span>GST (12% incl.)</span>
                   <span>{formatCurrency(taxAmount)}</span>
                 </div>
                 <div className="border-t border-gray-100 pt-3 flex justify-between font-bold text-base text-earth-dark">

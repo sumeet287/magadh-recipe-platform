@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     const {
       page, limit, search, category, minPrice, maxPrice,
       spiceLevel, isVeg, isBestseller, isNewArrival, isFeatured,
-      sort,
+      sort, tags,
     } = parsed.data;
 
     const where: Record<string, unknown> = { status: "ACTIVE" };
@@ -26,6 +26,7 @@ export async function GET(req: NextRequest) {
       ];
     }
     if (category) where.category = { slug: category };
+    if (tags) where.tags = { hasSome: tags.split(",") };
     if (minPrice !== undefined || maxPrice !== undefined) {
       where.variants = { some: { price: { gte: minPrice, lte: maxPrice } } };
     }
@@ -84,7 +85,9 @@ export async function GET(req: NextRequest) {
       };
     });
 
-    return paginatedResponse(mapped, total, page, limit);
+    const response = paginatedResponse(mapped, total, page, limit);
+    response.headers.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
+    return response;
   } catch (err) {
     return handleApiError(err);
   }

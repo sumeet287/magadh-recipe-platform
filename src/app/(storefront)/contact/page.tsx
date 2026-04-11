@@ -31,9 +31,9 @@ export default function ContactPage() {
   };
 
   const contactItems = [
-    { icon: MapPin, title: "Address", value: "Rajendra Nagar, Patna, Bihar 800016" },
-    { icon: Phone, title: "Phone", value: "+91 98765 43210" },
-    { icon: Mail, title: "Email", value: "hello@magadhrecipe.com" },
+    { icon: MapPin, title: "Address", value: "Patna, Bihar, India" },
+    { icon: Phone, title: "Phone", value: "+91 620-719-7364" },
+    { icon: Mail, title: "Email", value: "magadhrecipe@gmail.com" },
     { icon: Clock, title: "Hours", value: "Mon–Sat: 9 AM – 6 PM IST" },
   ];
 

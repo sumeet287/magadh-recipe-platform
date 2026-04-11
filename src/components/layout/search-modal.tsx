@@ -112,10 +112,10 @@ export function SearchModal() {
           </p>
           <div className="grid grid-cols-2 gap-2">
             {[
-              { label: "🥒 All Pickles", href: "/products?category=pickles" },
-              { label: "🏺 Regional Specials", href: "/products?category=regional-specials" },
-              { label: "⭐ Bestsellers", href: "/products?isBestseller=true" },
-              { label: "🆕 New Arrivals", href: "/products?isNewArrival=true" },
+              { label: "🥭 Mango Pickle", href: "/products?tags=mango" },
+              { label: "🍋 Lemon Pickle", href: "/products?tags=lemon" },
+              { label: "🌶️ Green Chilli", href: "/products?tags=green-chilli" },
+              { label: "🧄 Garlic Pickle", href: "/products?tags=garlic" },
             ].map(({ label, href }) => (
               <a
                 key={href}

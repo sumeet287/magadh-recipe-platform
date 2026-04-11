@@ -21,8 +21,17 @@ import type { ProductCardData, PaginationMeta } from "@/types";
 
 const CATEGORIES = [
   { label: "All", value: "" },
-  { label: "Pickles", value: "pickles" },
-  { label: "Regional Specials", value: "regional-specials" },
+  { label: "Amra Pickle", value: "amra", icon: "🍑" },
+  { label: "Badhal Pickle", value: "badhal", icon: "🌿" },
+  { label: "Garlic", value: "garlic", icon: "🧄" },
+  { label: "Green Chilli", value: "green-chilli", icon: "🌶️" },
+  { label: "Karonda", value: "karonda", icon: "🫒" },
+  { label: "Kathal Pickle", value: "kathal", icon: "🍈" },
+  { label: "Lemon", value: "lemon", icon: "🍋" },
+  { label: "Mango", value: "mango", icon: "🥭" },
+  { label: "Mixed Pickle", value: "mixed", icon: "🥗" },
+  { label: "Oal Pickle", value: "oal", icon: "🫚" },
+  { label: "Red Chilli", value: "chilli", icon: "🌶️" },
 ];
 
 const SPICE_LEVELS = [
@@ -96,12 +105,13 @@ function FilterSidebar({
             </button>
           )}
           {Object.keys(params).some((k) =>
-            ["category", "spiceLevel", "minPrice", "maxPrice", "inStock", "isBestseller", "isVeg"].includes(k)
+            ["category", "tags", "spiceLevel", "minPrice", "maxPrice", "inStock", "isBestseller", "isVeg"].includes(k)
           ) && (
             <button
               onClick={() =>
                 onUpdate({
                   category: "",
+                  tags: "",
                   spiceLevel: "",
                   minPrice: "",
                   maxPrice: "",
@@ -120,18 +130,19 @@ function FilterSidebar({
 
       {/* Category */}
       <FilterSection title="Category" id="category">
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.value}
-              onClick={() => onUpdate({ category: cat.value, page: "1" })}
+              onClick={() => onUpdate({ tags: cat.value, category: "", page: "1" })}
               className={cn(
-                "w-full text-left px-3 py-2 rounded-lg text-sm transition-colors",
-                params.category === cat.value
+                "w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2",
+                params.tags === cat.value || (!params.tags && !cat.value)
                   ? "bg-brand-50 text-brand-600 font-medium"
                   : "text-earth-700 hover:bg-cream-200"
               )}
             >
+              {"icon" in cat && cat.icon && <span className="text-base">{cat.icon}</span>}
               {cat.label}
             </button>
           ))}
@@ -275,7 +286,7 @@ function ProductsContent() {
   }, [searchParams]);
 
   const activeFilterCount = [
-    params.category,
+    params.tags,
     params.spiceLevel,
     params.minPrice,
     params.inStock,
@@ -295,8 +306,8 @@ function ProductsContent() {
             Browse
           </p>
           <h1 className="font-serif text-3xl md:text-4xl font-bold">
-            {params.category
-              ? CATEGORIES.find((c) => c.value === params.category)?.label ?? "Products"
+            {params.tags
+              ? CATEGORIES.find((c) => c.value === params.tags)?.label ?? "Products"
               : "All Products"}
           </h1>
           {meta && (
@@ -328,13 +339,13 @@ function ProductsContent() {
 
           {/* Active filter tags */}
           <div className="flex-1 flex flex-wrap gap-2 items-center">
-            {params.category && (
+            {params.tags && (
               <Badge
                 variant="outline"
                 className="text-xs cursor-pointer"
-                onClick={() => updateParams({ category: "" })}
+                onClick={() => updateParams({ tags: "" })}
               >
-                {CATEGORIES.find((c) => c.value === params.category)?.label}
+                {CATEGORIES.find((c) => c.value === params.tags)?.label ?? params.tags}
                 <X className="w-3 h-3 ml-1" />
               </Badge>
             )}
