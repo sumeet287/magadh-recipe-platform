@@ -560,20 +560,12 @@ export async function sendWhatsAppOrderNotification(order: PrismaOrderForEmail) 
   console.log(`[WhatsApp] Sending order notification for ${order.orderNumber} to ${adminPhone}`);
 
   const items = order.items
-    .map((i) => `• ${i.productName} (${i.variantName}) x${i.quantity}`)
-    .join("\n");
+    .map((i) => `${i.productName} (${i.variantName}) x${i.quantity}`)
+    .join(", ");
 
-  const message = [
-    `🛒 *New Order #${order.orderNumber}*`,
-    `💰 Amount: ₹${order.totalAmount}`,
-    `💳 Payment: ${order.paymentMethod}`,
-    ``,
-    `📦 *Items:*`,
+  const details = [
     items,
-    ``,
-    `👤 ${order.shipping?.recipientName ?? "Customer"}`,
-    `📞 ${order.shipping?.phone ?? "N/A"}`,
-    `📍 ${order.shipping?.city ?? ""}, ${order.shipping?.state ?? ""} ${order.shipping?.pincode ?? ""}`,
+    `${order.shipping?.recipientName ?? "Customer"} | ${order.shipping?.phone ?? "N/A"} | ${order.shipping?.city ?? ""}, ${order.shipping?.state ?? ""}`,
   ].join("\n");
 
   try {
@@ -586,8 +578,21 @@ export async function sendWhatsAppOrderNotification(order: PrismaOrderForEmail) 
       body: JSON.stringify({
         messaging_product: "whatsapp",
         to: adminPhone,
-        type: "text",
-        text: { body: message },
+        type: "template",
+        template: {
+          name: "order_notification",
+          language: { code: "en" },
+          components: [
+            {
+              type: "body",
+              parameters: [
+                { type: "text", text: `#${order.orderNumber}` },
+                { type: "text", text: `Rs.${order.totalAmount}` },
+                { type: "text", text: details },
+              ],
+            },
+          ],
+        },
       }),
     });
 
