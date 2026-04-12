@@ -178,8 +178,8 @@ export const TESTIMONIALS = [
     name: "Anita Singh",
     location: "Delhi",
     rating: 5,
-    text: "Ordered the gift hamper for my parents and they absolutely loved it! Excellent packaging, fresh products, and the taste is absolutely authentic.",
-    product: "Gift Hamper",
+    text: "Ordered a combo for my parents and they absolutely loved it! Excellent packaging, fresh products, and the taste is absolutely authentic.",
+    product: "Mixed Pickle Combo",
     avatar: "/images/avatars/avatar-3.jpg",
   },
   {

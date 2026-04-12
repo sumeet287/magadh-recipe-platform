@@ -89,7 +89,7 @@ export function Testimonials() {
             </div>
 
             {/* Nav */}
-            <div className="flex items-center gap-3 mt-10">
+            <div className="flex items-center justify-center gap-3 mt-10">
               <button onClick={() => go("left")} className="w-10 h-10 rounded-full border border-white/[0.06] flex items-center justify-center text-white/30 hover:text-white/70 hover:border-white/[0.12] transition-all" aria-label="Previous">
                 <ChevronLeft className="w-4 h-4" />
               </button>

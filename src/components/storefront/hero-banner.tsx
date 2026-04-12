@@ -173,7 +173,7 @@ export function HeroBanner() {
             </div>
 
             {/* Mobile slide nav */}
-            <div className="flex lg:hidden items-center gap-3 mt-6">
+            <div className="flex lg:hidden items-center justify-center gap-3 mt-6">
               <button onClick={() => goTo((cur - 1 + SLIDES.length) % SLIDES.length)} className="w-9 h-9 rounded-full border border-white/[0.08] flex items-center justify-center text-white/40 hover:text-white/80 transition-all" aria-label="Previous"><ChevronLeft className="w-4 h-4" /></button>
               <div className="flex gap-1.5">
                 {SLIDES.map((_, i) => <button key={i} onClick={() => goTo(i)} className={cn("rounded-full transition-all duration-500", i === cur ? "w-8 h-1.5 bg-brand-400" : "w-2 h-1.5 bg-white/15")} aria-label={`Slide ${i + 1}`} />)}
