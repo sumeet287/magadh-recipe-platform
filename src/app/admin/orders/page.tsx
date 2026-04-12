@@ -118,7 +118,7 @@ export default function AdminOrdersPage() {
                         </td>
                         <td className="px-5 py-3.5 text-white font-medium">{formatCurrency(order.totalAmount)}</td>
                         <td className="px-5 py-3.5">
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${config?.color ?? "text-gray-400"}`}>
+                          <span className={`text-[11px] px-2.5 py-1 rounded-full font-semibold ${config?.color ?? "text-gray-400"}`}>
                             {config?.label ?? order.status}
                           </span>
                         </td>
