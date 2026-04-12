@@ -100,7 +100,7 @@ export default function CartPage() {
                     {/* Quantity */}
                     <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
                       <button
-                        onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                        onClick={() => updateQuantity(item.variantId, Math.max(1, item.quantity - 1))}
                         className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-50"
                       >
                         <Minus className="w-3 h-3" />
@@ -109,7 +109,7 @@ export default function CartPage() {
                         {item.quantity}
                       </span>
                       <button
-                        onClick={() => updateQuantity(item.id, Math.min(10, item.variant.stock, item.quantity + 1))}
+                        onClick={() => updateQuantity(item.variantId, Math.min(10, item.variant.stock, item.quantity + 1))}
                         className="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-50"
                       >
                         <Plus className="w-3 h-3" />
@@ -130,7 +130,7 @@ export default function CartPage() {
                   </div>
                 </div>
                 <button
-                  onClick={() => removeItem(item.id)}
+                  onClick={() => removeItem(item.variantId)}
                   className="shrink-0 text-gray-400 hover:text-spice-600 transition-colors p-1"
                 >
                   <Trash2 className="w-4 h-4" />
