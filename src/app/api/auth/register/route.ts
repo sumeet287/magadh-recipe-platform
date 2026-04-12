@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { signUpSchema } from "@/lib/validations/auth";
+import { registerSchema } from "@/lib/validations/auth";
 import { handleApiError, ConflictError, ValidationError } from "@/lib/errors";
 import { successResponse } from "@/lib/api-response";
 import { rateLimiter, RATE_LIMITS } from "@/lib/rate-limit";
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const parsed = signUpSchema.safeParse(body);
+    const parsed = registerSchema.safeParse(body);
     if (!parsed.success) throw new ValidationError(parsed.error.errors[0].message);
 
     const { name, email, password, phone } = parsed.data;
