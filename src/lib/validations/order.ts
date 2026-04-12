@@ -1,13 +1,13 @@
 import { z } from "zod";
 
 export const addressShape = z.object({
-  name: z.string().min(2),
-  phone: z.string().regex(/^[6-9]\d{9}$/),
-  addressLine1: z.string().min(5),
+  name: z.string().min(2, "Name is required"),
+  phone: z.string().regex(/^[6-9]\d{9}$/, "Enter valid 10-digit mobile number"),
+  addressLine1: z.string().min(5, "Address is required"),
   addressLine2: z.string().optional(),
-  city: z.string().min(2),
-  state: z.string().min(2),
-  pincode: z.string().regex(/^[1-9][0-9]{5}$/),
+  city: z.string().min(2, "City is required"),
+  state: z.string().min(2, "State is required"),
+  pincode: z.string().regex(/^[1-9][0-9]{5}$/, "Enter valid 6-digit pincode"),
   country: z.string().default("India"),
 });
 
