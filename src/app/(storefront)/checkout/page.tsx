@@ -43,12 +43,11 @@ interface RazorpayResponse {
   razorpay_signature: string;
 }
 
-type Step = "address" | "payment" | "review";
+type Step = "address" | "review";
 
 const STEPS: { key: Step; label: string }[] = [
   { key: "address", label: "Address" },
-  { key: "payment", label: "Payment" },
-  { key: "review", label: "Review" },
+  { key: "review", label: "Review & Pay" },
 ];
 
 const INDIAN_STATES = [
@@ -65,7 +64,7 @@ export default function CheckoutPage() {
   const [step, setStep] = useState<Step>("address");
   const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<"RAZORPAY" | "COD">("RAZORPAY");
+  const paymentMethod = "RAZORPAY" as const;
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [useNewAddress, setUseNewAddress] = useState(false);
@@ -160,12 +159,6 @@ export default function CheckoutPage() {
 
     const order = orderData.data;
 
-    if (paymentMethod === "COD") {
-      clearCart();
-      router.push(`/checkout/success?orderId=${order.id}`);
-      return;
-    }
-
     // Razorpay
     const razorRes = await fetch("/api/payments/create-order", {
       method: "POST",
@@ -212,25 +205,25 @@ export default function CheckoutPage() {
   };
 
   const onAddressSubmit = (data: CheckoutInput) => {
-    setStep("payment");
+    setStep("review");
   };
 
   return (
-    <div className="bg-cream-50 min-h-screen">
+    <div className="bg-cream-50">
       <div className="container mx-auto max-w-5xl px-4 sm:px-6 py-5 sm:py-8">
         {/* Steps */}
-        <div className="flex items-center gap-2 mb-5 sm:mb-8">
+        <div className="flex items-center gap-2 sm:gap-3 mb-5 sm:mb-8">
           {STEPS.map((s, i) => (
-            <div key={s.key} className="flex items-center gap-2">
+            <div key={s.key} className="flex items-center gap-2 sm:gap-3">
               <div
-                className={`flex items-center gap-2 text-sm font-medium cursor-pointer
+                className={`flex items-center gap-2 text-sm sm:text-base font-medium cursor-pointer
                   ${step === s.key ? "text-brand-600" : i < STEPS.findIndex((x) => x.key === step) ? "text-green-600" : "text-gray-400"}
                 `}
                 onClick={() => {
                   if (i < STEPS.findIndex((x) => x.key === step)) setStep(s.key);
                 }}
               >
-                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs
+                <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold
                   ${step === s.key ? "bg-brand-500 text-white" : i < STEPS.findIndex((x) => x.key === step) ? "bg-green-500 text-white" : "bg-gray-200 text-gray-500"}
                 `}>
                   {i + 1}
@@ -247,18 +240,18 @@ export default function CheckoutPage() {
           <div className="lg:col-span-2">
             {/* Step 1: Address */}
             {step === "address" && (
-              <div className="bg-white rounded-2xl shadow-card p-4 sm:p-6">
-                <h2 className="font-serif font-bold text-earth-dark text-lg mb-4 flex items-center gap-2">
+              <div className="bg-white rounded-2xl shadow-card p-5 sm:p-6">
+                <h2 className="font-serif font-bold text-earth-dark text-xl mb-5 flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-brand-500" /> Delivery Address
                 </h2>
 
                 {savedAddresses.length > 0 && !useNewAddress && (
-                  <div className="space-y-2 mb-4">
+                  <div className="space-y-3 mb-5">
                     {savedAddresses.map((addr) => (
                       <label
                         key={addr.id}
-                        className={`flex gap-3 p-3 border-2 rounded-xl cursor-pointer transition-colors
-                          ${selectedAddressId === addr.id ? "border-brand-400 bg-brand-50" : "border-gray-100 hover:border-gray-200"}
+                        className={`flex gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all
+                          ${selectedAddressId === addr.id ? "border-brand-400 bg-brand-50 shadow-sm" : "border-gray-100 hover:border-gray-200"}
                         `}
                       >
                         <input
@@ -268,17 +261,17 @@ export default function CheckoutPage() {
                           onChange={() => setSelectedAddressId(addr.id)}
                           className="mt-0.5"
                         />
-                        <div className="text-sm leading-snug">
-                          <p className="font-semibold text-earth-dark">{addr.name} <span className="text-xs text-gray-400 capitalize">({addr.type.toLowerCase()})</span></p>
-                          <p className="text-gray-600">{addr.addressLine1}, {addr.city}, {addr.state} – {addr.pincode}</p>
-                          <p className="text-gray-500 text-xs">{addr.phone}</p>
+                        <div className="leading-snug">
+                          <p className="font-semibold text-base text-earth-dark">{addr.name} <span className="text-xs text-gray-400 capitalize">({addr.type.toLowerCase()})</span></p>
+                          <p className="text-sm text-gray-600 mt-0.5">{addr.addressLine1}, {addr.city}, {addr.state} – {addr.pincode}</p>
+                          <p className="text-gray-500 text-sm mt-0.5">{addr.phone}</p>
                         </div>
                       </label>
                     ))}
                     <button
                       type="button"
                       onClick={() => setUseNewAddress(true)}
-                      className="flex items-center gap-2 text-sm text-brand-600 font-medium hover:text-brand-700"
+                      className="flex items-center gap-2 text-sm text-brand-600 font-medium hover:text-brand-700 mt-1"
                     >
                       <Plus className="w-4 h-4" /> Add New Address
                     </button>
@@ -312,91 +305,106 @@ export default function CheckoutPage() {
                   </form>
                 )}
 
-                <div className="mt-6">
+                <div className="mt-5">
                   {useNewAddress || savedAddresses.length === 0 ? (
-                    <Button type="submit" form="address-form" size="lg" className="w-full">
-                      Continue to Payment
+                    <Button type="submit" form="address-form" size="lg" className="w-full text-base">
+                      Continue to Review
                     </Button>
                   ) : (
-                    <Button onClick={() => setStep("payment")} size="lg" className="w-full" disabled={!selectedAddressId}>
-                      Continue to Payment
+                    <Button onClick={() => setStep("review")} size="lg" className="w-full text-base" disabled={!selectedAddressId}>
+                      Continue to Review
                     </Button>
                   )}
                 </div>
               </div>
             )}
 
-            {/* Step 2: Payment */}
-            {step === "payment" && (
-              <div className="bg-white rounded-2xl shadow-card p-4 sm:p-6">
-                <h2 className="font-serif font-bold text-earth-dark text-lg mb-4 flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-brand-500" /> Payment Method
-                </h2>
-
-                <div className="space-y-2">
-                  <label className={`flex gap-3 p-3 border-2 rounded-xl cursor-pointer ${paymentMethod === "RAZORPAY" ? "border-brand-400 bg-brand-50" : "border-gray-100"}`}>
-                    <input type="radio" checked={paymentMethod === "RAZORPAY"} onChange={() => setPaymentMethod("RAZORPAY")} />
-                    <div>
-                      <p className="font-semibold text-sm text-earth-dark">Online Payment</p>
-                      <p className="text-xs text-gray-500">Debit/Credit Card, UPI, Net Banking via Razorpay</p>
-                    </div>
-                  </label>
-                  <label className={`flex gap-3 p-3 border-2 rounded-xl cursor-pointer ${paymentMethod === "COD" ? "border-brand-400 bg-brand-50" : "border-gray-100"}`}>
-                    <input type="radio" checked={paymentMethod === "COD"} onChange={() => setPaymentMethod("COD")} />
-                    <div>
-                      <p className="font-semibold text-sm text-earth-dark">Cash on Delivery</p>
-                      <p className="text-xs text-gray-500">Pay when your order arrives (+₹30 COD fee)</p>
-                    </div>
-                  </label>
-                </div>
-
-                <div className="mt-4 flex gap-3">
-                  <Button variant="outline" onClick={() => setStep("address")}>Back</Button>
-                  <Button onClick={() => setStep("review")} className="flex-1" size="lg">
-                    Review Order
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Step 3: Review */}
+            {/* Step 2: Review & Pay */}
             {step === "review" && (
-              <div className="bg-white rounded-2xl shadow-card p-4 sm:p-6">
-                <h2 className="font-serif font-bold text-earth-dark text-lg mb-4">Review & Place Order</h2>
+              <div className="bg-white rounded-2xl shadow-card p-5 sm:p-6">
+                <h2 className="font-serif font-bold text-earth-dark text-xl mb-5">Review & Place Order</h2>
 
                 {error && (
-                  <div className="text-sm text-spice-700 bg-spice-50 border border-spice-200 rounded-xl px-4 py-3 mb-4 flex items-center gap-2">
+                  <div className="text-sm text-spice-700 bg-spice-50 border border-spice-200 rounded-xl px-4 py-3 mb-5 flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     {error}
                   </div>
                 )}
 
                 {/* Delivery to */}
-                <div className="mb-4 p-4 bg-cream-100 rounded-xl text-sm">
-                  <p className="font-semibold text-earth-dark mb-1">Delivering to:</p>
+                <div className="mb-5 p-4 bg-cream-100 rounded-xl">
+                  <div className="flex items-center gap-2 mb-2">
+                    <MapPin className="w-4 h-4 text-brand-500" />
+                    <p className="font-semibold text-earth-dark text-sm">Delivering to:</p>
+                  </div>
                   {selectedAddress && !useNewAddress ? (
-                    <p className="text-gray-600">{selectedAddress.name}, {selectedAddress.addressLine1}, {selectedAddress.city} – {selectedAddress.pincode}</p>
+                    <div className="text-gray-600 text-sm leading-relaxed">
+                      <p className="font-medium text-earth-dark">{selectedAddress.name}</p>
+                      <p>{selectedAddress.addressLine1}</p>
+                      <p>{selectedAddress.city}, {selectedAddress.state} – {selectedAddress.pincode}</p>
+                      <p className="text-gray-500 text-xs mt-1">{selectedAddress.phone}</p>
+                    </div>
                   ) : (
-                    <p className="text-gray-600">{getValues("address.name")}, {getValues("address.addressLine1")}, {getValues("address.city")}</p>
+                    <p className="text-gray-600 text-sm">{getValues("address.name")}, {getValues("address.addressLine1")}, {getValues("address.city")}</p>
                   )}
                 </div>
 
-                {/* Items summary */}
-                <div className="space-y-2 mb-4">
-                  {items.map((item) => (
-                    <div key={item.id} className="flex justify-between text-sm">
-                      <span className="text-gray-600">{item.product.name} × {item.quantity}</span>
-                      <span className="text-earth-dark">{formatCurrency(item.variant.price * item.quantity)}</span>
-                    </div>
-                  ))}
+                {/* Payment method */}
+                <div className="mb-5 p-4 bg-cream-100 rounded-xl">
+                  <div className="flex items-center gap-2 mb-1">
+                    <CreditCard className="w-4 h-4 text-brand-500" />
+                    <p className="font-semibold text-earth-dark text-sm">Payment:</p>
+                  </div>
+                  <p className="text-gray-600 text-sm">Online Payment — UPI, Card, Net Banking (Razorpay)</p>
                 </div>
 
-                <div className="flex gap-3 mt-4">
-                  <Button variant="outline" onClick={() => setStep("payment")}>Back</Button>
+                {/* Items summary with images */}
+                <div className="mb-5">
+                  <p className="font-semibold text-earth-dark text-sm mb-3">Items ({items.length})</p>
+                  <div className="space-y-3">
+                    {items.map((item) => (
+                      <div key={item.id} className="flex gap-3 items-center p-3 bg-gray-50 rounded-xl">
+                        {item.product.image && (
+                          <img src={item.product.image} alt="" className="w-14 h-14 rounded-lg object-cover border border-gray-100 shrink-0" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-earth-dark truncate">{item.product.name}</p>
+                          <p className="text-xs text-gray-500">{item.variant.name} × {item.quantity}</p>
+                        </div>
+                        <p className="text-sm font-bold text-earth-dark shrink-0">{formatCurrency(item.variant.price * item.quantity)}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Price summary inline */}
+                <div className="mb-5 p-4 border border-gray-100 rounded-xl space-y-2.5 text-sm">
+                  <div className="flex justify-between text-gray-600">
+                    <span>Subtotal</span><span>{formatCurrency(subtotal)}</span>
+                  </div>
+                  {discount > 0 && (
+                    <div className="flex justify-between text-green-600 font-medium">
+                      <span>Discount</span><span>− {formatCurrency(discount)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-gray-600">
+                    <span>Shipping</span><span>{shippingCharge === 0 ? <span className="text-green-600 font-medium">FREE</span> : formatCurrency(shippingCharge)}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>GST (12% incl.)</span><span>{formatCurrency(taxAmount)}</span>
+                  </div>
+                  <div className="border-t border-gray-200 pt-2.5 flex justify-between font-bold text-base text-earth-dark">
+                    <span>Total</span>
+                    <span className="text-brand-600">{formatCurrency(total)}</span>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => setStep("address")}>Back</Button>
                   <Button
                     variant="premium"
                     size="lg"
-                    className="flex-1"
+                    className="flex-1 text-base"
                     loading={processing}
                     onClick={() => {
                       const addr = getAddressForOrder(getValues());
@@ -404,7 +412,7 @@ export default function CheckoutPage() {
                       placeOrder(addr);
                     }}
                   >
-                    Place Order — {formatCurrency(total)}
+                    Pay & Place Order — {formatCurrency(total)}
                   </Button>
                 </div>
               </div>
@@ -412,51 +420,46 @@ export default function CheckoutPage() {
           </div>
 
           {/* Right: Summary */}
-          <div className="bg-white rounded-2xl shadow-card p-4 sm:p-5 h-fit">
-            <h3 className="font-semibold text-earth-dark mb-3">Order Summary</h3>
-            <div className="space-y-3 text-sm">
+          <div className="bg-white rounded-2xl shadow-card p-5 sm:p-6 h-fit">
+            <h3 className="font-semibold text-earth-dark text-lg mb-4">Order Summary</h3>
+            <div className="space-y-3">
               {items.map((item) => (
-                <div key={item.id} className="flex gap-2.5">
+                <div key={item.id} className="flex gap-3">
                   {item.product.image && (
-                    <img src={item.product.image} alt="" className="w-10 h-10 rounded-lg object-cover border border-gray-100 shrink-0" />
+                    <img src={item.product.image} alt="" className="w-12 h-12 rounded-lg object-cover border border-gray-100 shrink-0" />
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-earth-dark font-medium truncate">{item.product.name}</p>
-                    <p className="text-xs text-gray-400">{item.variant.name} × {item.quantity}</p>
+                    <p className="text-sm text-earth-dark font-medium truncate">{item.product.name}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{item.variant.name} × {item.quantity}</p>
                   </div>
-                  <p className="text-xs font-medium shrink-0">{formatCurrency(item.variant.price * item.quantity)}</p>
+                  <p className="text-sm font-semibold shrink-0">{formatCurrency(item.variant.price * item.quantity)}</p>
                 </div>
               ))}
             </div>
-            <div className="border-t border-gray-100 mt-4 pt-4 space-y-2 text-sm">
-              <div className="flex justify-between text-gray-500">
+            <div className="border-t border-gray-100 mt-4 pt-4 space-y-2.5 text-sm">
+              <div className="flex justify-between text-gray-600">
                 <span>Subtotal</span><span>{formatCurrency(subtotal)}</span>
               </div>
               {discount > 0 && (
-                <div className="flex justify-between text-green-600">
+                <div className="flex justify-between text-green-600 font-medium">
                   <span>Discount</span><span>− {formatCurrency(discount)}</span>
                 </div>
               )}
               {couponDiscount > 0 && (
-                <div className="flex justify-between text-green-600">
+                <div className="flex justify-between text-green-600 font-medium">
                   <span>Coupon</span><span>− {formatCurrency(couponDiscount)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-gray-500">
+              <div className="flex justify-between text-gray-600">
                 <span>Shipping</span>
-                <span>{shippingCharge === 0 ? "FREE" : formatCurrency(shippingCharge)}</span>
+                <span>{shippingCharge === 0 ? <span className="text-green-600 font-medium">FREE</span> : formatCurrency(shippingCharge)}</span>
               </div>
-              {paymentMethod === "COD" && (
-                <div className="flex justify-between text-gray-500">
-                  <span>COD Fee</span><span>₹30</span>
-                </div>
-              )}
-              <div className="flex justify-between text-gray-500">
+              <div className="flex justify-between text-gray-600">
                 <span>GST (12% incl.)</span><span>{formatCurrency(taxAmount)}</span>
               </div>
-              <div className="border-t border-gray-100 pt-2 flex justify-between font-bold text-earth-dark">
+              <div className="border-t border-gray-200 pt-3 flex justify-between font-bold text-base text-earth-dark">
                 <span>Total</span>
-                <span>{formatCurrency(total + (paymentMethod === "COD" ? 30 : 0))}</span>
+                <span className="text-brand-600">{formatCurrency(total)}</span>
               </div>
             </div>
           </div>

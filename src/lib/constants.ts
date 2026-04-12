@@ -12,7 +12,7 @@ export const BRAND_ADDRESS = "Patna, Bihar, India";
 // ==================== Commerce ====================
 
 export const FREE_SHIPPING_THRESHOLD = 499; // INR
-export const STANDARD_SHIPPING_FEE = 60;    // INR
+export const STANDARD_SHIPPING_FEE = 99;    // INR
 export const COD_FEE = 30;                  // INR
 export const GST_RATE = 12;                 // Percentage — branded packaged pickles HSN 2001/2005
 
