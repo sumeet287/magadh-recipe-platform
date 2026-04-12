@@ -11,7 +11,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCartStore } from "@/store/cart-store";
 import { formatCurrency } from "@/lib/utils";
-import { checkoutSchema, type CheckoutInput } from "@/lib/validations/order";
+import { addressShape, type CheckoutInput } from "@/lib/validations/order";
+import { z } from "zod";
+
+const addressFormSchema = z.object({ address: addressShape });
 import type { Address } from "@prisma/client";
 
 declare global {
@@ -69,8 +72,8 @@ export default function CheckoutPage() {
   const [error, setError] = useState<string | null>(null);
   const [useNewAddress, setUseNewAddress] = useState(false);
 
-  const { register, handleSubmit, getValues, formState: { errors } } = useForm<CheckoutInput>({
-    resolver: zodResolver(checkoutSchema),
+  const { register, handleSubmit, getValues, formState: { errors } } = useForm<{ address: CheckoutInput["address"] }>({
+    resolver: zodResolver(addressFormSchema),
   });
 
   useEffect(() => {
@@ -204,7 +207,7 @@ export default function CheckoutPage() {
     rzp.open();
   };
 
-  const onAddressSubmit = (data: CheckoutInput) => {
+  const onAddressSubmit = () => {
     setStep("review");
   };
 

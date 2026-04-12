@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const addressShape = z.object({
+export const addressShape = z.object({
   name: z.string().min(2),
   phone: z.string().regex(/^[6-9]\d{9}$/),
   addressLine1: z.string().min(5),
