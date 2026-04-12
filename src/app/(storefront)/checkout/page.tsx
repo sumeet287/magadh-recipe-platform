@@ -382,21 +382,19 @@ export default function CheckoutPage() {
                   <div className="flex justify-between text-gray-600">
                     <span>Subtotal</span><span>{formatCurrency(subtotal)}</span>
                   </div>
-                  {discount > 0 && (
+                  {couponDiscount > 0 && (
                     <div className="flex justify-between text-green-600 font-medium">
-                      <span>Discount</span><span>− {formatCurrency(discount)}</span>
+                      <span>Coupon</span><span>− {formatCurrency(couponDiscount)}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-gray-600">
                     <span>Shipping</span><span>{shippingCharge === 0 ? <span className="text-green-600 font-medium">FREE</span> : formatCurrency(shippingCharge)}</span>
                   </div>
-                  <div className="flex justify-between text-gray-600">
-                    <span>GST (12% incl.)</span><span>{formatCurrency(taxAmount)}</span>
-                  </div>
                   <div className="border-t border-gray-200 pt-2.5 flex justify-between font-bold text-base text-earth-dark">
                     <span>Total</span>
                     <span className="text-brand-600">{formatCurrency(total)}</span>
                   </div>
+                  <p className="text-xs text-gray-400 text-right">Incl. GST {formatCurrency(taxAmount)}{discount > 0 && <> · You save {formatCurrency(discount)} on MRP</>}</p>
                 </div>
 
                 <div className="flex gap-3">
@@ -440,11 +438,6 @@ export default function CheckoutPage() {
               <div className="flex justify-between text-gray-600">
                 <span>Subtotal</span><span>{formatCurrency(subtotal)}</span>
               </div>
-              {discount > 0 && (
-                <div className="flex justify-between text-green-600 font-medium">
-                  <span>Discount</span><span>− {formatCurrency(discount)}</span>
-                </div>
-              )}
               {couponDiscount > 0 && (
                 <div className="flex justify-between text-green-600 font-medium">
                   <span>Coupon</span><span>− {formatCurrency(couponDiscount)}</span>
@@ -454,13 +447,11 @@ export default function CheckoutPage() {
                 <span>Shipping</span>
                 <span>{shippingCharge === 0 ? <span className="text-green-600 font-medium">FREE</span> : formatCurrency(shippingCharge)}</span>
               </div>
-              <div className="flex justify-between text-gray-600">
-                <span>GST (12% incl.)</span><span>{formatCurrency(taxAmount)}</span>
-              </div>
               <div className="border-t border-gray-200 pt-3 flex justify-between font-bold text-base text-earth-dark">
                 <span>Total</span>
                 <span className="text-brand-600">{formatCurrency(total)}</span>
               </div>
+              <p className="text-xs text-gray-400 text-right">Incl. GST {formatCurrency(taxAmount)}{discount > 0 && <> · You save {formatCurrency(discount)}</>}</p>
             </div>
           </div>
         </div>

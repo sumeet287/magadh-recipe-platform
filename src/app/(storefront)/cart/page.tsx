@@ -184,30 +184,21 @@ export default function CartPage() {
                   <span>Subtotal</span>
                   <span>{formatCurrency(subtotal)}</span>
                 </div>
-                {discount > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Product Discount</span>
-                    <span>− {formatCurrency(discount)}</span>
-                  </div>
-                )}
                 {couponDiscount > 0 && (
-                  <div className="flex justify-between text-green-600">
+                  <div className="flex justify-between text-green-600 font-medium">
                     <span>Coupon ({coupon?.code})</span>
                     <span>− {formatCurrency(couponDiscount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-gray-600">
                   <span>Shipping</span>
-                  <span>{shippingCharge === 0 ? "FREE" : formatCurrency(shippingCharge)}</span>
-                </div>
-                <div className="flex justify-between text-gray-600">
-                  <span>GST (12% incl.)</span>
-                  <span>{formatCurrency(taxAmount)}</span>
+                  <span>{shippingCharge === 0 ? <span className="text-green-600 font-medium">FREE</span> : formatCurrency(shippingCharge)}</span>
                 </div>
                 <div className="border-t border-gray-100 pt-3 flex justify-between font-bold text-base text-earth-dark">
                   <span>Total</span>
                   <span>{formatCurrency(total)}</span>
                 </div>
+                <p className="text-xs text-gray-400 text-right mt-1">Incl. GST {formatCurrency(taxAmount)}{discount > 0 && <> · You save {formatCurrency(discount)} on MRP</>}</p>
               </div>
 
               {shippingCharge > 0 && subtotal < 499 && (499 - subtotal) > 0 && (
