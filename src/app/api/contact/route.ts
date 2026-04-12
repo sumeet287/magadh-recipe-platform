@@ -27,8 +27,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Notify admin (non-blocking)
-    sendMail({
+    await sendMail({
       to: process.env.ADMIN_NOTIFICATION_EMAIL ?? "magadhrecipe@gmail.com",
       subject: `New Contact Inquiry: ${parsed.data.subject}`,
       html: `<h2>New Contact Form Submission</h2>
@@ -39,7 +38,7 @@ export async function POST(req: NextRequest) {
 <hr/>
 <p><strong>Message:</strong></p>
 <p>${parsed.data.message}</p>`,
-    }).catch(() => {});
+    });
 
     return NextResponse.json(successResponse({ id: inquiry.id }), { status: 201 });
   } catch (err) {

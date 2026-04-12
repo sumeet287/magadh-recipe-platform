@@ -208,7 +208,7 @@ export async function PATCH(req: NextRequest) {
 
     if (customerEmail) {
       if (status === "SHIPPED" || (status === "PROCESSING" && finalTrackingNumber)) {
-        sendMail({
+        await sendMail({
           to: customerEmail,
           subject: `Your Order #${order.orderNumber} Has Been Shipped!`,
           html: orderShippedHtml({
@@ -218,19 +218,19 @@ export async function PATCH(req: NextRequest) {
             trackingUrl: finalTrackingUrl,
             courier: finalCourier,
           }),
-        }).catch(() => {});
+        });
       } else if (status === "DELIVERED") {
-        sendMail({
+        await sendMail({
           to: customerEmail,
           subject: `Your Order #${order.orderNumber} Has Been Delivered!`,
           html: orderDeliveredHtml({ orderNumber: order.orderNumber, customerName }),
-        }).catch(() => {});
+        });
       } else if (status === "CANCELLED") {
-        sendMail({
+        await sendMail({
           to: customerEmail,
           subject: `Order #${order.orderNumber} Cancelled`,
           html: orderCancelledHtml({ orderNumber: order.orderNumber, customerName, reason: note }),
-        }).catch(() => {});
+        });
       }
     }
 

@@ -46,11 +46,12 @@ export async function POST(req: NextRequest) {
     });
 
     const verifyUrl = `${process.env.NEXTAUTH_URL}/verify-email?token=${token}&email=${encodeURIComponent(normalizedEmail)}`;
-    sendMail({
+    const emailRes = await sendMail({
       to: normalizedEmail,
       subject: "Verify your email – Magadh Recipe",
       html: verificationEmailHtml({ name: user.name ?? undefined, verifyUrl }),
-    }).catch((e) => console.error("[Email] Verification email failed:", e));
+    });
+    console.log(`[Email] Verification email to ${normalizedEmail} → ${emailRes.success ? "OK" : "FAILED"}`, emailRes.success ? emailRes.messageId : emailRes.error);
 
     return NextResponse.json(
       successResponse(
