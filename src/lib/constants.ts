@@ -33,21 +33,21 @@ export const SPICE_LEVEL_CONFIG = {
 
 // ==================== Order Status Config ====================
 
-export const ORDER_STATUS_CONFIG = {
-  PENDING: { label: "Pending", color: "gray", description: "Order placed, awaiting confirmation" },
-  CONFIRMED: { label: "Confirmed", color: "blue", description: "Order confirmed" },
-  PAID: { label: "Paid", color: "green", description: "Payment received" },
-  PROCESSING: { label: "Processing", color: "yellow", description: "Being prepared" },
-  PACKED: { label: "Packed", color: "yellow", description: "Order packed and ready" },
-  SHIPPED: { label: "Shipped", color: "blue", description: "Out for delivery" },
-  OUT_FOR_DELIVERY: { label: "Out for Delivery", color: "blue", description: "With delivery partner" },
-  DELIVERED: { label: "Delivered", color: "green", description: "Delivered successfully" },
-  RETURN_REQUESTED: { label: "Return Requested", color: "orange", description: "Customer requested a return" },
-  RETURNED: { label: "Returned", color: "orange", description: "Product returned to seller" },
-  CANCELLED: { label: "Cancelled", color: "red", description: "Order cancelled" },
-  REFUND_INITIATED: { label: "Refund Initiated", color: "orange", description: "Refund in process" },
-  REFUNDED: { label: "Refunded", color: "purple", description: "Amount refunded" },
-  FAILED: { label: "Failed", color: "red", description: "Payment/order failed" },
+export const ORDER_STATUS_CONFIG: Record<string, { label: string; color: string; description: string }> = {
+  PENDING: { label: "Pending", color: "text-gray-300 bg-gray-500/10", description: "Order placed, awaiting confirmation" },
+  CONFIRMED: { label: "Confirmed", color: "text-blue-400 bg-blue-500/10", description: "Order confirmed" },
+  PAID: { label: "Paid", color: "text-green-400 bg-green-500/10", description: "Payment received" },
+  PROCESSING: { label: "Processing", color: "text-yellow-400 bg-yellow-500/10", description: "Being prepared" },
+  PACKED: { label: "Packed", color: "text-amber-400 bg-amber-500/10", description: "Order packed and ready" },
+  SHIPPED: { label: "Shipped", color: "text-blue-400 bg-blue-500/10", description: "Out for delivery" },
+  OUT_FOR_DELIVERY: { label: "Out for Delivery", color: "text-indigo-400 bg-indigo-500/10", description: "With delivery partner" },
+  DELIVERED: { label: "Delivered", color: "text-green-400 bg-green-500/10", description: "Delivered successfully" },
+  RETURN_REQUESTED: { label: "Return Requested", color: "text-orange-400 bg-orange-500/10", description: "Customer requested a return" },
+  RETURNED: { label: "Returned", color: "text-orange-400 bg-orange-500/10", description: "Product returned to seller" },
+  CANCELLED: { label: "Cancelled", color: "text-red-400 bg-red-500/10", description: "Order cancelled" },
+  REFUND_INITIATED: { label: "Refund Initiated", color: "text-orange-400 bg-orange-500/10", description: "Refund in process" },
+  REFUNDED: { label: "Refunded", color: "text-purple-400 bg-purple-500/10", description: "Amount refunded" },
+  FAILED: { label: "Failed", color: "text-red-400 bg-red-500/10", description: "Payment/order failed" },
 };
 
 // ==================== Product Regions ====================
