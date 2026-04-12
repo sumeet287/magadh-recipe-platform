@@ -408,6 +408,9 @@ model OrderShipping {
   courier        String?
   estimatedDelivery DateTime?
   deliveredAt    DateTime?
+  shiprocketOrderId  Int?
+  shiprocketShipmentId Int?
+  awbCode        String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 

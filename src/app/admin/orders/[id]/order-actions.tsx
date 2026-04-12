@@ -21,9 +21,10 @@ const ALLOWED_TRANSITIONS: Record<string, string[]> = {
 interface OrderActionsProps {
   orderId: string;
   currentStatus: string;
+  hasShiprocket?: boolean;
 }
 
-export function OrderActions({ orderId, currentStatus }: OrderActionsProps) {
+export function OrderActions({ orderId, currentStatus, hasShiprocket }: OrderActionsProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -129,8 +130,16 @@ export function OrderActions({ orderId, currentStatus }: OrderActionsProps) {
           </select>
         </div>
 
-        {/* Tracking fields — shown when transitioning to SHIPPED */}
-        {showTrackingFields && (
+        {status === "PROCESSING" && !hasShiprocket && (
+          <div className="p-3 bg-purple-900/20 rounded-lg border border-purple-800/30">
+            <p className="text-xs text-purple-400">
+              Shiprocket order will be auto-created when you move to Processing. AWB and courier will be assigned automatically.
+            </p>
+          </div>
+        )}
+
+        {/* Tracking fields — only shown if Shiprocket is NOT handling shipping */}
+        {showTrackingFields && !hasShiprocket && (
           <div className="space-y-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700/50">
             <p className="text-xs text-gray-400 font-medium">
               Shipping Details

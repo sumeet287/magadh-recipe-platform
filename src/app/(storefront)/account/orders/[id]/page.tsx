@@ -104,14 +104,29 @@ export default async function OrderDetailPage({ params }: Props) {
         </div>
 
         {order.shipping?.trackingNumber && (
-          <p className="text-xs text-gray-500 mt-4">
-            Tracking: <strong className="text-earth-dark">{order.shipping.trackingNumber}</strong>
-            {order.shipping.trackingUrl && (
-              <a href={order.shipping.trackingUrl} target="_blank" rel="noopener noreferrer" className="ml-2 text-brand-600 hover:underline">
-                Track Package →
-              </a>
-            )}
-          </p>
+          <div className="mt-5 p-4 bg-brand-50 rounded-xl border border-brand-100">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <p className="text-sm font-medium text-earth-dark">
+                  {order.shipping.courier ? `Shipped via ${order.shipping.courier}` : "Shipment Details"}
+                </p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  AWB: <strong className="text-earth-dark font-mono">{order.shipping.trackingNumber}</strong>
+                </p>
+              </div>
+              {order.shipping.trackingUrl && (
+                <a
+                  href={order.shipping.trackingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 bg-brand-600 text-white text-xs font-medium px-4 py-2 rounded-lg hover:bg-brand-700 transition-colors"
+                >
+                  <Truck className="w-3.5 h-3.5" />
+                  Track Package
+                </a>
+              )}
+            </div>
+          </div>
         )}
       </div>
 
@@ -156,7 +171,7 @@ export default async function OrderDetailPage({ params }: Props) {
               { label: "Subtotal", value: order.subtotalAmount },
               { label: "Discount", value: -order.discountAmount },
               { label: "Shipping", value: order.shippingAmount },
-              { label: "Tax (GST 5%)", value: order.taxAmount },
+              { label: "GST (12% incl.)", value: order.taxAmount },
             ].map(({ label, value }) => (
               <div key={label} className="flex justify-between">
                 <span className="text-gray-600">{label}</span>

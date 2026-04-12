@@ -406,20 +406,38 @@ export default async function AdminOrderDetailPage({
             </div>
           )}
 
-          {/* Tracking */}
-          {order.shipping?.trackingNumber && (
+          {/* Shiprocket / Tracking */}
+          {(order.shipping?.trackingNumber || order.shipping?.shiprocketOrderId) && (
             <div className="bg-gray-900 rounded-2xl border border-gray-800 p-5">
               <div className="flex items-center gap-2 mb-3">
                 <Truck className="w-4 h-4 text-gray-400" />
-                <h2 className="text-white font-semibold text-sm">Tracking</h2>
+                <h2 className="text-white font-semibold text-sm">Shipping & Tracking</h2>
               </div>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Tracking #</span>
-                  <span className="text-white font-mono text-xs">
-                    {order.shipping.trackingNumber}
-                  </span>
-                </div>
+                {order.shipping.shiprocketOrderId && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Shiprocket ID</span>
+                    <span className="text-white font-mono text-xs">
+                      #{order.shipping.shiprocketOrderId}
+                    </span>
+                  </div>
+                )}
+                {order.shipping.awbCode && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">AWB Code</span>
+                    <span className="text-white font-mono text-xs">
+                      {order.shipping.awbCode}
+                    </span>
+                  </div>
+                )}
+                {order.shipping.trackingNumber && order.shipping.trackingNumber !== order.shipping.awbCode && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Tracking #</span>
+                    <span className="text-white font-mono text-xs">
+                      {order.shipping.trackingNumber}
+                    </span>
+                  </div>
+                )}
                 {order.shipping.courier && (
                   <div className="flex justify-between">
                     <span className="text-gray-400">Courier</span>
@@ -448,17 +466,30 @@ export default async function AdminOrderDetailPage({
                     </span>
                   </div>
                 )}
-                {order.shipping.trackingUrl && (
-                  <a
-                    href={order.shipping.trackingUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 mt-2 text-xs text-brand-400 hover:text-brand-300 transition-colors"
-                  >
-                    Track Shipment
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                )}
+                <div className="flex gap-2 mt-2">
+                  {order.shipping.trackingUrl && (
+                    <a
+                      href={order.shipping.trackingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs text-brand-400 hover:text-brand-300 transition-colors"
+                    >
+                      Track Shipment
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
+                  {order.shipping.shiprocketOrderId && (
+                    <a
+                      href={`https://app.shiprocket.in/seller/orders/details/${order.shipping.shiprocketOrderId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs text-purple-400 hover:text-purple-300 transition-colors"
+                    >
+                      View on Shiprocket
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -474,7 +505,7 @@ export default async function AdminOrderDetailPage({
           )}
 
           {/* Actions */}
-          <OrderActions orderId={order.id} currentStatus={order.status} />
+          <OrderActions orderId={order.id} currentStatus={order.status} hasShiprocket={!!order.shipping?.shiprocketOrderId} />
         </div>
       </div>
     </div>
