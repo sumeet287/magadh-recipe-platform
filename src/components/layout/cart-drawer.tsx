@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight, Gift } from "lucide-react";
+import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 import { useCartStore } from "@/store/cart-store";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
@@ -224,12 +224,6 @@ export function CartDrawer() {
                 <span>Total</span>
                 <span className="text-brand-600">{formatCurrency(total)}</span>
               </div>
-            </div>
-
-            {/* Gift Note */}
-            <div className="flex items-center gap-2 text-xs text-gray-500 bg-white rounded-lg p-2.5 border border-gray-100">
-              <Gift className="w-3.5 h-3.5 text-brand-400 shrink-0" />
-              <span>Add gift message at checkout</span>
             </div>
 
             {/* CTA */}
