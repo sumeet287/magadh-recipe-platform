@@ -188,6 +188,12 @@ export const useCartStore = create<CartStore>()(
         items: state.items,
         coupon: state.coupon,
       }),
+      merge: (persisted, current) => {
+        const p = persisted as Partial<CartStore>;
+        const items = p?.items ?? [];
+        const coupon = p?.coupon ?? null;
+        return { ...current, items, coupon, ...calculateCartTotals(items, coupon) };
+      },
     }
   )
 );
