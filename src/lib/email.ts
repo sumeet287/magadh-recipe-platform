@@ -1,15 +1,6 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
-const smtpPort = Number(process.env.SMTP_PORT ?? 465);
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST ?? "smtp.resend.com",
-  port: smtpPort,
-  secure: smtpPort === 465,
-  auth: {
-    user: process.env.SMTP_USER ?? "resend",
-    pass: process.env.SMTP_PASS ?? process.env.RESEND_API_KEY ?? "",
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY ?? process.env.SMTP_PASS ?? "");
 
 interface SendMailOptions {
   to: string | string[];
@@ -21,15 +12,24 @@ interface SendMailOptions {
 
 export async function sendMail(options: SendMailOptions) {
   const { to, subject, html, text, from } = options;
+  const fromAddr = from ?? `Magadh Recipe <${process.env.FROM_EMAIL ?? "noreply@magadhrecipe.com"}>`;
+  const toAddrs = Array.isArray(to) ? to : [to];
+
   try {
-    const info = await transporter.sendMail({
-      from: from ?? `Magadh Recipe <${process.env.FROM_EMAIL ?? "noreply@magadhrecipe.com"}>`,
-      to: Array.isArray(to) ? to.join(", ") : to,
+    const { data, error } = await resend.emails.send({
+      from: fromAddr,
+      to: toAddrs,
       subject,
       html,
-      text,
+      text: text ?? undefined,
     });
-    return { success: true, messageId: info.messageId };
+
+    if (error) {
+      console.error("[Email] Resend API error:", error);
+      return { success: false, error };
+    }
+
+    return { success: true, messageId: data?.id };
   } catch (error) {
     console.error("[Email] Failed to send email:", error);
     return { success: false, error };
