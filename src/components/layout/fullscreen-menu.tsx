@@ -62,9 +62,7 @@ export function FullscreenMenu() {
       {/* Top bar */}
       <div className="relative z-10 flex items-center justify-between px-6 sm:px-10 lg:px-16 py-5 border-b border-white/[0.04]">
         <Link href="/" onClick={handleClose} className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-gradient-to-br from-brand-500 to-brand-400 rounded-xl flex items-center justify-center shadow-[0_2px_12px_rgba(212,132,58,0.4)]">
-            <span className="text-white font-black text-base font-serif">M</span>
-          </div>
+          <img src="/images/brand/logo.png" alt="Magadh Recipe" className="w-9 h-9 rounded-xl object-contain shadow-[0_2px_12px_rgba(212,132,58,0.4)]" />
           <span className="font-serif font-bold text-white text-base">Magadh Recipe</span>
         </Link>
         <button

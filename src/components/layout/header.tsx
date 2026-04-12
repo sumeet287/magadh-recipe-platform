@@ -105,12 +105,11 @@ export function Header() {
           <div className="flex h-16 items-center justify-between gap-4">
             {/* Logo */}
             <Link href="/" onClick={(e) => handleNavClick(e, "/")} className="flex items-center gap-3 shrink-0 group">
-              <div className="relative w-10 h-10">
-                <div className="w-10 h-10 bg-gradient-to-br from-brand-500 via-brand-400 to-turmeric-500 rounded-xl flex items-center justify-center shadow-[0_3px_16px_rgba(212,132,58,0.5)] group-hover:shadow-[0_4px_24px_rgba(212,132,58,0.7)] transition-all duration-300 group-hover:scale-105">
-                  <span className="text-white font-black text-lg font-serif">M</span>
-                </div>
-                <div className="absolute -inset-0.5 bg-gradient-to-br from-brand-400/30 to-transparent rounded-xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </div>
+              <img
+                src="/images/brand/logo.png"
+                alt="Magadh Recipe"
+                className="w-10 h-10 rounded-xl object-contain shadow-[0_3px_16px_rgba(212,132,58,0.5)] group-hover:shadow-[0_4px_24px_rgba(212,132,58,0.7)] transition-all duration-300 group-hover:scale-105"
+              />
               <div className="hidden sm:block">
                 <div className="font-serif font-bold text-white text-[17px] leading-none tracking-tight">
                   Magadh Recipe
