@@ -144,6 +144,13 @@ export default function SignupPage() {
         {serverError && (
           <div className="text-sm text-spice-700 bg-spice-50 border border-spice-200 rounded-xl px-4 py-3">
             {serverError}
+            {serverError.toLowerCase().includes("already exists") && (
+              <p className="mt-2 text-sm">
+                <Link href="/login" className="text-brand-600 font-medium hover:underline">Login here</Link>
+                {" "}or{" "}
+                <Link href="/forgot-password" className="text-brand-600 font-medium hover:underline">reset your password</Link>
+              </p>
+            )}
           </div>
         )}
 
