@@ -536,7 +536,11 @@ export async function sendOrderNotifications(order: PrismaOrderForEmail, custome
   });
   console.log(`[Email] Admin notification → ${adminRes.success ? "OK" : "FAILED"}`, adminRes.success ? adminRes.messageId : adminRes.error);
 
-  sendWhatsAppOrderNotification(order).catch((e) => console.error("[WhatsApp] Notification failed:", e));
+  try {
+    await sendWhatsAppOrderNotification(order);
+  } catch (e) {
+    console.error("[WhatsApp] Notification failed:", e);
+  }
 }
 
 // ---- WhatsApp Integration (Meta Cloud API) ----
@@ -548,7 +552,12 @@ export async function sendWhatsAppOrderNotification(order: PrismaOrderForEmail) 
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
   const adminPhone = process.env.WHATSAPP_ADMIN_PHONE;
 
-  if (!token || !phoneNumberId || !adminPhone) return;
+  if (!token || !phoneNumberId || !adminPhone) {
+    console.log("[WhatsApp] Skipped — missing env vars", { token: !!token, phoneNumberId: !!phoneNumberId, adminPhone: !!adminPhone });
+    return;
+  }
+
+  console.log(`[WhatsApp] Sending order notification for ${order.orderNumber} to ${adminPhone}`);
 
   const items = order.items
     .map((i) => `• ${i.productName} (${i.variantName}) x${i.quantity}`)
@@ -585,6 +594,8 @@ export async function sendWhatsAppOrderNotification(order: PrismaOrderForEmail) 
     if (!res.ok) {
       const err = await res.text();
       console.error("[WhatsApp] API error:", res.status, err);
+    } else {
+      console.log("[WhatsApp] Sent successfully for", order.orderNumber);
     }
   } catch (error) {
     console.error("[WhatsApp] Failed to send notification:", error);
