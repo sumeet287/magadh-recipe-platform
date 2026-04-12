@@ -210,9 +210,9 @@ export default function CartPage() {
                 </div>
               </div>
 
-              {shippingCharge > 0 && (
-                <p className="text-xs text-gray-400 mt-3">
-                  Add {formatCurrency(499 - subtotal)} more for free shipping
+              {shippingCharge > 0 && subtotal < 499 && (499 - subtotal) > 0 && (
+                <p className="text-xs text-green-600 mt-3">
+                  🚚 Add {formatCurrency(499 - subtotal)} more to get <strong>free shipping!</strong>
                 </p>
               )}
 

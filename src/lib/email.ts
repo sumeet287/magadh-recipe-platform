@@ -126,7 +126,7 @@ export function orderConfirmationHtml(data: {
         <tr>
           <td style="background:linear-gradient(135deg,#2C1810,#5C2E15);padding:32px 40px;text-align:center;">
             <h1 style="color:#D4843A;margin:0;font-size:28px;letter-spacing:2px;">MAGADH RECIPE</h1>
-            <p style="color:#f0c579;margin:8px 0 0;font-size:14px;letter-spacing:1px;">आचार की असली पहचान</p>
+            <p style="color:#f0c579;margin:8px 0 0;font-size:14px;letter-spacing:1px;">माँ के हाथ का स्वाद</p>
           </td>
         </tr>
 
@@ -226,7 +226,7 @@ export function verificationEmailHtml(data: { name?: string; verifyUrl: string }
         <tr>
           <td style="background:linear-gradient(135deg,#2C1810,#5C2E15);padding:32px 40px;text-align:center;">
             <h1 style="color:#D4843A;margin:0;font-size:28px;letter-spacing:2px;">MAGADH RECIPE</h1>
-            <p style="color:#f0c579;margin:8px 0 0;font-size:14px;letter-spacing:1px;">आचार की असली पहचान</p>
+            <p style="color:#f0c579;margin:8px 0 0;font-size:14px;letter-spacing:1px;">माँ के हाथ का स्वाद</p>
           </td>
         </tr>
 
@@ -257,6 +257,83 @@ export function verificationEmailHtml(data: { name?: string; verifyUrl: string }
         <tr>
           <td style="background:#2C1810;padding:24px 40px;text-align:center;">
             <p style="color:#f0c579;margin:0 0 8px;font-size:13px;">Questions? Contact us at <a href="mailto:support@magadhrecipe.com" style="color:#D4843A;">support@magadhrecipe.com</a></p>
+            <p style="color:#8B6040;margin:0;font-size:12px;">&copy; ${new Date().getFullYear()} Magadh Recipe. All rights reserved.</p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+// ---- Welcome Email for Migrated Users ----
+
+export function welcomeMigratedUserHtml(data: { name: string; resetUrl: string }): string {
+  const { name, resetUrl } = data;
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Welcome to Magadh Recipe</title></head>
+<body style="margin:0;padding:0;background:#FDF8F0;font-family:Georgia,serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FDF8F0;padding:32px 16px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(44,24,16,0.10);">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#2C1810,#5C2E15);padding:32px 40px;text-align:center;">
+            <h1 style="color:#D4843A;margin:0;font-size:28px;letter-spacing:2px;">MAGADH RECIPE</h1>
+            <p style="color:#f0c579;margin:8px 0 0;font-size:14px;letter-spacing:1px;">माँ के हाथ का स्वाद</p>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="padding:40px;">
+            <h2 style="color:#2C1810;margin:0 0 16px;font-size:22px;">Namaste ${name}! 🙏</h2>
+
+            <p style="color:#5C3D2E;margin:0 0 16px;line-height:1.7;">
+              Magadh Recipe ka naya avatar aa gaya hai! Naya look, faster shopping aur aasan checkout — sab kuch better.
+            </p>
+
+            <p style="color:#5C3D2E;margin:0 0 16px;line-height:1.7;">
+              Shuru karne ke liye bas <strong>apna password set karo</strong>:
+            </p>
+
+            <div style="text-align:center;margin:32px 0;">
+              <a href="${resetUrl}"
+                 style="display:inline-block;background:#D4843A;color:#fff;text-decoration:none;padding:16px 40px;border-radius:8px;font-size:16px;font-weight:bold;letter-spacing:1px;">
+                SET YOUR PASSWORD
+              </a>
+            </div>
+
+            <p style="color:#9B7B5C;margin:0 0 24px;font-size:13px;text-align:center;">Ye link 24 hours ke liye valid hai.</p>
+
+            <div style="background:#FDF8F0;border-radius:8px;padding:20px;margin-bottom:24px;">
+              <h3 style="color:#2C1810;margin:0 0 12px;font-size:16px;">Naye platform pe kya hai khaas?</h3>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr><td style="padding:6px 0;color:#5C3D2E;font-size:14px;">⚡</td><td style="padding:6px 8px;color:#5C3D2E;font-size:14px;">Lightning-fast checkout</td></tr>
+                <tr><td style="padding:6px 0;color:#5C3D2E;font-size:14px;">📦</td><td style="padding:6px 8px;color:#5C3D2E;font-size:14px;">Real-time order tracking</td></tr>
+                <tr><td style="padding:6px 0;color:#5C3D2E;font-size:14px;">🔒</td><td style="padding:6px 8px;color:#5C3D2E;font-size:14px;">Secure payments (Razorpay)</td></tr>
+                <tr><td style="padding:6px 0;color:#5C3D2E;font-size:14px;">💾</td><td style="padding:6px 8px;color:#5C3D2E;font-size:14px;">Saved addresses & order history</td></tr>
+              </table>
+            </div>
+
+            <p style="color:#5C3D2E;margin:0 0 8px;line-height:1.7;">
+              Koi sawaal ho to hume mail karo: <a href="mailto:magadhrecipe@gmail.com" style="color:#D4843A;">magadhrecipe@gmail.com</a>
+            </p>
+            <p style="color:#5C3D2E;margin:0;line-height:1.7;">
+              Ya call karo: <a href="tel:+916207197364" style="color:#D4843A;">+91 6207197364</a>
+            </p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:#2C1810;padding:24px 40px;text-align:center;">
+            <p style="color:#f0c579;margin:0 0 8px;font-size:13px;">Maa ke Haath ka Swaad — Magadh se aapke ghar tak</p>
             <p style="color:#8B6040;margin:0;font-size:12px;">&copy; ${new Date().getFullYear()} Magadh Recipe. All rights reserved.</p>
           </td>
         </tr>
@@ -460,24 +537,53 @@ export async function sendOrderNotifications(order: PrismaOrderForEmail, custome
   sendWhatsAppOrderNotification(order).catch((e) => console.error("[WhatsApp] Notification failed:", e));
 }
 
-// ---- WhatsApp Integration ----
+// ---- WhatsApp Integration (Meta Cloud API) ----
+
+const META_GRAPH_URL = "https://graph.facebook.com/v21.0";
 
 export async function sendWhatsAppOrderNotification(order: PrismaOrderForEmail) {
-  const apiKey = process.env.WHATSAPP_API_KEY;
-  const apiUrl = process.env.WHATSAPP_API_URL;
-  const phone = process.env.WHATSAPP_PHONE_NUMBER;
+  const token = process.env.WHATSAPP_ACCESS_TOKEN;
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const adminPhone = process.env.WHATSAPP_ADMIN_PHONE;
 
-  if (!apiKey || !apiUrl || !phone) return;
+  if (!token || !phoneNumberId || !adminPhone) return;
 
-  const itemsSummary = order.items.map((i) => `${i.productName} (${i.variantName}) x${i.quantity}`).join(", ");
-  const message = `🛒 *New Order #${order.orderNumber}*\n💰 Amount: ₹${order.totalAmount}\n💳 Payment: ${order.paymentMethod}\n📦 Items: ${itemsSummary}\n👤 ${order.shipping?.recipientName ?? "Customer"}\n📍 ${order.shipping?.city ?? ""}, ${order.shipping?.state ?? ""} ${order.shipping?.pincode ?? ""}\n📞 ${order.shipping?.phone ?? "N/A"}`;
+  const items = order.items
+    .map((i) => `• ${i.productName} (${i.variantName}) x${i.quantity}`)
+    .join("\n");
+
+  const message = [
+    `🛒 *New Order #${order.orderNumber}*`,
+    `💰 Amount: ₹${order.totalAmount}`,
+    `💳 Payment: ${order.paymentMethod}`,
+    ``,
+    `📦 *Items:*`,
+    items,
+    ``,
+    `👤 ${order.shipping?.recipientName ?? "Customer"}`,
+    `📞 ${order.shipping?.phone ?? "N/A"}`,
+    `📍 ${order.shipping?.city ?? ""}, ${order.shipping?.state ?? ""} ${order.shipping?.pincode ?? ""}`,
+  ].join("\n");
 
   try {
-    await fetch(apiUrl, {
+    const res = await fetch(`${META_GRAPH_URL}/${phoneNumberId}/messages`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({ phone, message }),
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        to: adminPhone,
+        type: "text",
+        text: { body: message },
+      }),
     });
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error("[WhatsApp] API error:", res.status, err);
+    }
   } catch (error) {
     console.error("[WhatsApp] Failed to send notification:", error);
   }

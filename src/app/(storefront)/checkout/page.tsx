@@ -217,9 +217,9 @@ export default function CheckoutPage() {
 
   return (
     <div className="bg-cream-50 min-h-screen">
-      <div className="container mx-auto max-w-5xl px-4 sm:px-6 py-8">
+      <div className="container mx-auto max-w-5xl px-4 sm:px-6 py-5 sm:py-8">
         {/* Steps */}
-        <div className="flex items-center gap-2 mb-8">
+        <div className="flex items-center gap-2 mb-5 sm:mb-8">
           {STEPS.map((s, i) => (
             <div key={s.key} className="flex items-center gap-2">
               <div
@@ -242,22 +242,22 @@ export default function CheckoutPage() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-8">
           {/* Left: Steps */}
           <div className="lg:col-span-2">
             {/* Step 1: Address */}
             {step === "address" && (
-              <div className="bg-white rounded-2xl shadow-card p-6">
-                <h2 className="font-serif font-bold text-earth-dark text-lg mb-5 flex items-center gap-2">
+              <div className="bg-white rounded-2xl shadow-card p-4 sm:p-6">
+                <h2 className="font-serif font-bold text-earth-dark text-lg mb-4 flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-brand-500" /> Delivery Address
                 </h2>
 
                 {savedAddresses.length > 0 && !useNewAddress && (
-                  <div className="space-y-3 mb-5">
+                  <div className="space-y-2 mb-4">
                     {savedAddresses.map((addr) => (
                       <label
                         key={addr.id}
-                        className={`flex gap-3 p-4 border-2 rounded-xl cursor-pointer transition-colors
+                        className={`flex gap-3 p-3 border-2 rounded-xl cursor-pointer transition-colors
                           ${selectedAddressId === addr.id ? "border-brand-400 bg-brand-50" : "border-gray-100 hover:border-gray-200"}
                         `}
                       >
@@ -266,13 +266,12 @@ export default function CheckoutPage() {
                           name="address"
                           checked={selectedAddressId === addr.id}
                           onChange={() => setSelectedAddressId(addr.id)}
-                          className="mt-1"
+                          className="mt-0.5"
                         />
-                        <div className="text-sm">
+                        <div className="text-sm leading-snug">
                           <p className="font-semibold text-earth-dark">{addr.name} <span className="text-xs text-gray-400 capitalize">({addr.type.toLowerCase()})</span></p>
-                          <p className="text-gray-600">{addr.addressLine1}</p>
-                          <p className="text-gray-600">{addr.city}, {addr.state} – {addr.pincode}</p>
-                          <p className="text-gray-500">{addr.phone}</p>
+                          <p className="text-gray-600">{addr.addressLine1}, {addr.city}, {addr.state} – {addr.pincode}</p>
+                          <p className="text-gray-500 text-xs">{addr.phone}</p>
                         </div>
                       </label>
                     ))}
@@ -329,20 +328,20 @@ export default function CheckoutPage() {
 
             {/* Step 2: Payment */}
             {step === "payment" && (
-              <div className="bg-white rounded-2xl shadow-card p-6">
-                <h2 className="font-serif font-bold text-earth-dark text-lg mb-5 flex items-center gap-2">
+              <div className="bg-white rounded-2xl shadow-card p-4 sm:p-6">
+                <h2 className="font-serif font-bold text-earth-dark text-lg mb-4 flex items-center gap-2">
                   <CreditCard className="w-5 h-5 text-brand-500" /> Payment Method
                 </h2>
 
-                <div className="space-y-3">
-                  <label className={`flex gap-4 p-4 border-2 rounded-xl cursor-pointer ${paymentMethod === "RAZORPAY" ? "border-brand-400 bg-brand-50" : "border-gray-100"}`}>
+                <div className="space-y-2">
+                  <label className={`flex gap-3 p-3 border-2 rounded-xl cursor-pointer ${paymentMethod === "RAZORPAY" ? "border-brand-400 bg-brand-50" : "border-gray-100"}`}>
                     <input type="radio" checked={paymentMethod === "RAZORPAY"} onChange={() => setPaymentMethod("RAZORPAY")} />
                     <div>
                       <p className="font-semibold text-sm text-earth-dark">Online Payment</p>
                       <p className="text-xs text-gray-500">Debit/Credit Card, UPI, Net Banking via Razorpay</p>
                     </div>
                   </label>
-                  <label className={`flex gap-4 p-4 border-2 rounded-xl cursor-pointer ${paymentMethod === "COD" ? "border-brand-400 bg-brand-50" : "border-gray-100"}`}>
+                  <label className={`flex gap-3 p-3 border-2 rounded-xl cursor-pointer ${paymentMethod === "COD" ? "border-brand-400 bg-brand-50" : "border-gray-100"}`}>
                     <input type="radio" checked={paymentMethod === "COD"} onChange={() => setPaymentMethod("COD")} />
                     <div>
                       <p className="font-semibold text-sm text-earth-dark">Cash on Delivery</p>
@@ -351,7 +350,7 @@ export default function CheckoutPage() {
                   </label>
                 </div>
 
-                <div className="mt-6 flex gap-3">
+                <div className="mt-4 flex gap-3">
                   <Button variant="outline" onClick={() => setStep("address")}>Back</Button>
                   <Button onClick={() => setStep("review")} className="flex-1" size="lg">
                     Review Order
@@ -362,8 +361,8 @@ export default function CheckoutPage() {
 
             {/* Step 3: Review */}
             {step === "review" && (
-              <div className="bg-white rounded-2xl shadow-card p-6">
-                <h2 className="font-serif font-bold text-earth-dark text-lg mb-5">Review & Place Order</h2>
+              <div className="bg-white rounded-2xl shadow-card p-4 sm:p-6">
+                <h2 className="font-serif font-bold text-earth-dark text-lg mb-4">Review & Place Order</h2>
 
                 {error && (
                   <div className="text-sm text-spice-700 bg-spice-50 border border-spice-200 rounded-xl px-4 py-3 mb-4 flex items-center gap-2">
@@ -392,7 +391,7 @@ export default function CheckoutPage() {
                   ))}
                 </div>
 
-                <div className="flex gap-3 mt-6">
+                <div className="flex gap-3 mt-4">
                   <Button variant="outline" onClick={() => setStep("payment")}>Back</Button>
                   <Button
                     variant="premium"
@@ -413,8 +412,8 @@ export default function CheckoutPage() {
           </div>
 
           {/* Right: Summary */}
-          <div className="bg-white rounded-2xl shadow-card p-5 h-fit">
-            <h3 className="font-semibold text-earth-dark mb-4">Order Summary</h3>
+          <div className="bg-white rounded-2xl shadow-card p-4 sm:p-5 h-fit">
+            <h3 className="font-semibold text-earth-dark mb-3">Order Summary</h3>
             <div className="space-y-3 text-sm">
               {items.map((item) => (
                 <div key={item.id} className="flex gap-2.5">
