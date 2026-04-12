@@ -510,19 +510,21 @@ export function orderCancelledHtml(data: { orderNumber: string; customerName: st
 export async function sendOrderNotifications(order: PrismaOrderForEmail, customerEmail?: string) {
   const emailData = mapOrderToEmailData(order);
   const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL ?? process.env.FROM_EMAIL ?? "magadhrecipe@gmail.com";
+  const fromEmail = process.env.FROM_EMAIL ?? "noreply@magadhrecipe.com";
   const customerPhone = order.shipping?.phone ?? "";
 
-  // Customer confirmation email
+  console.log(`[Email] Sending notifications for order ${order.orderNumber} | from=${fromEmail} admin=${adminEmail} customer=${customerEmail ?? "none"}`);
+
   if (customerEmail) {
-    sendMail({
+    const res = await sendMail({
       to: customerEmail,
       subject: `Order Confirmed – #${order.orderNumber}`,
       html: orderConfirmationHtml(emailData),
-    }).catch((e) => console.error("[Email] Customer confirmation failed:", e));
+    });
+    console.log(`[Email] Customer confirmation → ${res.success ? "OK" : "FAILED"}`, res.success ? res.messageId : res.error);
   }
 
-  // Admin notification email
-  sendMail({
+  const adminRes = await sendMail({
     to: adminEmail,
     subject: `🛒 New Order #${order.orderNumber} — ₹${order.totalAmount}`,
     html: newOrderAdminHtml({
@@ -531,9 +533,9 @@ export async function sendOrderNotifications(order: PrismaOrderForEmail, custome
       customerPhone,
       paymentMethod: order.paymentMethod,
     }),
-  }).catch((e) => console.error("[Email] Admin notification failed:", e));
+  });
+  console.log(`[Email] Admin notification → ${adminRes.success ? "OK" : "FAILED"}`, adminRes.success ? adminRes.messageId : adminRes.error);
 
-  // WhatsApp notification (if configured)
   sendWhatsAppOrderNotification(order).catch((e) => console.error("[WhatsApp] Notification failed:", e));
 }
 

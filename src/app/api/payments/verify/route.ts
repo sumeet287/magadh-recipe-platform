@@ -6,6 +6,12 @@ import { successResponse } from "@/lib/api-response";
 import { verifyRazorpaySignature } from "@/lib/razorpay";
 import { verifyPaymentSchema } from "@/lib/validations/order";
 import { sendOrderNotifications } from "@/lib/email";
+import {
+  createShiprocketOrder,
+  generateAWB,
+  requestPickup,
+  type ShiprocketOrderPayload,
+} from "@/lib/shiprocket";
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,7 +37,6 @@ export async function POST(req: NextRequest) {
     });
     if (!order) throw new NotFoundError("Order not found");
 
-    // Confirm order + capture payment + decrement stock (deferred from order creation for Razorpay)
     await prisma.$transaction(async (tx) => {
       await tx.order.update({ where: { id: orderId }, data: { status: "CONFIRMED" } });
       await tx.payment.update({
@@ -50,7 +55,72 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    sendOrderNotifications(order, session.user.email ?? undefined).catch(() => {});
+    // Auto-create Shiprocket order for prepaid orders
+    if (order.shipping && !order.shipping.shiprocketOrderId) {
+      try {
+        const shipping = order.shipping;
+        const orderDate = new Date(order.createdAt)
+          .toISOString()
+          .replace("T", " ")
+          .slice(0, 16);
+
+        const payload: ShiprocketOrderPayload = {
+          order_id: order.orderNumber,
+          order_date: orderDate,
+          pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION ?? "Patna Br",
+          billing_customer_name: shipping.recipientName.split(" ")[0],
+          billing_last_name: shipping.recipientName.split(" ").slice(1).join(" ") || undefined,
+          billing_address: shipping.addressLine1,
+          billing_address_2: shipping.addressLine2 ?? undefined,
+          billing_city: shipping.city,
+          billing_pincode: shipping.pincode,
+          billing_state: shipping.state,
+          billing_country: shipping.country || "India",
+          billing_email: session.user.email ?? "",
+          billing_phone: shipping.phone.replace(/\D/g, "").slice(-10),
+          shipping_is_billing: true,
+          order_items: order.items.map((item) => ({
+            name: item.productName,
+            sku: item.sku,
+            units: item.quantity,
+            selling_price: item.unitPrice,
+          })),
+          payment_method: "Prepaid",
+          sub_total: order.subtotalAmount,
+          length: 20,
+          breadth: 15,
+          height: 10,
+          weight: 0.5,
+        };
+
+        const srOrder = await createShiprocketOrder(payload);
+
+        if (srOrder.shipment_id) {
+          const awbData = await generateAWB(srOrder.shipment_id);
+          await requestPickup(srOrder.shipment_id).catch(() => {});
+
+          await prisma.orderShipping.update({
+            where: { orderId },
+            data: {
+              shiprocketOrderId: srOrder.order_id,
+              shiprocketShipmentId: srOrder.shipment_id,
+              awbCode: awbData.awb_code,
+              trackingNumber: awbData.awb_code,
+              trackingUrl: `https://www.shiprocket.in/shipment-tracking/${awbData.awb_code}`,
+              courier: awbData.courier_name,
+            },
+          });
+
+          console.log(`[Shiprocket] Auto-created: ${order.orderNumber} → SR#${srOrder.order_id}, AWB: ${awbData.awb_code}`);
+        }
+      } catch (err) {
+        console.error("[Shiprocket] Auto-create failed for", order.orderNumber, err);
+      }
+    }
+
+    // Send confirmation emails + WhatsApp
+    sendOrderNotifications(order, session.user.email ?? undefined)
+      .catch((e) => console.error("[Email] sendOrderNotifications failed:", e));
 
     return NextResponse.json(successResponse({ orderId }));
   } catch (err) {
