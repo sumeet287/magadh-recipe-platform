@@ -1,8 +1,10 @@
 import { z } from "zod";
 
 export const productVariantSchema = z.object({
+  id: z.string().optional(),
   name: z.string().min(1, "Variant name required"),
   weight: z.string().optional(),
+  unit: z.string().optional(),
   sku: z.string().min(1, "SKU required"),
   mrp: z.number().positive("MRP must be positive"),
   price: z.number().positive("Price must be positive"),
@@ -32,16 +34,17 @@ export const productSchema = z.object({
   isFeatured: z.boolean().default(false),
   isBestseller: z.boolean().default(false),
   isNewArrival: z.boolean().default(false),
-  status: z.enum(["DRAFT", "ACTIVE", "OUT_OF_STOCK", "DISCONTINUED"]).default("ACTIVE"),
+  status: z.enum(["DRAFT", "ACTIVE", "OUT_OF_STOCK", "DISCONTINUED", "ARCHIVED"]).default("ACTIVE"),
   metaTitle: z.string().max(60).optional(),
   metaDesc: z.string().max(160).optional(),
   variants: z.array(productVariantSchema).min(1, "At least one variant required"),
   images: z.array(z.object({
-    url: z.string().url(),
-    alt: z.string().optional(),
+    id: z.string().optional(),
+    url: z.string().min(1, "Image URL required"),
+    altText: z.string().optional(),
     isPrimary: z.boolean().default(false),
     sortOrder: z.number().int().default(0),
-  })),
+  })).optional(),
 });
 
 export const productQuerySchema = z.object({

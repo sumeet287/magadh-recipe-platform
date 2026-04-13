@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
+  labelClassName?: string;
   error?: string;
   hint?: string;
   leftIcon?: React.ReactNode;
@@ -11,14 +12,14 @@ export interface InputProps
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, label, error, hint, leftIcon, rightIcon, id, ...props }, ref) => {
+  ({ className, type, label, labelClassName, error, hint, leftIcon, rightIcon, id, ...props }, ref) => {
     const inputId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
     return (
       <div className="w-full">
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-medium text-earth-dark mb-1.5"
+            className={labelClassName ?? "block text-sm font-medium text-earth-dark mb-1.5"}
           >
             {label}
             {props.required && <span className="text-spice-500 ml-1">*</span>}
@@ -73,19 +74,20 @@ Input.displayName = "Input";
 export interface TextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
+  labelClassName?: string;
   error?: string;
   hint?: string;
 }
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, label, error, hint, id, ...props }, ref) => {
+  ({ className, label, labelClassName, error, hint, id, ...props }, ref) => {
     const inputId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
     return (
       <div className="w-full">
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-medium text-earth-dark mb-1.5"
+            className={labelClassName ?? "block text-sm font-medium text-earth-dark mb-1.5"}
           >
             {label}
             {props.required && <span className="text-spice-500 ml-1">*</span>}

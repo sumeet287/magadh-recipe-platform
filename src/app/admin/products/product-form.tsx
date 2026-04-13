@@ -105,7 +105,7 @@ function slugify(text: string): string {
 
 const inputClass = "bg-gray-800 border-gray-700 text-white placeholder:text-gray-500";
 const textareaClass = "bg-gray-800 border-gray-700 text-white placeholder:text-gray-500";
-const labelClass = "block text-sm font-medium text-gray-400 mb-1.5";
+const labelClass = "block text-sm font-medium text-gray-300 mb-1.5";
 const sectionClass = "bg-gray-900 rounded-2xl border border-gray-800 p-6";
 
 export default function ProductForm({ initialData }: { initialData?: ProductFormData }) {
@@ -366,6 +366,7 @@ export default function ProductForm({ initialData }: { initialData?: ProductForm
             <div className="space-y-4">
               <Input
                 label="Product Name"
+                labelClassName={labelClass}
                 required
                 placeholder="e.g. Mango Pickle"
                 value={form.name}
@@ -393,6 +394,7 @@ export default function ProductForm({ initialData }: { initialData?: ProductForm
               </div>
               <Input
                 label="Short Description"
+                labelClassName={labelClass}
                 placeholder="Brief product summary"
                 value={form.shortDescription}
                 onChange={(e) => updateField("shortDescription", e.target.value)}
@@ -407,6 +409,7 @@ export default function ProductForm({ initialData }: { initialData?: ProductForm
             <div className="space-y-4">
               <Textarea
                 label="Full Description (HTML)"
+                labelClassName={labelClass}
                 placeholder="<p>Detailed product description...</p>"
                 value={form.description}
                 onChange={(e) => updateField("description", e.target.value)}
@@ -415,6 +418,7 @@ export default function ProductForm({ initialData }: { initialData?: ProductForm
               />
               <Textarea
                 label="Ingredients"
+                labelClassName={labelClass}
                 placeholder="List of ingredients..."
                 value={form.ingredients}
                 onChange={(e) => updateField("ingredients", e.target.value)}
@@ -424,6 +428,7 @@ export default function ProductForm({ initialData }: { initialData?: ProductForm
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input
                   label="Shelf Life"
+                  labelClassName={labelClass}
                   placeholder="e.g. 12 months"
                   value={form.shelfLife}
                   onChange={(e) => updateField("shelfLife", e.target.value)}
@@ -431,6 +436,7 @@ export default function ProductForm({ initialData }: { initialData?: ProductForm
                 />
                 <Input
                   label="Region"
+                  labelClassName={labelClass}
                   placeholder="e.g. Magadh, Bihar"
                   value={form.region}
                   onChange={(e) => updateField("region", e.target.value)}
@@ -439,6 +445,7 @@ export default function ProductForm({ initialData }: { initialData?: ProductForm
               </div>
               <Textarea
                 label="Storage Instructions"
+                labelClassName={labelClass}
                 placeholder="How to store the product..."
                 value={form.storageInstructions}
                 onChange={(e) => updateField("storageInstructions", e.target.value)}
@@ -447,6 +454,7 @@ export default function ProductForm({ initialData }: { initialData?: ProductForm
               />
               <Textarea
                 label="Usage Suggestions"
+                labelClassName={labelClass}
                 placeholder="Serving suggestions, pairings..."
                 value={form.usageSuggestions}
                 onChange={(e) => updateField("usageSuggestions", e.target.value)}
@@ -639,6 +647,7 @@ export default function ProductForm({ initialData }: { initialData?: ProductForm
             <div className="space-y-4">
               <Input
                 label="Meta Title"
+                labelClassName={labelClass}
                 placeholder="Page title for search engines"
                 value={form.metaTitle}
                 onChange={(e) => updateField("metaTitle", e.target.value)}
@@ -646,6 +655,7 @@ export default function ProductForm({ initialData }: { initialData?: ProductForm
               />
               <Textarea
                 label="Meta Description"
+                labelClassName={labelClass}
                 placeholder="Brief description for search results..."
                 value={form.metaDesc}
                 onChange={(e) => updateField("metaDesc", e.target.value)}
