@@ -51,12 +51,120 @@ export async function PATCH(
 
     const { variants, images, ...productData } = parsed.data;
 
-    const product = await prisma.product.update({
-      where: { id },
-      data: productData,
+    // Update product in a transaction with variants and images
+    const product = await prisma.$transaction(async (tx) => {
+      // Update product base data
+      const updatedProduct = await tx.product.update({
+        where: { id },
+        data: productData,
+      });
+
+      // Handle variants if provided
+      if (variants && variants.length > 0) {
+        // Get existing variant IDs
+        const existingVariants = await tx.productVariant.findMany({
+          where: { productId: id },
+          select: { id: true },
+        });
+        const existingIds = existingVariants.map((v) => v.id);
+        const incomingIds = variants.filter((v) => v.id).map((v) => v.id!);
+
+        // Delete removed variants
+        const toDelete = existingIds.filter((eid) => !incomingIds.includes(eid));
+        if (toDelete.length > 0) {
+          await tx.productVariant.deleteMany({
+            where: { id: { in: toDelete } },
+          });
+        }
+
+        // Upsert variants
+        for (const variant of variants) {
+          if (variant.id) {
+            await tx.productVariant.update({
+              where: { id: variant.id },
+              data: {
+                name: variant.name,
+                sku: variant.sku,
+                mrp: variant.mrp,
+                price: variant.price,
+                stock: variant.stock,
+                unit: variant.unit,
+                isDefault: variant.isDefault,
+                sortOrder: variant.sortOrder,
+              },
+            });
+          } else {
+            await tx.productVariant.create({
+              data: {
+                productId: id,
+                name: variant.name,
+                sku: variant.sku,
+                mrp: variant.mrp,
+                price: variant.price,
+                stock: variant.stock ?? 0,
+                unit: variant.unit,
+                isDefault: variant.isDefault ?? false,
+                sortOrder: variant.sortOrder ?? 0,
+              },
+            });
+          }
+        }
+      }
+
+      // Handle images if provided
+      if (images && images.length > 0) {
+        // Get existing image IDs
+        const existingImages = await tx.productImage.findMany({
+          where: { productId: id },
+          select: { id: true },
+        });
+        const existingIds = existingImages.map((img) => img.id);
+        const incomingIds = images.filter((img) => img.id).map((img) => img.id!);
+
+        // Delete removed images
+        const toDelete = existingIds.filter((eid) => !incomingIds.includes(eid));
+        if (toDelete.length > 0) {
+          await tx.productImage.deleteMany({
+            where: { id: { in: toDelete } },
+          });
+        }
+
+        // Upsert images
+        for (const img of images) {
+          if (img.id) {
+            await tx.productImage.update({
+              where: { id: img.id },
+              data: {
+                url: img.url,
+                altText: img.altText,
+                isPrimary: img.isPrimary,
+                sortOrder: img.sortOrder,
+              },
+            });
+          } else {
+            await tx.productImage.create({
+              data: {
+                productId: id,
+                url: img.url,
+                altText: img.altText ?? "",
+                isPrimary: img.isPrimary ?? false,
+                sortOrder: img.sortOrder ?? 0,
+              },
+            });
+          }
+        }
+      }
+
+      return updatedProduct;
     });
 
-    return NextResponse.json(successResponse(product));
+    // Fetch updated product with relations
+    const fullProduct = await prisma.product.findUnique({
+      where: { id },
+      include: { category: true, variants: true, images: { orderBy: { sortOrder: "asc" } } },
+    });
+
+    return NextResponse.json(successResponse(fullProduct));
   } catch (err) {
     return handleApiError(err);
   }
