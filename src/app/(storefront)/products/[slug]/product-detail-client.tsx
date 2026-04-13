@@ -388,7 +388,7 @@ export function ProductDetailClient({ product, relatedProducts, avgRating }: Pro
                 >
                   <Icon className="w-4 h-4 text-brand-500" />
                   <p className="text-xs font-semibold text-earth-dark">{label}</p>
-                  <p className="text-[11px] text-gray-500">{sub}</p>
+                  <p className="text-xs text-gray-500">{sub}</p>
                 </div>
               ))}
             </div>

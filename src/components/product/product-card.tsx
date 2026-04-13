@@ -211,7 +211,7 @@ export function ProductCard({ product, className, compact = false }: ProductCard
       <div className="p-3 sm:p-5 flex-1 flex flex-col">
         {/* Category + Veg */}
         <div className="flex items-center justify-between mb-2">
-          <span className="text-[10px] text-brand-500/80 font-semibold uppercase tracking-[0.15em]">
+          <span className="text-[11px] text-brand-500 font-semibold uppercase tracking-[0.15em]">
             {product.category.name}
           </span>
           <VegIndicator isVeg={product.isVeg} />

@@ -71,7 +71,7 @@ export function Header() {
   return (
     <>
       {/* Announcement Bar — cinematic marquee */}
-      <div className="relative overflow-hidden bg-[#0f0802] text-cream-200/70 py-2 px-4 text-[11px] font-medium tracking-wide">
+      <div className="relative overflow-hidden bg-[#0f0802] text-cream-200/90 py-2 px-4 text-xs font-medium tracking-wide">
         <div className="flex whitespace-nowrap marquee-track gap-0">
           {[0,1].map((k) => (
             <span key={k} className="flex items-center gap-0 mr-0">
@@ -115,7 +115,7 @@ export function Header() {
                 <div className="font-serif font-bold text-white text-[15px] sm:text-[17px] leading-none tracking-tight">
                   Magadh Recipe
                 </div>
-                <div className="hidden sm:block text-[10px] text-brand-400/70 font-medium tracking-[0.18em] leading-none mt-0.5 uppercase">
+                <div className="hidden sm:block text-[11px] text-brand-400 font-medium tracking-[0.18em] leading-none mt-0.5 uppercase">
                   माँ के हाथ का स्वाद
                 </div>
               </div>
@@ -137,7 +137,7 @@ export function Header() {
                       "nav-link-luxury flex items-center gap-1 px-4 py-2 text-sm font-medium transition-colors",
                       pathname === link.href || pathname?.startsWith(link.href + "/")
                         ? "text-brand-400 active"
-                        : "text-white/75 hover:text-white"
+                        : "text-white/90 hover:text-white"
                     )}
                   >
                     {link.label}
@@ -160,7 +160,7 @@ export function Header() {
                           <Link
                             key={sub.href}
                             href={sub.href}
-                            className="flex items-center gap-3 px-5 py-2.5 text-sm text-white/65 hover:text-brand-300 hover:bg-brand-500/10 transition-all duration-150 group/sub"
+                            className="flex items-center gap-3 px-5 py-2.5 text-sm text-white/85 hover:text-brand-300 hover:bg-brand-500/10 transition-all duration-150 group/sub"
                           >
                             <span className="w-1 h-1 rounded-full bg-brand-400/40 group-hover/sub:bg-brand-500 transition-colors" />
                             {sub.label}
@@ -178,7 +178,7 @@ export function Header() {
               {/* Search */}
               <button
                 onClick={openSearch}
-                className="p-2 rounded-lg text-white/55 hover:text-brand-400 transition-colors"
+                className="p-2 rounded-lg text-white/80 hover:text-brand-400 transition-colors"
                 aria-label="Search"
               >
                 <Search className="w-[18px] h-[18px]" />
@@ -187,7 +187,7 @@ export function Header() {
               {/* Wishlist */}
               <Link
                 href="/account/wishlist"
-                className="p-2 rounded-lg text-white/55 hover:text-brand-400 transition-colors hidden sm:block"
+                className="p-2 rounded-lg text-white/80 hover:text-brand-400 transition-colors hidden sm:block"
                 aria-label="Wishlist"
               >
                 <Heart className="w-[18px] h-[18px]" />
@@ -242,7 +242,7 @@ export function Header() {
               ) : (
                 <Link
                   href="/login"
-                  className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-white/65 hover:text-white border border-white/15 hover:border-brand-400/50 px-4 py-1.5 rounded-full transition-all duration-200 hover:bg-brand-500/10"
+                  className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-white border border-white/25 hover:border-brand-400/50 px-4 py-1.5 rounded-full transition-all duration-200 hover:bg-brand-500/10"
                 >
                   <User className="w-4 h-4" />
                   Login
@@ -252,7 +252,7 @@ export function Header() {
               {/* Menu Button — mobile/tablet */}
               <button
                 onClick={openMobileMenu}
-                className="lg:hidden p-2 rounded-lg text-white/55 hover:text-white transition-colors ml-1"
+                className="lg:hidden p-2 rounded-lg text-white/80 hover:text-white transition-colors ml-1"
                 aria-label="Open menu"
               >
                 <Menu className="w-5 h-5" />

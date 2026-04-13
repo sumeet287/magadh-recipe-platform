@@ -45,13 +45,13 @@ export function Footer() {
                 <div className="font-serif font-bold text-cream-100 text-lg leading-none">
                   {APP_NAME}
                 </div>
-                <div className="text-[10px] text-brand-400 font-medium tracking-wider leading-none mt-0.5">
+                <div className="text-[11px] text-brand-400 font-medium tracking-wider leading-none mt-0.5">
                   माँ के हाथ का स्वाद
                 </div>
               </div>
             </Link>
 
-            <p className="text-sm text-earth-300 leading-relaxed mb-6 max-w-xs">
+            <p className="text-sm text-cream-200/90 leading-relaxed mb-6 max-w-xs">
               Born from a mother&apos;s kitchen in Bihar — premium handcrafted pickles & achars. 
               Every jar carries generations of love, tradition, and the finest ingredients.
             </p>
@@ -70,7 +70,7 @@ export function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="w-9 h-9 rounded-lg bg-earth-800 border border-earth-700 flex items-center justify-center text-earth-300 hover:text-brand-400 hover:border-brand-500 hover:bg-earth-900 transition-all"
+                  className="w-9 h-9 rounded-lg bg-earth-800 border border-earth-700 flex items-center justify-center text-cream-200/80 hover:text-brand-400 hover:border-brand-500 hover:bg-earth-900 transition-all"
                 >
                   <Icon className="w-4 h-4" />
                 </a>
@@ -89,7 +89,7 @@ export function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-earth-300 hover:text-brand-400 transition-colors"
+                      className="text-sm text-cream-200/80 hover:text-brand-400 transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -108,7 +108,7 @@ export function Footer() {
                 <Phone className="w-4 h-4 text-brand-400" />
               </div>
               <div>
-                <p className="text-[11px] text-earth-400 uppercase tracking-wide">Call Us</p>
+                <p className="text-xs text-cream-200/60 uppercase tracking-wide">Call Us</p>
                 <a href={`tel:${SUPPORT_PHONE}`} className="text-sm text-cream-100 hover:text-brand-400 transition-colors">
                   {SUPPORT_PHONE}
                 </a>
@@ -119,7 +119,7 @@ export function Footer() {
                 <Mail className="w-4 h-4 text-brand-400" />
               </div>
               <div>
-                <p className="text-[11px] text-earth-400 uppercase tracking-wide">Email Us</p>
+                <p className="text-xs text-cream-200/60 uppercase tracking-wide">Email Us</p>
                 <a href={`mailto:${SUPPORT_EMAIL}`} className="text-sm text-cream-100 hover:text-brand-400 transition-colors">
                   {SUPPORT_EMAIL}
                 </a>
@@ -130,7 +130,7 @@ export function Footer() {
                 <MapPin className="w-4 h-4 text-brand-400" />
               </div>
               <div>
-                <p className="text-[11px] text-earth-400 uppercase tracking-wide">Location</p>
+                <p className="text-xs text-cream-200/60 uppercase tracking-wide">Location</p>
                 <p className="text-sm text-cream-100">{BRAND_ADDRESS}</p>
               </div>
             </div>
@@ -141,7 +141,7 @@ export function Footer() {
       {/* Bottom Bar */}
       <div className="border-t border-earth-800 bg-earth-950">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 py-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-earth-400">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-cream-200/70">
             <p>
               © {new Date().getFullYear()} {APP_NAME}. All rights reserved. Made with ❤️ in Bihar.
             </p>

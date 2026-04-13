@@ -67,7 +67,7 @@ export function FullscreenMenu() {
         </Link>
         <button
           onClick={handleClose}
-          className="w-11 h-11 rounded-full border border-white/[0.08] flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 hover:bg-white/[0.03] transition-all duration-300 hover:rotate-90"
+          className="w-11 h-11 rounded-full border border-white/[0.15] flex items-center justify-center text-white/70 hover:text-white hover:border-white/30 hover:bg-white/[0.05] transition-all duration-300 hover:rotate-90"
           aria-label="Close"
         >
           <X className="w-5 h-5" />
@@ -84,11 +84,11 @@ export function FullscreenMenu() {
                 onClick={handleClose}
                 className={cn(
                   "menu-link-animate group flex items-center gap-5 py-5 sm:py-6 transition-all duration-300",
-                  pathname === link.href ? "text-brand-400" : "text-white/80 hover:text-white hover:pl-3"
+                  pathname === link.href ? "text-brand-400" : "text-white/90 hover:text-white hover:pl-3"
                 )}
                 style={{ animationDelay: `${i * 100 + 100}ms` }}
               >
-                <span className="text-brand-400/25 font-mono text-[11px] tabular-nums w-6">0{i + 1}</span>
+                <span className="text-brand-400/50 font-mono text-xs tabular-nums w-6">0{i + 1}</span>
                 <span className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-none">
                   {link.label}
                 </span>
@@ -102,7 +102,7 @@ export function FullscreenMenu() {
                       key={s.href}
                       href={s.href}
                       onClick={handleClose}
-                      className="text-xs text-white/25 hover:text-brand-300 px-3.5 py-1.5 rounded-full border border-white/[0.05] hover:border-brand-400/25 hover:bg-brand-500/5 transition-all duration-200"
+                      className="text-xs text-white/50 hover:text-brand-300 px-3.5 py-1.5 rounded-full border border-white/[0.12] hover:border-brand-400/40 hover:bg-brand-500/10 transition-all duration-200"
                     >
                       {s.label}
                     </Link>
@@ -118,12 +118,12 @@ export function FullscreenMenu() {
       <div className="relative z-10 px-6 sm:px-10 lg:px-16 py-5 border-t border-white/[0.04] flex items-center justify-between">
         <div className="flex gap-8">
           {["Instagram", "Facebook", "YouTube"].map((s, i) => (
-            <a key={s} href="#" className="menu-link-animate text-[10px] text-white/20 hover:text-brand-400/60 uppercase tracking-[0.2em] font-medium transition-colors" style={{ animationDelay: `${(LINKS.length + i) * 100 + 100}ms` }}>
+            <a key={s} href="#" className="menu-link-animate text-xs text-white/40 hover:text-brand-400 uppercase tracking-[0.2em] font-medium transition-colors" style={{ animationDelay: `${(LINKS.length + i) * 100 + 100}ms` }}>
               {s}
             </a>
           ))}
         </div>
-        <span className="text-[10px] text-white/10 tracking-widest uppercase">माँ के हाथ का स्वाद</span>
+        <span className="text-xs text-white/30 tracking-widest uppercase">माँ के हाथ का स्वाद</span>
       </div>
     </div>
   );
