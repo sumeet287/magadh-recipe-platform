@@ -82,6 +82,7 @@ export function Header() {
                 "✦  50,000+ Happy Families",
                 "✦  FSSAI Certified · 100% Natural",
                 "✦  Traditional Recipes · Handcrafted with Love",
+                "✦  Order on WhatsApp @ +916207197364",
               ].map((item, i) => (
                 <span key={i} className="inline-flex items-center gap-6 pr-12">
                   <span className={i % 3 === 1 ? "text-brand-400 font-semibold" : ""}>{item}</span>
