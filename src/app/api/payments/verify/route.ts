@@ -8,8 +8,6 @@ import { verifyPaymentSchema } from "@/lib/validations/order";
 import { sendOrderNotifications } from "@/lib/email";
 import {
   createShiprocketOrder,
-  generateAWB,
-  requestPickup,
   type ShiprocketOrderPayload,
 } from "@/lib/shiprocket";
 
@@ -95,24 +93,15 @@ export async function POST(req: NextRequest) {
 
         const srOrder = await createShiprocketOrder(payload);
 
-        if (srOrder.shipment_id) {
-          const awbData = await generateAWB(srOrder.shipment_id);
-          await requestPickup(srOrder.shipment_id).catch(() => {});
+        await prisma.orderShipping.update({
+          where: { orderId },
+          data: {
+            shiprocketOrderId: srOrder.order_id,
+            shiprocketShipmentId: srOrder.shipment_id ?? null,
+          },
+        });
 
-          await prisma.orderShipping.update({
-            where: { orderId },
-            data: {
-              shiprocketOrderId: srOrder.order_id,
-              shiprocketShipmentId: srOrder.shipment_id,
-              awbCode: awbData.awb_code,
-              trackingNumber: awbData.awb_code,
-              trackingUrl: `https://www.shiprocket.in/shipment-tracking/${awbData.awb_code}`,
-              courier: awbData.courier_name,
-            },
-          });
-
-          console.log(`[Shiprocket] Auto-created: ${order.orderNumber} → SR#${srOrder.order_id}, AWB: ${awbData.awb_code}`);
-        }
+        console.log(`[Shiprocket] Order created: ${order.orderNumber} → SR#${srOrder.order_id} (courier selection pending by admin)`);
       } catch (err) {
         console.error("[Shiprocket] Auto-create failed for", order.orderNumber, err);
       }
