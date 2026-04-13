@@ -104,17 +104,17 @@ export function Header() {
         <div className="container mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between gap-4">
             {/* Logo */}
-            <Link href="/" onClick={(e) => handleNavClick(e, "/")} className="flex items-center gap-3 shrink-0 group">
+            <Link href="/" onClick={(e) => handleNavClick(e, "/")} className="flex items-center gap-2 sm:gap-3 shrink-0 group">
               <img
                 src="/images/brand/logo.png"
                 alt="Magadh Recipe"
-                className="w-10 h-10 rounded-xl object-contain shadow-[0_3px_16px_rgba(212,132,58,0.5)] group-hover:shadow-[0_4px_24px_rgba(212,132,58,0.7)] transition-all duration-300 group-hover:scale-105"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-contain shadow-[0_3px_16px_rgba(212,132,58,0.5)] group-hover:shadow-[0_4px_24px_rgba(212,132,58,0.7)] transition-all duration-300 group-hover:scale-105"
               />
-              <div className="hidden sm:block">
-                <div className="font-serif font-bold text-white text-[17px] leading-none tracking-tight">
+              <div>
+                <div className="font-serif font-bold text-white text-[15px] sm:text-[17px] leading-none tracking-tight">
                   Magadh Recipe
                 </div>
-                <div className="text-[10px] text-brand-400/70 font-medium tracking-[0.18em] leading-none mt-0.5 uppercase">
+                <div className="hidden sm:block text-[10px] text-brand-400/70 font-medium tracking-[0.18em] leading-none mt-0.5 uppercase">
                   माँ के हाथ का स्वाद
                 </div>
               </div>

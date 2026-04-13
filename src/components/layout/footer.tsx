@@ -36,9 +36,11 @@ export function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center gap-2.5 mb-5">
-              <div className="w-9 h-9 bg-brand-gradient rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-base">M</span>
-              </div>
+              <img
+                src="/images/brand/logo.png"
+                alt="Magadh Recipe"
+                className="w-10 h-10 rounded-xl object-contain shadow-[0_3px_16px_rgba(212,132,58,0.4)]"
+              />
               <div>
                 <div className="font-serif font-bold text-cream-100 text-lg leading-none">
                   {APP_NAME}

@@ -59,9 +59,11 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         {/* Logo */}
         <div className="px-5 py-4 border-b border-gray-800">
           <Link href="/admin" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-              M
-            </div>
+            <img
+              src="/images/brand/logo.png"
+              alt="Magadh Recipe"
+              className="w-9 h-9 rounded-lg object-contain shadow-[0_2px_12px_rgba(212,132,58,0.4)]"
+            />
             <div>
               <p className="text-white text-sm font-semibold leading-none">Magadh Recipe</p>
               <p className="text-gray-400 text-xs mt-0.5">Admin Panel</p>
