@@ -34,6 +34,9 @@ pnpm-debug.log*
 .Trashes
 Thumbs.db
 
+# skills.sh / npx skills (regenerate: npx skills add … -y)
+.agents/
+
 # IDE
 .vscode/
 .idea/
