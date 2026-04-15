@@ -1,9 +1,14 @@
 import type { MetadataRoute } from "next";
-import { prisma } from "@/lib/prisma";
+import { getSiteUrl } from "@/lib/site-url";
 import { storefrontListingWhere } from "@/lib/storefront-products";
 
+/** Cache sitemap generation; reduces DB load and avoids cold-timeouts on each request. */
+export const revalidate = 3600;
+
+export const runtime = "nodejs";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXTAUTH_URL ?? "https://magadhrecipe.com";
+  const baseUrl = getSiteUrl();
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: new Date(), changeFrequency: "daily", priority: 1.0 },
@@ -17,7 +22,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   let productPages: MetadataRoute.Sitemap = [];
+
   try {
+    const { prisma } = await import("@/lib/prisma");
     const products = await prisma.product.findMany({
       where: storefrontListingWhere({}),
       select: { slug: true, updatedAt: true },
@@ -28,25 +35,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority: 0.8,
     }));
-  } catch {
-    // DB may be unreachable during build; return static pages only
+  } catch (err) {
+    console.error("[sitemap] product URLs skipped:", err);
   }
 
-  let categoryPages: MetadataRoute.Sitemap = [];
-  try {
-    const categories = await prisma.category.findMany({
-      where: { isActive: true },
-      select: { slug: true },
-    });
-    categoryPages = categories.map((c) => ({
-      url: `${baseUrl}/products?category=${c.slug}`,
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
-    }));
-  } catch {
-    // same fallback
-  }
-
-  return [...staticPages, ...productPages, ...categoryPages];
+  return [...staticPages, ...productPages];
 }

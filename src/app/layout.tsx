@@ -3,6 +3,7 @@ import { Inter, Cormorant_Garamond } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { Providers } from "@/providers/providers";
+import { getSiteUrl } from "@/lib/site-url";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -17,8 +18,10 @@ const cormorant = Cormorant_Garamond({
   display: "swap",
 });
 
+const siteUrl = getSiteUrl();
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXTAUTH_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(siteUrl),
   title: {
     default: "Magadh Recipe — Maa ke Haath ka Swaad | Premium Handcrafted Pickles from Bihar",
     template: "%s | Magadh Recipe — Premium Pickles & Regional Food",

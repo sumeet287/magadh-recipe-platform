@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { storefrontListingWhere } from "@/lib/storefront-products";
+import { getSiteUrl } from "@/lib/site-url";
 import { ProductDetailClient } from "./product-detail-client";
 
 interface PageProps {
@@ -69,6 +70,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const defaultVariant = pickPrimaryVariant(product.variants);
   const image = product.images.find((i) => i.isPrimary) ?? product.images[0];
+  const canonicalPath = `/products/${slug}`;
+  const ogImage = image?.url
+    ? image.url.startsWith("http")
+      ? image.url
+      : `${getSiteUrl()}${image.url.startsWith("/") ? "" : "/"}${image.url}`
+    : undefined;
 
   return {
     title: product.metaTitle ?? `${product.name} — Magadh Recipe`,
@@ -76,10 +83,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       product.metaDesc ??
       product.shortDescription ??
       `Buy ${product.name} online. Authentic handcrafted ${product.category.name} from Bihar.`,
+    alternates: {
+      canonical: canonicalPath,
+    },
     openGraph: {
+      type: "website",
+      url: canonicalPath,
       title: product.name,
       description: product.shortDescription ?? "",
-      images: image ? [{ url: image.url, alt: product.name }] : [],
+      images: ogImage ? [{ url: ogImage, alt: product.name }] : [],
     },
     other: {
       "product:price:amount": String(defaultVariant?.price ?? 0),

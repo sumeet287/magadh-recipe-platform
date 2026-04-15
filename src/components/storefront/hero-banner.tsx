@@ -6,30 +6,19 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { ArrowRight, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-function Counter({ value, label, run }: { value: string; label: string; run: boolean }) {
-  const [display, setDisplay] = useState("0");
-  const ran = useRef(false);
-  useEffect(() => {
-    if (!run || ran.current) return;
-    ran.current = true;
-    if (!/^\d/.test(value)) { setDisplay(value); return; }
-    const num = parseInt(value.replace(/\D/g, ""), 10);
-    const suffix = value.replace(/^\d+/, "");
-    const dur = 1600;
-    const t0 = performance.now();
-    const tick = (now: number) => {
-      const p = Math.min((now - t0) / dur, 1);
-      const ease = 1 - (1 - p) ** 4;
-      const cur = Math.round(ease * num);
-      setDisplay((num >= 1000 ? `${Math.round(cur / 1000)}K` : `${cur}`) + suffix);
-      if (p < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  }, [run, value]);
+/** Static hero stats so crawlers and first paint see real numbers (no count-up from "0"). */
+function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div className="text-center sm:text-left">
-      <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-brand-400 font-serif tabular-nums leading-none mb-2" style={{ textShadow: "0 0 40px rgba(212,132,58,0.3)" }}>{display}</div>
-      <div className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-white/35 font-medium">{label}</div>
+      <div
+        className="text-3xl sm:text-4xl lg:text-5xl font-bold text-brand-400 font-serif tabular-nums leading-none mb-2"
+        style={{ textShadow: "0 0 40px rgba(212,132,58,0.3)" }}
+      >
+        {value}
+      </div>
+      <div className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-white/35 font-medium">
+        {label}
+      </div>
     </div>
   );
 }
@@ -62,14 +51,15 @@ const SLIDES = [
 export function HeroBanner() {
   const [cur, setCur] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
-  const [countersOn, setCountersOn] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const imgRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
   const raf = useRef(0);
 
-  useEffect(() => { requestAnimationFrame(() => { setLoaded(true); setCountersOn(true); }); }, []);
+  useEffect(() => {
+    requestAnimationFrame(() => setLoaded(true));
+  }, []);
 
   const handleMouse = useCallback((e: React.MouseEvent<HTMLElement>) => {
     if (window.innerWidth < 1024) return;
@@ -102,8 +92,10 @@ export function HeroBanner() {
   const goTo = useCallback((i: number) => {
     if (i === cur || transitioning) return;
     setTransitioning(true);
-    setCountersOn(false);
-    setTimeout(() => { setCur(i); setTransitioning(false); setTimeout(() => setCountersOn(true), 400); }, 400);
+    setTimeout(() => {
+      setCur(i);
+      setTransitioning(false);
+    }, 400);
   }, [cur, transitioning]);
 
   useEffect(() => {
@@ -167,18 +159,18 @@ export function HeroBanner() {
               {s.stats.map((st, i) => (
                 <div key={st.label} className="relative">
                   {i > 0 && <div className="absolute -left-4 sm:-left-6 top-1 bottom-1 w-px bg-white/[0.06]" />}
-                  <Counter value={st.value} label={st.label} run={countersOn} />
+                  <Stat value={st.value} label={st.label} />
                 </div>
               ))}
             </div>
 
             {/* Mobile slide nav */}
             <div className="flex lg:hidden items-center justify-center gap-3 mt-6">
-              <button onClick={() => goTo((cur - 1 + SLIDES.length) % SLIDES.length)} className="w-9 h-9 rounded-full border border-white/[0.08] flex items-center justify-center text-white/40 hover:text-white/80 transition-all" aria-label="Previous"><ChevronLeft className="w-4 h-4" /></button>
+              <button type="button" onClick={() => goTo((cur - 1 + SLIDES.length) % SLIDES.length)} className="w-9 h-9 rounded-full border border-white/[0.08] flex items-center justify-center text-white/40 hover:text-white/80 transition-all" aria-label="Previous"><ChevronLeft className="w-4 h-4" /></button>
               <div className="flex gap-1.5">
-                {SLIDES.map((_, i) => <button key={i} onClick={() => goTo(i)} className={cn("rounded-full transition-all duration-500", i === cur ? "w-8 h-1.5 bg-brand-400" : "w-2 h-1.5 bg-white/15")} aria-label={`Slide ${i + 1}`} />)}
+                {SLIDES.map((_, i) => <button type="button" key={i} onClick={() => goTo(i)} className={cn("rounded-full transition-all duration-500", i === cur ? "w-8 h-1.5 bg-brand-400" : "w-2 h-1.5 bg-white/15")} aria-label={`Slide ${i + 1}`} />)}
               </div>
-              <button onClick={() => goTo((cur + 1) % SLIDES.length)} className="w-9 h-9 rounded-full border border-white/[0.08] flex items-center justify-center text-white/40 hover:text-white/80 transition-all" aria-label="Next"><ChevronRight className="w-4 h-4" /></button>
+              <button type="button" onClick={() => goTo((cur + 1) % SLIDES.length)} className="w-9 h-9 rounded-full border border-white/[0.08] flex items-center justify-center text-white/40 hover:text-white/80 transition-all" aria-label="Next"><ChevronRight className="w-4 h-4" /></button>
             </div>
           </div>
 
@@ -227,11 +219,11 @@ export function HeroBanner() {
       </div>
 
       <div className="hidden lg:flex absolute bottom-8 left-1/2 -translate-x-1/2 items-center gap-4 z-10">
-        <button onClick={() => goTo((cur - 1 + SLIDES.length) % SLIDES.length)} className="w-10 h-10 rounded-full border border-white/[0.06] flex items-center justify-center text-white/40 hover:text-white/80 hover:border-white/[0.15] transition-all duration-300 backdrop-blur-sm" aria-label="Previous"><ChevronLeft className="w-4 h-4" /></button>
+        <button type="button" onClick={() => goTo((cur - 1 + SLIDES.length) % SLIDES.length)} className="w-10 h-10 rounded-full border border-white/[0.06] flex items-center justify-center text-white/40 hover:text-white/80 hover:border-white/[0.15] transition-all duration-300 backdrop-blur-sm" aria-label="Previous"><ChevronLeft className="w-4 h-4" /></button>
         <div className="flex gap-2">
-          {SLIDES.map((_, i) => <button key={i} onClick={() => goTo(i)} className={cn("rounded-full transition-all duration-500", i === cur ? "w-10 h-1.5 bg-brand-400" : "w-2 h-1.5 bg-white/15 hover:bg-white/30")} aria-label={`Slide ${i + 1}`} />)}
+          {SLIDES.map((_, i) => <button type="button" key={i} onClick={() => goTo(i)} className={cn("rounded-full transition-all duration-500", i === cur ? "w-10 h-1.5 bg-brand-400" : "w-2 h-1.5 bg-white/15 hover:bg-white/30")} aria-label={`Slide ${i + 1}`} />)}
         </div>
-        <button onClick={() => goTo((cur + 1) % SLIDES.length)} className="w-10 h-10 rounded-full border border-white/[0.06] flex items-center justify-center text-white/40 hover:text-white/80 hover:border-white/[0.15] transition-all duration-300 backdrop-blur-sm" aria-label="Next"><ChevronRight className="w-4 h-4" /></button>
+        <button type="button" onClick={() => goTo((cur + 1) % SLIDES.length)} className="w-10 h-10 rounded-full border border-white/[0.06] flex items-center justify-center text-white/40 hover:text-white/80 hover:border-white/[0.15] transition-all duration-300 backdrop-blur-sm" aria-label="Next"><ChevronRight className="w-4 h-4" /></button>
       </div>
 
       {/* NO bottom fade - dark to dark */}

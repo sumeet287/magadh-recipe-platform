@@ -12,6 +12,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import type { ProductCardData } from "@/types";
 import { storefrontListingWhere } from "@/lib/storefront-products";
+import { getSiteUrl } from "@/lib/site-url";
 
 const IngredientReveal = dynamic(() => import("@/components/storefront/ingredient-reveal").then(m => m.IngredientReveal));
 const ProcessStory = dynamic(() => import("@/components/storefront/process-story").then(m => m.ProcessStory));
@@ -283,19 +284,20 @@ function FestiveBanner() {
   );
 }
 function StructuredData() {
+  const site = getSiteUrl();
   const orgSchema = {
     "@context": "https://schema.org",
     "@type": "OnlineStore",
     name: "Magadh Recipe",
     alternateName: "Magadh Recipe — माँ के हाथ का स्वाद",
     description: "Premium handcrafted pickles, achars, masalas and regional food products born from a mother's kitchen in Bihar. No preservatives, FSSAI certified, 50,000+ happy families.",
-    url: process.env.NEXTAUTH_URL,
-    logo: `${process.env.NEXTAUTH_URL}/images/brand/logo.png`,
-    image: `${process.env.NEXTAUTH_URL}/images/og-image.jpg`,
+    url: site,
+    logo: `${site}/images/brand/logo.png`,
+    image: `${site}/images/og-image.jpg`,
     priceRange: "₹₹",
     contactPoint: {
       "@type": "ContactPoint",
-      telephone: "+91-9876543210",
+      telephone: "+91-6207197364",
       contactType: "customer service",
       areaServed: "IN",
       availableLanguage: ["Hindi", "English"],
@@ -336,7 +338,7 @@ function StructuredData() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: process.env.NEXTAUTH_URL },
+      { "@type": "ListItem", position: 1, name: "Home", item: site },
     ],
   };
 
