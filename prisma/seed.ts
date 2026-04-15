@@ -448,8 +448,8 @@ async function main() {
       sortOrder: 15,
       tags: ["lemon", "nimbu", "digestive", "classic"],
       variants: [
-        { name: "200g", sku: "LMP-200", mrp: 225, price: 200, stock: 90, unit: "g", sortOrder: 1 },
-        { name: "400g", sku: "LMP-400", mrp: 450, price: 400, stock: 60, unit: "g", sortOrder: 2, isDefault: true },
+        { name: "250g", sku: "LMP-250", mrp: 250, price: 225, stock: 20, unit: "g", sortOrder: 1, isDefault: true },
+        { name: "400g", sku: "LMP-400", mrp: 450, price: 400, stock: 1, unit: "g", sortOrder: 2 },
       ],
       images: [
         { url: "/images/products/lemon.webp", altText: "Lemon Pickle", isPrimary: true, sortOrder: 1 },

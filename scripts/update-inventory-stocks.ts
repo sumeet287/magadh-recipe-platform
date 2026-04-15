@@ -61,6 +61,14 @@ async function rekeyVariant(
 }
 
 /** Plain "Mango Pickle" — match sizes by variant label if SKUs differ */
+async function setLemonPickleDefaultVariant() {
+  const p = await prisma.product.findFirst({ where: { slug: "lemon-pickle" }, select: { id: true } });
+  if (!p) return;
+  await prisma.productVariant.updateMany({ where: { productId: p.id }, data: { isDefault: false } });
+  const n = await prisma.productVariant.updateMany({ where: { sku: "LMP-250" }, data: { isDefault: true } });
+  if (n.count) console.log("  ✓ Lemon Pickle: default → 250g (LMP-250)");
+}
+
 async function syncMangoPickleClassic() {
   const product =
     (await prisma.product.findFirst({
@@ -98,6 +106,7 @@ async function syncMangoPickleClassic() {
 
 async function main() {
   console.log("Catalog rekeys (SKUs / sizes)…\n");
+  await rekeyVariant("LMP-200", "LMP-250", { name: "250g", mrp: 250, price: 225, stock: 20 });
   await rekeyVariant("MPL-400", "MPL-450", { name: "450g", mrp: 475, price: 425, stock: 20 });
   await rekeyVariant("BDH-200", "BDH-250", { name: "250g", mrp: 250, price: 225 });
   await rekeyVariant("BDH-400", "BDH-450", { name: "450g", mrp: 475, price: 425 });
@@ -138,7 +147,12 @@ async function main() {
     "LMB-450": 40,
     "BDH-250": 40,
     "BDH-450": 25,
+    "LMP-250": 20,
+    "LMP-400": 1,
   });
+
+  console.log("\nLemon Pickle default size…");
+  await setLemonPickleDefaultVariant();
 
   console.log("\nMango Pickle — by slug / name (fallback)…");
   await syncMangoPickleClassic();
