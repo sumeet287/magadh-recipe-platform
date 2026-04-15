@@ -76,6 +76,7 @@ function FilterSidebar({
   }) => (
     <div className="border-b border-gray-100 pb-4 mb-4">
       <button
+        type="button"
         onClick={() => toggle(id)}
         className="flex items-center justify-between w-full text-sm font-semibold text-earth-dark mb-3"
       >
@@ -100,7 +101,7 @@ function FilterSidebar({
         </h3>
         <div className="flex items-center gap-2">
           {onClose && (
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600">
               <X className="w-4 h-4" />
             </button>
           )}
@@ -108,6 +109,7 @@ function FilterSidebar({
             ["category", "tags", "spiceLevel", "minPrice", "maxPrice", "inStock", "isBestseller", "isVeg"].includes(k)
           ) && (
             <button
+              type="button"
               onClick={() =>
                 onUpdate({
                   category: "",
@@ -133,6 +135,7 @@ function FilterSidebar({
         <div className="space-y-1">
           {CATEGORIES.map((cat) => (
             <button
+              type="button"
               key={cat.value}
               onClick={() => onUpdate({ tags: cat.value, category: "", page: "1" })}
               className={cn(
@@ -154,6 +157,7 @@ function FilterSidebar({
         <div className="space-y-1.5">
           {PRICE_RANGES.map((r) => (
             <button
+              type="button"
               key={r.label}
               onClick={() =>
                 onUpdate({
@@ -180,6 +184,7 @@ function FilterSidebar({
         <div className="space-y-1.5">
           {SPICE_LEVELS.map((s) => (
             <button
+              type="button"
               key={s.value}
               onClick={() =>
                 onUpdate({
@@ -254,13 +259,14 @@ function ProductsContent() {
   const params = getParams();
 
   const updateParams = useCallback(
-    (updates: Record<string, string>) => {
+    (updates: Record<string, string>, nav?: { scroll?: boolean }) => {
       const current = new URLSearchParams(searchParams.toString());
       Object.entries(updates).forEach(([k, v]) => {
         if (v) current.set(k, v);
         else current.delete(k);
       });
-      router.push(`/products?${current.toString()}`);
+      const scroll = nav?.scroll ?? false;
+      router.push(`/products?${current.toString()}`, { scroll });
     },
     [router, searchParams]
   );
@@ -389,7 +395,9 @@ function ProductsContent() {
               <Pagination
                 currentPage={currentPage}
                 totalPages={meta.totalPages}
-                onPageChange={(page) => updateParams({ page: String(page) })}
+                onPageChange={(page) =>
+                  updateParams({ page: String(page) }, { scroll: true })
+                }
                 className="mt-10"
               />
             )}
