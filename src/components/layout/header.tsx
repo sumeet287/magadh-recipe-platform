@@ -203,50 +203,71 @@ export function Header() {
                 <span className="text-xs font-bold min-w-[1ch]">{itemCount > 0 ? itemCount : "0"}</span>
               </button>
 
-              {/* User */}
+              {/* User — desktop: pill + hover menu; mobile: icon → account/login */}
               {session ? (
-                <div className="relative group hidden sm:block">
-                  <button className="flex items-center gap-2 p-2 rounded-lg text-earth-dark hover:text-brand-600 hover:bg-brand-50 transition-colors">
-                    <div className="w-7 h-7 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 text-xs font-bold">
+                <>
+                  <Link
+                    href="/account"
+                    className="sm:hidden p-2 rounded-lg text-white/80 hover:text-brand-400 transition-colors"
+                    aria-label="My account"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-brand-500/20 border border-brand-400/40 flex items-center justify-center text-brand-300 text-xs font-bold">
                       {session.user?.name?.[0]?.toUpperCase() ?? "U"}
                     </div>
-                  </button>
-                  <div className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-card-hover border border-gray-100 py-2 min-w-[160px] opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200">
-                    <div className="px-4 py-2 border-b border-gray-100 mb-1">
-                      <p className="text-xs font-semibold text-earth-dark truncate">
-                        {session.user?.name}
-                      </p>
-                      <p className="text-[11px] text-gray-400 truncate">
-                        {session.user?.email}
-                      </p>
-                    </div>
-                    <Link href="/account" className="block px-4 py-2 text-sm text-earth-dark hover:text-brand-600 hover:bg-brand-50">
-                      My Account
-                    </Link>
-                    <Link href="/account/orders" className="block px-4 py-2 text-sm text-earth-dark hover:text-brand-600 hover:bg-brand-50">
-                      My Orders
-                    </Link>
-                    {(session.user?.role === "ADMIN" || session.user?.role === "SUPER_ADMIN") && (
-                      <Link href="/admin" className="block px-4 py-2 text-sm text-brand-600 hover:bg-brand-50 font-medium">
-                        Admin Panel
-                      </Link>
-                    )}
-                    <button
-                      onClick={() => signOut({ callbackUrl: "/" })}
-                      className="block w-full text-left px-4 py-2 text-sm text-spice-600 hover:bg-red-50"
-                    >
-                      Sign Out
+                  </Link>
+                  <div className="relative group hidden sm:block">
+                    <button type="button" className="flex items-center gap-2 p-2 rounded-lg text-earth-dark hover:text-brand-600 hover:bg-brand-50 transition-colors">
+                      <div className="w-7 h-7 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 text-xs font-bold">
+                        {session.user?.name?.[0]?.toUpperCase() ?? "U"}
+                      </div>
                     </button>
+                    <div className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-card-hover border border-gray-100 py-2 min-w-[160px] opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200">
+                      <div className="px-4 py-2 border-b border-gray-100 mb-1">
+                        <p className="text-xs font-semibold text-earth-dark truncate">
+                          {session.user?.name}
+                        </p>
+                        <p className="text-[11px] text-gray-400 truncate">
+                          {session.user?.email}
+                        </p>
+                      </div>
+                      <Link href="/account" className="block px-4 py-2 text-sm text-earth-dark hover:text-brand-600 hover:bg-brand-50">
+                        My Account
+                      </Link>
+                      <Link href="/account/orders" className="block px-4 py-2 text-sm text-earth-dark hover:text-brand-600 hover:bg-brand-50">
+                        My Orders
+                      </Link>
+                      {(session.user?.role === "ADMIN" || session.user?.role === "SUPER_ADMIN") && (
+                        <Link href="/admin" className="block px-4 py-2 text-sm text-brand-600 hover:bg-brand-50 font-medium">
+                          Admin Panel
+                        </Link>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => signOut({ callbackUrl: "/" })}
+                        className="block w-full text-left px-4 py-2 text-sm text-spice-600 hover:bg-red-50"
+                      >
+                        Sign Out
+                      </button>
+                    </div>
                   </div>
-                </div>
+                </>
               ) : (
-                <Link
-                  href="/login"
-                  className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-white border border-white/25 hover:border-brand-400/50 px-4 py-1.5 rounded-full transition-all duration-200 hover:bg-brand-500/10"
-                >
-                  <User className="w-4 h-4" />
-                  Login
-                </Link>
+                <>
+                  <Link
+                    href="/login"
+                    className="sm:hidden p-2 rounded-lg text-white/80 hover:text-brand-400 transition-colors"
+                    aria-label="Log in"
+                  >
+                    <User className="w-[18px] h-[18px]" />
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-white border border-white/25 hover:border-brand-400/50 px-4 py-1.5 rounded-full transition-all duration-200 hover:bg-brand-500/10"
+                  >
+                    <User className="w-4 h-4" />
+                    Login
+                  </Link>
+                </>
               )}
 
               {/* Menu Button — mobile/tablet */}

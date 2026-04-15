@@ -101,8 +101,8 @@ async function main() {
       sortOrder: 1,
       tags: ["chilli", "pickle", "stuffed", "spicy", "bestseller"],
       variants: [
-        { name: "250g", sku: "LMB-250", mrp: 250, price: 225, stock: 100, unit: "g", sortOrder: 1, isDefault: true },
-        { name: "450g", sku: "LMB-450", mrp: 475, price: 425, stock: 80, unit: "g", sortOrder: 2 },
+        { name: "250g", sku: "LMB-250", mrp: 250, price: 225, stock: 40, unit: "g", sortOrder: 1, isDefault: true },
+        { name: "450g", sku: "LMB-450", mrp: 475, price: 425, stock: 40, unit: "g", sortOrder: 2 },
       ],
       images: [
         { url: "/images/products/lal-mirch-bharua.png", altText: "Lal Mirch Bharua Achar - Stuffed Red Chilli Pickle", isPrimary: true, sortOrder: 1 },
@@ -222,8 +222,8 @@ async function main() {
       sortOrder: 6,
       tags: ["green-chilli", "pickle", "spicy", "fresh"],
       variants: [
-        { name: "250g", sku: "GCP-250", mrp: 250, price: 225, stock: 110, unit: "g", sortOrder: 1, isDefault: true },
-        { name: "450g", sku: "GCP-450", mrp: 475, price: 425, stock: 75, unit: "g", sortOrder: 2 },
+        { name: "250g", sku: "GCP-250", mrp: 250, price: 225, stock: 20, unit: "g", sortOrder: 1, isDefault: true },
+        { name: "450g", sku: "GCP-450", mrp: 475, price: 425, stock: 20, unit: "g", sortOrder: 2 },
       ],
       images: [
         { url: "/images/products/green-chilli.webp", altText: "Green Chilli Pickle", isPrimary: true, sortOrder: 1 },
@@ -247,7 +247,7 @@ async function main() {
       tags: ["kathal", "jackfruit", "seasonal", "rare", "regional"],
       variants: [
         { name: "200g", sku: "KTH-200", mrp: 225, price: 200, stock: 0, unit: "g", sortOrder: 1 },
-        { name: "250g", sku: "KTH-250", mrp: 250, price: 225, stock: 0, unit: "g", sortOrder: 2, isDefault: true },
+        { name: "250g", sku: "KTH-250", mrp: 250, price: 225, stock: 20, unit: "g", sortOrder: 2, isDefault: true },
         { name: "450g", sku: "KTH-450", mrp: 475, price: 425, stock: 0, unit: "g", sortOrder: 3 },
       ],
       images: [
@@ -323,8 +323,8 @@ async function main() {
       variants: [
         { name: "200g", sku: "AKP-200", mrp: 225, price: 200, stock: 0, unit: "g", sortOrder: 1 },
         { name: "250g", sku: "AKP-250", mrp: 250, price: 225, stock: 0, unit: "g", sortOrder: 2, isDefault: true },
-        { name: "400g", sku: "AKP-400", mrp: 450, price: 400, stock: 0, unit: "g", sortOrder: 3 },
-        { name: "450g", sku: "AKP-450", mrp: 475, price: 425, stock: 0, unit: "g", sortOrder: 4 },
+        { name: "400g", sku: "AKP-400", mrp: 450, price: 400, stock: 1, unit: "g", sortOrder: 3 },
+        { name: "450g", sku: "AKP-450", mrp: 475, price: 425, stock: 3, unit: "g", sortOrder: 4 },
       ],
       images: [
         { url: "/images/products/kuccha-aam.webp", altText: "Aam Kuccha Pickle - Raw Mango Pickle", isPrimary: true, sortOrder: 1 },
@@ -376,7 +376,7 @@ async function main() {
       sortOrder: 12,
       tags: ["green-chilli", "kuccha", "raw", "fiery"],
       variants: [
-        { name: "200g", sku: "GCK-200", mrp: 225, price: 200, stock: 60, unit: "g", sortOrder: 1 },
+        { name: "200g", sku: "GCK-200", mrp: 225, price: 200, stock: 20, unit: "g", sortOrder: 1 },
         { name: "250g", sku: "GCK-250", mrp: 250, price: 225, stock: 45, unit: "g", sortOrder: 2, isDefault: true },
         { name: "400g", sku: "GCK-400", mrp: 450, price: 400, stock: 30, unit: "g", sortOrder: 3 },
       ],
@@ -454,6 +454,32 @@ async function main() {
       ],
       images: [
         { url: "/images/products/lemon.webp", altText: "Lemon Pickle", isPrimary: true, sortOrder: 1 },
+      ],
+    },
+    {
+      name: "Mango Pickle",
+      slug: "mango-pickle",
+      shortDescription: "Classic mango pickle — whole & sliced raw mango in traditional mustard oil masala",
+      description:
+        "<p>Raw mangoes pickled in cold-pressed mustard oil with our family spice blend. A versatile everyday achar that pairs with dal-chawal, parathas, and more.</p>",
+      ingredients: "Raw mango, mustard oil, mustard seeds, fenugreek, fennel, nigella seeds, red chilli, turmeric, salt",
+      storageInstructions: "Store in a cool, dry place. Always use a dry spoon.",
+      shelfLife: "12 months unopened",
+      categorySlug: "pickles",
+      spiceLevel: "MEDIUM" as const,
+      isVeg: true,
+      isBestseller: true,
+      isFeatured: true,
+      region: "Magadh, Bihar",
+      sortOrder: 16,
+      tags: ["mango", "pickle", "traditional", "bestseller"],
+      variants: [
+        { name: "250g", sku: "MPL-250", mrp: 250, price: 225, stock: 20, unit: "g", sortOrder: 1, isDefault: true },
+        { name: "400g", sku: "MPL-400", mrp: 450, price: 400, stock: 20, unit: "g", sortOrder: 2 },
+        { name: "800g", sku: "MPL-800", mrp: 900, price: 800, stock: 20, unit: "g", sortOrder: 3 },
+      ],
+      images: [
+        { url: "/images/products/kuccha-aam.webp", altText: "Mango Pickle", isPrimary: true, sortOrder: 1 },
       ],
     },
   ];

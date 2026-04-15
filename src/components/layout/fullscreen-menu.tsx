@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { X, ArrowRight } from "lucide-react";
+import { X, ArrowRight, User, LogIn, Package, Heart, Shield } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store/ui-store";
 
@@ -25,6 +26,7 @@ const LINKS = [
 
 export function FullscreenMenu() {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const { isMobileMenuOpen, closeMobileMenu } = useUIStore();
   const [closing, setClosing] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -75,7 +77,7 @@ export function FullscreenMenu() {
       </div>
 
       {/* Nav links - centered vertically */}
-      <div className="relative z-10 flex-1 flex flex-col justify-center px-6 sm:px-10 lg:px-16 max-w-3xl">
+      <div className="relative z-10 flex-1 flex flex-col justify-center min-h-0 overflow-y-auto px-6 sm:px-10 lg:px-16 max-w-3xl py-4">
         <nav className="space-y-0">
           {LINKS.map((link, i) => (
             <div key={link.href} className="border-b border-white/[0.03]">
@@ -112,6 +114,68 @@ export function FullscreenMenu() {
             </div>
           ))}
         </nav>
+
+        {/* Account — visible on mobile/tablet where header login was hidden */}
+        <div className="mt-8 pt-6 border-t border-white/[0.06] space-y-1 menu-link-animate" style={{ animationDelay: `${(LINKS.length + 1) * 100}ms` }}>
+          <p className="text-[10px] text-white/35 uppercase tracking-[0.22em] font-medium mb-3">Account</p>
+          {session ? (
+            <div className="flex flex-col gap-0.5">
+              <Link
+                href="/account"
+                onClick={handleClose}
+                className="flex items-center gap-3 py-3 text-white/85 hover:text-brand-300 text-sm transition-colors"
+              >
+                <User className="w-4 h-4 text-brand-400/70 shrink-0" />
+                My account
+              </Link>
+              <Link
+                href="/account/orders"
+                onClick={handleClose}
+                className="flex items-center gap-3 py-3 text-white/85 hover:text-brand-300 text-sm transition-colors"
+              >
+                <Package className="w-4 h-4 text-brand-400/70 shrink-0" />
+                My orders
+              </Link>
+              <Link
+                href="/account/wishlist"
+                onClick={handleClose}
+                className="flex items-center gap-3 py-3 text-white/85 hover:text-brand-300 text-sm transition-colors"
+              >
+                <Heart className="w-4 h-4 text-brand-400/70 shrink-0" />
+                Wishlist
+              </Link>
+              {(session.user?.role === "ADMIN" || session.user?.role === "SUPER_ADMIN") && (
+                <Link
+                  href="/admin"
+                  onClick={handleClose}
+                  className="flex items-center gap-3 py-3 text-brand-400 hover:text-brand-300 text-sm font-medium transition-colors"
+                >
+                  <Shield className="w-4 h-4 shrink-0" />
+                  Admin panel
+                </Link>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  handleClose();
+                  signOut({ callbackUrl: "/" });
+                }}
+                className="flex items-center gap-3 py-3 text-left text-spice-400/90 hover:text-spice-300 text-sm transition-colors"
+              >
+                Sign out
+              </button>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              onClick={handleClose}
+              className="inline-flex items-center gap-2.5 py-3.5 px-5 rounded-full border border-brand-400/35 bg-brand-500/15 text-brand-200 text-sm font-semibold hover:bg-brand-500/25 hover:border-brand-400/50 transition-all"
+            >
+              <LogIn className="w-4 h-4" />
+              Log in / Register
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Bottom bar */}
