@@ -5,8 +5,6 @@ import { storefrontListingWhere } from "@/lib/storefront-products";
 /** Cache sitemap generation; reduces DB load and avoids cold-timeouts on each request. */
 export const revalidate = 3600;
 
-export const runtime = "nodejs";
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getSiteUrl();
 
