@@ -271,8 +271,8 @@ async function main() {
       sortOrder: 8,
       tags: ["badhal", "monkey-jackfruit", "rare", "wild", "regional"],
       variants: [
-        { name: "200g", sku: "BDH-200", mrp: 225, price: 200, stock: 40, unit: "g", sortOrder: 1 },
-        { name: "400g", sku: "BDH-400", mrp: 450, price: 400, stock: 25, unit: "g", sortOrder: 2, isDefault: true },
+        { name: "250g", sku: "BDH-250", mrp: 250, price: 225, stock: 40, unit: "g", sortOrder: 1 },
+        { name: "450g", sku: "BDH-450", mrp: 475, price: 425, stock: 25, unit: "g", sortOrder: 2, isDefault: true },
       ],
       images: [
         { url: "/images/products/badhal.webp", altText: "Badhal Monkey Jackfruit Pickle", isPrimary: true, sortOrder: 1 },
@@ -296,8 +296,8 @@ async function main() {
       sortOrder: 9,
       tags: ["amra", "hog-plum", "seasonal", "sour", "regional"],
       variants: [
-        { name: "200g", sku: "AMR-200", mrp: 225, price: 200, stock: 0, unit: "g", sortOrder: 1 },
-        { name: "400g", sku: "AMR-400", mrp: 450, price: 400, stock: 0, unit: "g", sortOrder: 2, isDefault: true },
+        { name: "250g", sku: "AMR-250", mrp: 250, price: 225, stock: 0, unit: "g", sortOrder: 1 },
+        { name: "450g", sku: "AMR-450", mrp: 475, price: 425, stock: 0, unit: "g", sortOrder: 2, isDefault: true },
       ],
       images: [
         { url: "/images/products/amra.webp", altText: "Amra Pickle - Hog Plum Pickle", isPrimary: true, sortOrder: 1 },
@@ -321,10 +321,10 @@ async function main() {
       sortOrder: 10,
       tags: ["mango", "aam", "kuccha", "traditional", "bestseller"],
       variants: [
-        { name: "200g", sku: "AKP-200", mrp: 225, price: 200, stock: 0, unit: "g", sortOrder: 1 },
+        { name: "200g", sku: "AKP-200", mrp: 225, price: 200, stock: 1, unit: "g", sortOrder: 1 },
         { name: "250g", sku: "AKP-250", mrp: 250, price: 225, stock: 0, unit: "g", sortOrder: 2, isDefault: true },
         { name: "400g", sku: "AKP-400", mrp: 450, price: 400, stock: 1, unit: "g", sortOrder: 3 },
-        { name: "450g", sku: "AKP-450", mrp: 475, price: 425, stock: 3, unit: "g", sortOrder: 4 },
+        { name: "450g", sku: "AKP-450", mrp: 475, price: 425, stock: 2, unit: "g", sortOrder: 4 },
       ],
       images: [
         { url: "/images/products/kuccha-aam.webp", altText: "Aam Kuccha Pickle - Raw Mango Pickle", isPrimary: true, sortOrder: 1 },
@@ -349,10 +349,9 @@ async function main() {
       sortOrder: 11,
       tags: ["garlic", "lahsun", "spicy", "bold"],
       variants: [
-        { name: "200g", sku: "GRP-200", mrp: 225, price: 200, stock: 50, unit: "g", sortOrder: 1 },
-        { name: "225g", sku: "GRP-225", mrp: 250, price: 225, stock: 60, unit: "g", sortOrder: 2 },
-        { name: "250g", sku: "GRP-250", mrp: 275, price: 250, stock: 70, unit: "g", sortOrder: 3, isDefault: true },
-        { name: "450g", sku: "GRP-450", mrp: 475, price: 425, stock: 40, unit: "g", sortOrder: 4 },
+        { name: "225g", sku: "GRP-225", mrp: 250, price: 225, stock: 60, unit: "g", sortOrder: 1 },
+        { name: "250g", sku: "GRP-250", mrp: 275, price: 250, stock: 70, unit: "g", sortOrder: 2, isDefault: true },
+        { name: "450g", sku: "GRP-450", mrp: 475, price: 425, stock: 40, unit: "g", sortOrder: 3 },
       ],
       images: [
         { url: "/images/products/garlic.webp", altText: "Garlic Pickle", isPrimary: true, sortOrder: 1 },
@@ -475,7 +474,7 @@ async function main() {
       tags: ["mango", "pickle", "traditional", "bestseller"],
       variants: [
         { name: "250g", sku: "MPL-250", mrp: 250, price: 225, stock: 20, unit: "g", sortOrder: 1, isDefault: true },
-        { name: "400g", sku: "MPL-400", mrp: 450, price: 400, stock: 20, unit: "g", sortOrder: 2 },
+        { name: "450g", sku: "MPL-450", mrp: 475, price: 425, stock: 20, unit: "g", sortOrder: 2 },
         { name: "800g", sku: "MPL-800", mrp: 900, price: 800, stock: 20, unit: "g", sortOrder: 3 },
       ],
       images: [

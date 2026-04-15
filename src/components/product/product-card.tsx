@@ -246,8 +246,8 @@ export function ProductCard({ product, className, compact = false }: ProductCard
           </div>
         )}
 
-        {/* Variant selector */}
-        {product.variants.length > 1 && !compact && (
+        {/* Variant selector (include single-variant so weight e.g. 250g always shows) */}
+        {product.variants.length > 0 && !compact && (
           <div className="flex gap-1 sm:gap-1.5 mb-2 sm:mb-3 flex-wrap">
             {product.variants.map((v, i) => (
               <button

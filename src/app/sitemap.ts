@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
+import { storefrontListingWhere } from "@/lib/storefront-products";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXTAUTH_URL ?? "https://magadhrecipe.com";
@@ -18,7 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let productPages: MetadataRoute.Sitemap = [];
   try {
     const products = await prisma.product.findMany({
-      where: { status: "ACTIVE", isActive: true },
+      where: storefrontListingWhere({}),
       select: { slug: true, updatedAt: true },
     });
     productPages = products.map((p) => ({

@@ -36,6 +36,13 @@ type ProductWithDetails = Product & {
   reviews: (Review & { user: Pick<User, "id" | "name" | "image"> })[];
 };
 
+function initialVariantIndex(variants: ProductVariant[]) {
+  const preferred = variants.findIndex((v) => v.isDefault && v.stock > 0);
+  if (preferred >= 0) return preferred;
+  const firstInStock = variants.findIndex((v) => v.stock > 0);
+  return firstInStock >= 0 ? firstInStock : 0;
+}
+
 interface Props {
   product: ProductWithDetails;
   relatedProducts: ProductCardData[];
@@ -44,7 +51,9 @@ interface Props {
 
 export function ProductDetailClient({ product, relatedProducts, avgRating }: Props) {
   const { data: session } = useSession();
-  const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
+  const [selectedVariantIdx, setSelectedVariantIdx] = useState(() =>
+    initialVariantIndex(product.variants)
+  );
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<"description" | "ingredients" | "nutrition" | "reviews">("description");
   const [pincode, setPincode] = useState("");

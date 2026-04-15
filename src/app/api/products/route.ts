@@ -1,8 +1,10 @@
 import { NextRequest } from "next/server";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { handleApiError, ValidationError } from "@/lib/errors";
 import { paginatedResponse } from "@/lib/api-response";
 import { productQuerySchema } from "@/lib/validations/product";
+import { storefrontListingWhere } from "@/lib/storefront-products";
 
 export async function GET(req: NextRequest) {
   try {
@@ -16,25 +18,31 @@ export async function GET(req: NextRequest) {
       sort, tags,
     } = parsed.data;
 
-    const where: Record<string, unknown> = { status: "ACTIVE" };
+    const clauses: Prisma.ProductWhereInput[] = [];
 
     if (search) {
-      where.OR = [
-        { name: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-        { tags: { has: search } },
-      ];
+      clauses.push({
+        OR: [
+          { name: { contains: search, mode: "insensitive" } },
+          { description: { contains: search, mode: "insensitive" } },
+          { tags: { has: search } },
+        ],
+      });
     }
-    if (category) where.category = { slug: category };
-    if (tags) where.tags = { hasSome: tags.split(",") };
-    if (minPrice !== undefined || maxPrice !== undefined) {
-      where.variants = { some: { price: { gte: minPrice, lte: maxPrice } } };
-    }
-    if (spiceLevel) where.spiceLevel = spiceLevel;
-    if (isVeg !== undefined) where.isVeg = isVeg;
-    if (isBestseller) where.isBestseller = true;
-    if (isNewArrival) where.isNewArrival = true;
-    if (isFeatured) where.isFeatured = true;
+    if (category) clauses.push({ category: { slug: category } });
+    if (tags) clauses.push({ tags: { hasSome: tags.split(",") } });
+    if (spiceLevel) clauses.push({ spiceLevel });
+    if (isVeg !== undefined) clauses.push({ isVeg });
+    if (isBestseller) clauses.push({ isBestseller: true });
+    if (isNewArrival) clauses.push({ isNewArrival: true });
+    if (isFeatured) clauses.push({ isFeatured: true });
+
+    const priceOpts =
+      minPrice !== undefined || maxPrice !== undefined
+        ? { minPrice, maxPrice }
+        : {};
+
+    const where = storefrontListingWhere(priceOpts, ...clauses);
 
     const skip = (page - 1) * limit;
 
@@ -48,12 +56,18 @@ export async function GET(req: NextRequest) {
     };
     const orderBy = orderByMap[sort] ?? { createdAt: "desc" };
 
+    const variantSelect = {
+      orderBy: { price: "asc" as const },
+      where: { isActive: true, stock: { gt: 0 } },
+      select: { id: true, name: true, price: true, mrp: true, stock: true, isDefault: true },
+    };
+
     const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
         include: {
           category: { select: { name: true, slug: true } },
-          variants: { orderBy: { price: "asc" }, select: { id: true, name: true, price: true, mrp: true, stock: true, isDefault: true } },
+          variants: variantSelect,
           images: { orderBy: { sortOrder: "asc" }, select: { url: true, altText: true, isPrimary: true } },
           reviews: { select: { rating: true } },
         },

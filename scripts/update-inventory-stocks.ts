@@ -1,5 +1,5 @@
 /**
- * One-off inventory sync (April 2026). Safe to re-run.
+ * Inventory + catalog SKU sync. Safe to re-run.
  *
  * Usage: npx tsx scripts/update-inventory-stocks.ts
  * Requires: DATABASE_URL
@@ -23,7 +23,44 @@ async function setStockBySku(updates: Record<string, number>) {
   }
 }
 
-/** Plain "Mango Pickle" — match 250g / 400g / 800g by variant name if SKUs differ from MPL-* */
+async function rekeyVariant(
+  fromSku: string,
+  toSku: string,
+  patch: { name: string; mrp: number; price: number; stock?: number }
+) {
+  const v = await prisma.productVariant.findUnique({ where: { sku: fromSku } });
+  if (!v) {
+    const existing = await prisma.productVariant.findUnique({ where: { sku: toSku } });
+    if (existing) {
+      await prisma.productVariant.update({
+        where: { sku: toSku },
+        data: {
+          name: patch.name,
+          mrp: patch.mrp,
+          price: patch.price,
+          ...(patch.stock !== undefined ? { stock: patch.stock } : {}),
+        },
+      });
+      console.log(`  ✓ ${toSku} exists — updated ${patch.name}`);
+    }
+    return;
+  }
+  const tmp = `__rk_${fromSku.replace(/[^a-z0-9]/gi, "_")}_${Math.random().toString(36).slice(2, 9)}`;
+  await prisma.productVariant.update({ where: { sku: fromSku }, data: { sku: tmp } });
+  await prisma.productVariant.update({
+    where: { sku: tmp },
+    data: {
+      sku: toSku,
+      name: patch.name,
+      mrp: patch.mrp,
+      price: patch.price,
+      ...(patch.stock !== undefined ? { stock: patch.stock } : {}),
+    },
+  });
+  console.log(`  ✓ Rekey ${fromSku} → ${toSku} (${patch.name})`);
+}
+
+/** Plain "Mango Pickle" — match sizes by variant label if SKUs differ */
 async function syncMangoPickleClassic() {
   const product =
     (await prisma.product.findFirst({
@@ -40,7 +77,7 @@ async function syncMangoPickleClassic() {
     return;
   }
 
-  const want: Record<string, number> = { "250": 20, "400": 20, "800": 20 };
+  const want: Record<string, number> = { "250": 20, "450": 20, "800": 20 };
   for (const v of product.variants) {
     const m = v.name.match(/(\d+)\s*g/i) ?? v.name.match(/^(\d+)/);
     const key = m?.[1];
@@ -60,38 +97,50 @@ async function syncMangoPickleClassic() {
 }
 
 async function main() {
-  console.log("Updating variant stocks…\n");
+  console.log("Catalog rekeys (SKUs / sizes)…\n");
+  await rekeyVariant("MPL-400", "MPL-450", { name: "450g", mrp: 475, price: 425, stock: 20 });
+  await rekeyVariant("BDH-200", "BDH-250", { name: "250g", mrp: 250, price: 225 });
+  await rekeyVariant("BDH-400", "BDH-450", { name: "450g", mrp: 475, price: 425 });
+  await rekeyVariant("AMR-200", "AMR-250", { name: "250g", mrp: 250, price: 225, stock: 0 });
+  await rekeyVariant("AMR-400", "AMR-450", { name: "450g", mrp: 475, price: 425, stock: 0 });
+
+  console.log("\nDeactivate removed garlic 200g…");
+  const g = await prisma.productVariant.updateMany({
+    where: { sku: "GRP-200" },
+    data: { isActive: false, stock: 0 },
+  });
+  if (g.count) console.log(`  ✓ GRP-200 deactivated (${g.count})`);
+  else console.log("  (GRP-200 not present — ok)");
+
+  console.log("\nUpdating variant stocks…\n");
 
   await setStockBySku({
-    // Chilli kuccha — 200g
     "GCK-200": 20,
-    // Mango Pickle (canonical SKUs from seed)
     "MPL-250": 20,
-    "MPL-400": 20,
+    "MPL-450": 20,
     "MPL-800": 20,
-    // Sold out
     "KRN-250": 0,
     "KRN-450": 0,
-    "AMR-200": 0,
-    "AMR-400": 0,
+    "AMR-250": 0,
+    "AMR-450": 0,
     "KMM-250": 0,
     "KMM-400": 0,
-    // Aam kuccha
+    "AKP-200": 1,
+    "AKP-250": 0,
     "AKP-400": 1,
-    "AKP-450": 3,
-    // Green chilli (whole)
+    "AKP-450": 2,
     "GCP-250": 20,
     "GCP-450": 20,
-    // Kathal — only 250g in stock
     "KTH-200": 0,
     "KTH-250": 20,
     "KTH-450": 0,
-    // Lal mirch bharua
     "LMB-250": 40,
     "LMB-450": 40,
+    "BDH-250": 40,
+    "BDH-450": 25,
   });
 
-  console.log("\nMango Pickle — by slug / name (non-MPL SKUs)…");
+  console.log("\nMango Pickle — by slug / name (fallback)…");
   await syncMangoPickleClassic();
 
   console.log("\nDone.");

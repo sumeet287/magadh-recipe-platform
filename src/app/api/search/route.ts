@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { handleApiError, ValidationError } from "@/lib/errors";
 import { successResponse } from "@/lib/api-response";
 import { rateLimiter, RATE_LIMITS } from "@/lib/rate-limit";
+import { storefrontListingWhere } from "@/lib/storefront-products";
 
 export async function GET(req: NextRequest) {
   try {
@@ -18,35 +19,34 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, message: "Too many requests" }, { status: 429 });
     }
 
+    const searchClause = {
+      OR: [
+        { name: { contains: q, mode: "insensitive" as const } },
+        { shortDescription: { contains: q, mode: "insensitive" as const } },
+        { description: { contains: q, mode: "insensitive" as const } },
+        { tags: { has: q } },
+        { category: { name: { contains: q, mode: "insensitive" as const } } },
+      ],
+    };
+
+    const listWhere = storefrontListingWhere({}, searchClause);
+
     const [products, total] = await Promise.all([
       prisma.product.findMany({
-        where: {
-          status: "ACTIVE",
-          OR: [
-            { name: { contains: q, mode: "insensitive" } },
-            { shortDescription: { contains: q, mode: "insensitive" } },
-            { description: { contains: q, mode: "insensitive" } },
-            { tags: { has: q } },
-            { category: { name: { contains: q, mode: "insensitive" } } },
-          ],
-        },
+        where: listWhere,
         include: {
           category: { select: { name: true, slug: true } },
-          variants: { orderBy: { price: "asc" }, take: 1 },
+          variants: {
+            where: { isActive: true, stock: { gt: 0 } },
+            orderBy: { price: "asc" },
+            take: 1,
+          },
           images: { where: { isPrimary: true }, take: 1 },
           reviews: { select: { rating: true } },
         },
         take: limit,
       }),
-      prisma.product.count({
-        where: {
-          status: "ACTIVE",
-          OR: [
-            { name: { contains: q, mode: "insensitive" } },
-            { description: { contains: q, mode: "insensitive" } },
-          ],
-        },
-      }),
+      prisma.product.count({ where: listWhere }),
     ]);
 
     const mapped = products.map((p) => {

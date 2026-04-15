@@ -1,14 +1,23 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { storefrontListingWhere } from "@/lib/storefront-products";
 import { ProductDetailClient } from "./product-detail-client";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+function pickPrimaryVariant<T extends { isDefault: boolean; stock: number }>(variants: T[]) {
+  return (
+    variants.find((v) => v.isDefault && v.stock > 0) ??
+    variants.find((v) => v.stock > 0) ??
+    variants[0]
+  );
+}
+
 async function getProduct(slug: string) {
-  return prisma.product.findFirst({
+  const product = await prisma.product.findFirst({
     where: { slug, status: "ACTIVE", isActive: true },
     include: {
       category: true,
@@ -27,21 +36,19 @@ async function getProduct(slug: string) {
       },
     },
   });
+  if (!product) return null;
+  if (!product.variants.some((v) => v.stock > 0)) return null;
+  return product;
 }
 
 async function getRelatedProducts(categoryId: string, excludeId: string) {
   return prisma.product.findMany({
-    where: {
-      categoryId,
-      id: { not: excludeId },
-      status: "ACTIVE",
-      isActive: true,
-    },
+    where: storefrontListingWhere({}, { categoryId, id: { not: excludeId } }),
     take: 4,
     include: {
       category: { select: { name: true, slug: true } },
       variants: {
-        where: { isActive: true },
+        where: { isActive: true, stock: { gt: 0 } },
         orderBy: { sortOrder: "asc" },
         select: { id: true, name: true, price: true, mrp: true, stock: true, isDefault: true },
       },
@@ -60,7 +67,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const product = await getProduct(slug);
   if (!product) return { title: "Product Not Found" };
 
-  const defaultVariant = product.variants.find((v) => v.isDefault) ?? product.variants[0];
+  const defaultVariant = pickPrimaryVariant(product.variants);
   const image = product.images.find((i) => i.isPrimary) ?? product.images[0];
 
   return {
@@ -94,7 +101,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
       : 0;
 
   // Structured data for product
-  const defaultVariant = product.variants.find((v) => v.isDefault) ?? product.variants[0];
+  const defaultVariant = pickPrimaryVariant(product.variants);
   const primaryImage = product.images.find((i) => i.isPrimary) ?? product.images[0];
 
   const productSchema = {

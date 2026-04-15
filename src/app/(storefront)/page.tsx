@@ -11,6 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import type { ProductCardData } from "@/types";
+import { storefrontListingWhere } from "@/lib/storefront-products";
 
 const IngredientReveal = dynamic(() => import("@/components/storefront/ingredient-reveal").then(m => m.IngredientReveal));
 const ProcessStory = dynamic(() => import("@/components/storefront/process-story").then(m => m.ProcessStory));
@@ -35,12 +36,12 @@ export const metadata: Metadata = {
 async function getFeaturedProducts(): Promise<ProductCardData[]> {
   try {
     const products = await prisma.product.findMany({
-      where: { isFeatured: true, status: "ACTIVE", isActive: true },
+      where: storefrontListingWhere({}, { isFeatured: true }),
       take: 8,
       include: {
         category: { select: { name: true, slug: true } },
         variants: {
-          where: { isActive: true },
+          where: { isActive: true, stock: { gt: 0 } },
           orderBy: { sortOrder: "asc" },
           select: {
             id: true,
@@ -90,12 +91,12 @@ async function getFeaturedProducts(): Promise<ProductCardData[]> {
 async function getBestsellers(): Promise<ProductCardData[]> {
   try {
     const products = await prisma.product.findMany({
-      where: { isBestseller: true, status: "ACTIVE", isActive: true },
+      where: storefrontListingWhere({}, { isBestseller: true }),
       take: 8,
       include: {
         category: { select: { name: true, slug: true } },
         variants: {
-          where: { isActive: true },
+          where: { isActive: true, stock: { gt: 0 } },
           orderBy: { sortOrder: "asc" },
           select: {
             id: true,
@@ -144,13 +145,13 @@ async function getBestsellers(): Promise<ProductCardData[]> {
 async function getNewArrivals(): Promise<ProductCardData[]> {
   try {
     const products = await prisma.product.findMany({
-      where: { isNewArrival: true, status: "ACTIVE", isActive: true },
+      where: storefrontListingWhere({}, { isNewArrival: true }),
       take: 4,
       orderBy: { createdAt: "desc" },
       include: {
         category: { select: { name: true, slug: true } },
         variants: {
-          where: { isActive: true },
+          where: { isActive: true, stock: { gt: 0 } },
           orderBy: { sortOrder: "asc" },
           select: {
             id: true,
