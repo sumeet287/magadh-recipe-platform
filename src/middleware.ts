@@ -6,13 +6,27 @@ const PROTECTED_PATHS = ["/account", "/checkout"];
 const ADMIN_PATHS = ["/admin"];
 const AUTH_PATHS = ["/login", "/signup", "/forgot-password"];
 
+/** Same-origin path only — blocks open redirects. */
+function safeCallbackDestination(raw: string | null, req: NextRequest): URL | null {
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//")) return null;
+  try {
+    const dest = new URL(raw, req.url);
+    if (dest.origin !== new URL(req.url).origin) return null;
+    return dest;
+  } catch {
+    return null;
+  }
+}
+
 export default auth((req) => {
   const { pathname } = req.nextUrl;
   const isAuthenticated = !!req.auth;
   const userRole = req.auth?.user?.role;
 
-  // Redirect authenticated users away from auth pages
+  // Redirect authenticated users away from auth pages (honour checkout/account return URL)
   if (isAuthenticated && AUTH_PATHS.some((p) => pathname.startsWith(p))) {
+    const next = safeCallbackDestination(req.nextUrl.searchParams.get("callbackUrl"), req);
+    if (next) return NextResponse.redirect(next);
     return NextResponse.redirect(new URL("/", req.url));
   }
 

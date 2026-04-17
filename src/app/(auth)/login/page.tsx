@@ -14,7 +14,11 @@ import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/";
+  const rawCallback = searchParams.get("callbackUrl") ?? "/";
+  const callbackUrl =
+    rawCallback.startsWith("/") && !rawCallback.startsWith("//")
+      ? rawCallback
+      : "/";
   const verified = searchParams.get("verified") === "true";
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -139,7 +143,14 @@ function LoginForm() {
 
       <p className="text-center text-sm text-gray-500 mt-6">
         Don&apos;t have an account?{" "}
-        <Link href="/signup" className="text-brand-600 font-medium hover:text-brand-700">
+        <Link
+          href={
+            callbackUrl !== "/"
+              ? `/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`
+              : "/signup"
+          }
+          className="text-brand-600 font-medium hover:text-brand-700"
+        >
           Create one
         </Link>
       </p>
