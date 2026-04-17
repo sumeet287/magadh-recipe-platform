@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { ArrowRight, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FSSAI_REGISTRATION_NUMBER } from "@/lib/constants";
 
 /** Static hero stats so crawlers and first paint see real numbers (no count-up from "0"). */
 function Stat({ value, label }: { value: string; label: string }) {
@@ -187,10 +188,13 @@ export function HeroBanner() {
                 <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 40%)" }} />
 
                 {/* FSSAI badge — inside card, top-right */}
-                <div className="absolute top-5 right-5 z-10">
-                  <div className="flex items-center gap-1.5 backdrop-blur-xl rounded-full px-3 py-1.5" style={{ background: "rgba(13,6,3,0.6)", border: "1px solid rgba(212,132,58,0.12)" }}>
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    <span className="text-[10px] font-semibold text-white/70 tracking-wide">FSSAI Certified</span>
+                <div className="absolute top-5 right-5 z-10 max-w-[min(200px,46%)]">
+                  <div className="flex flex-col items-end gap-0.5 backdrop-blur-xl rounded-2xl px-3 py-1.5" style={{ background: "rgba(13,6,3,0.6)", border: "1px solid rgba(212,132,58,0.12)" }}>
+                    <div className="flex items-center gap-1.5 w-full">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                      <span className="text-[10px] font-semibold text-white/70 tracking-wide">FSSAI Registered</span>
+                    </div>
+                    <span className="text-[9px] text-white/50 font-mono tabular-nums pr-0.5">{FSSAI_REGISTRATION_NUMBER}</span>
                   </div>
                 </div>
 

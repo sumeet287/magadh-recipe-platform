@@ -11,7 +11,7 @@ import {
   Check,
   AlertCircle,
   Truck,
-  RotateCcw,
+  Award,
   Shield,
   MapPin,
 } from "lucide-react";
@@ -26,6 +26,7 @@ import { useCartStore } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/wishlist-store";
 import { useUIStore } from "@/store/ui-store";
 import { cn, formatCurrency, calculateDiscount, isValidPincode } from "@/lib/utils";
+import { FSSAI_REGISTRATION_NUMBER } from "@/lib/constants";
 import type { ProductCardData } from "@/types";
 import type { Product, ProductVariant, ProductImage, Category, Review, User } from "@prisma/client";
 
@@ -388,8 +389,8 @@ export function ProductDetailClient({ product, relatedProducts, avgRating }: Pro
             <div className="grid grid-cols-3 gap-3">
               {[
                 { icon: Truck, label: "Free Delivery", sub: "Above ₹499" },
-                { icon: RotateCcw, label: "Easy Returns", sub: "7-day policy" },
-                { icon: Shield, label: "Secure", sub: "100% Safe" },
+                { icon: Award, label: "FSSAI Registered", sub: FSSAI_REGISTRATION_NUMBER },
+                { icon: Shield, label: "Secure checkout", sub: "Razorpay · UPI" },
               ].map(({ icon: Icon, label, sub }) => (
                 <div
                   key={label}

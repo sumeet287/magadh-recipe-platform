@@ -1,15 +1,16 @@
 "use client";
 
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
-import { FlaskConical, Leaf, Package, Truck, RotateCcw, Award } from "lucide-react";
+import { FlaskConical, Leaf, Package, Truck, ShieldCheck, Award } from "lucide-react";
+import { FSSAI_REGISTRATION_NUMBER } from "@/lib/constants";
 
 const BADGES = [
   { Icon: FlaskConical, label: "100% Homemade" },
   { Icon: Leaf, label: "No Preservatives" },
   { Icon: Package, label: "Secure Packaging" },
   { Icon: Truck, label: "Pan-India Delivery" },
-  { Icon: RotateCcw, label: "Easy Returns" },
-  { Icon: Award, label: "FSSAI Certified" },
+  { Icon: ShieldCheck, label: `FSSAI Reg. ${FSSAI_REGISTRATION_NUMBER}` },
+  { Icon: Award, label: "Quality Assured" },
 ];
 
 export function TrustBadges() {

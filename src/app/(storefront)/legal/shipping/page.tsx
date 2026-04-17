@@ -19,9 +19,9 @@ export default function ShippingPolicyPage() {
         <h2 className="font-serif font-semibold text-earth-dark text-lg">Shipping Charges</h2>
         <ul className="list-disc pl-5 space-y-1">
           <li><strong>Free Shipping</strong> on orders above ₹499</li>
-          <li><strong>Standard Shipping:</strong> ₹60 for orders below ₹499</li>
-          <li><strong>Cash on Delivery (COD):</strong> Additional ₹30 handling charge</li>
+          <li><strong>Standard Shipping:</strong> ₹99 for orders below ₹499</li>
         </ul>
+        <p className="text-gray-600">We accept online payment only (no cash on delivery).</p>
 
         <h2 className="font-serif font-semibold text-earth-dark text-lg">Estimated Delivery Time</h2>
         <ul className="list-disc pl-5 space-y-1">
@@ -44,9 +44,8 @@ export default function ShippingPolicyPage() {
         <p>If a delivery attempt fails due to incorrect address, unavailability, or refusal:</p>
         <ul className="list-disc pl-5 space-y-1">
           <li>The courier partner will attempt delivery up to 2 additional times</li>
-          <li>After 3 failed attempts, the order will be returned to us</li>
-          <li>For prepaid orders, a refund will be processed after deducting return shipping charges</li>
-          <li>For COD orders, the order will be cancelled</li>
+          <li>After 3 failed attempts, the shipment may be returned to us</li>
+          <li>For prepaid orders, any eligible refund is handled case-by-case after deducting applicable return shipping charges</li>
         </ul>
 
         <h2 className="font-serif font-semibold text-earth-dark text-lg">Contact Us</h2>

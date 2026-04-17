@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { X } from "lucide-react";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
@@ -8,10 +9,10 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       {/* Close / Back to site */}
       <Link
         href="/"
-        className="absolute top-5 right-5 z-50 w-11 h-11 rounded-full border border-gray-200 lg:border-white/15 flex items-center justify-center text-gray-400 lg:text-white/50 hover:text-gray-700 lg:hover:text-white hover:border-gray-400 lg:hover:border-white/30 hover:bg-gray-50 lg:hover:bg-white/[0.06] transition-all duration-300 hover:rotate-90 backdrop-blur-sm"
-        aria-label="Back to site"
+        className="absolute top-4 right-4 sm:top-5 sm:right-5 z-[100] flex h-11 w-11 items-center justify-center rounded-full border border-earth-200 bg-white/95 text-earth-600 shadow-md backdrop-blur-sm hover:bg-cream-50 hover:text-earth-dark hover:border-brand-400/35 hover:shadow-lg transition-all duration-300 hover:rotate-90"
+        aria-label="Close and go to homepage"
       >
-        <X className="w-5 h-5" />
+        <X className="w-5 h-5" strokeWidth={2.25} />
       </Link>
 
       {/* Left: Decorative panel */}
@@ -22,9 +23,13 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         />
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 relative z-10">
-          <div className="w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center text-white font-serif font-bold text-lg">
-            M
-          </div>
+          <Image
+            src="/images/brand/logo.png"
+            alt="Magadh Recipe"
+            width={40}
+            height={40}
+            className="w-10 h-10 rounded-xl object-contain shadow-[0_3px_16px_rgba(212,132,58,0.4)]"
+          />
           <div>
             <p className="font-serif font-bold text-xl leading-none">Magadh Recipe</p>
             <p className="text-white/60 text-xs mt-0.5">Premium Indian Pickles & Spices</p>
@@ -67,9 +72,13 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         {/* Mobile logo */}
         <div className="lg:hidden mb-8">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-brand-500 rounded-xl flex items-center justify-center text-white font-serif font-bold">
-              M
-            </div>
+            <Image
+              src="/images/brand/logo.png"
+              alt="Magadh Recipe"
+              width={36}
+              height={36}
+              className="w-9 h-9 rounded-xl object-contain shadow-[0_2px_12px_rgba(212,132,58,0.35)]"
+            />
             <p className="font-serif font-bold text-lg text-earth-dark">Magadh Recipe</p>
           </Link>
         </div>

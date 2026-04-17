@@ -5,8 +5,7 @@ import { handleApiError, UnauthorizedError, ValidationError } from "@/lib/errors
 import { successResponse } from "@/lib/api-response";
 import { checkoutSchema } from "@/lib/validations/order";
 import { generateOrderNumber } from "@/lib/utils";
-import { GST_RATE, FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_FEE, COD_FEE } from "@/lib/constants";
-import { sendOrderNotifications } from "@/lib/email";
+import { GST_RATE, FREE_SHIPPING_THRESHOLD, STANDARD_SHIPPING_FEE } from "@/lib/constants";
 
 // POST /api/orders — create order
 export async function POST(req: NextRequest) {
@@ -78,12 +77,10 @@ export async function POST(req: NextRequest) {
 
     const isFreeShipping = coupon?.type === "FREE_SHIPPING" || subtotal >= FREE_SHIPPING_THRESHOLD;
     const shippingCharge = isFreeShipping ? 0 : STANDARD_SHIPPING_FEE;
-    const codFee = paymentMethod === "COD" ? COD_FEE : 0;
     const taxableAmount = subtotal - couponDiscount;
     const taxAmount = Math.round(((taxableAmount * GST_RATE) / (100 + GST_RATE)) * 100) / 100;
-    const totalAmount = taxableAmount + shippingCharge + codFee;
+    const totalAmount = taxableAmount + shippingCharge;
 
-    const isCod = paymentMethod === "COD";
     const orderNumber = generateOrderNumber();
 
     const order = await prisma.$transaction(async (tx) => {
@@ -91,7 +88,7 @@ export async function POST(req: NextRequest) {
         data: {
           orderNumber,
           userId: session.user.id,
-          status: isCod ? "CONFIRMED" : "PENDING",
+          status: "PENDING",
           subtotalAmount: subtotal,
           discountAmount: productDiscount + couponDiscount,
           shippingAmount: shippingCharge,
@@ -99,7 +96,7 @@ export async function POST(req: NextRequest) {
           totalAmount,
           couponCode: coupon?.code,
           couponDiscount,
-          paymentMethod: paymentMethod as "RAZORPAY" | "COD" | "UPI",
+          paymentMethod: paymentMethod as "RAZORPAY" | "UPI",
           items: {
             create: items.map((item) => {
               const variant = variants.find((v) => v.id === item.variantId)!;
@@ -132,16 +129,7 @@ export async function POST(req: NextRequest) {
         include: { items: true, shipping: true, user: { select: { name: true, email: true } } },
       });
 
-      // Only decrement stock for COD (confirmed immediately).
-      // Razorpay orders decrement stock on payment verification to avoid holding inventory for unpaid orders.
-      if (isCod) {
-        for (const item of items) {
-          await tx.productVariant.update({
-            where: { id: item.variantId },
-            data: { stock: { decrement: item.quantity } },
-          });
-        }
-      }
+      // Stock is decremented when payment is verified (Razorpay).
 
       if (coupon) {
         await tx.coupon.update({ where: { id: coupon.id }, data: { usedCount: { increment: 1 } } });
@@ -150,11 +138,6 @@ export async function POST(req: NextRequest) {
 
       return newOrder;
     });
-
-    // Send confirmation + admin notification for COD orders (Razorpay orders send on verify)
-    if (isCod) {
-      sendOrderNotifications(order, session.user.email ?? undefined).catch(() => {});
-    }
 
     return NextResponse.json(successResponse(order), { status: 201 });
   } catch (err) {

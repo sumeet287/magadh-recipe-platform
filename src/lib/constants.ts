@@ -9,6 +9,9 @@ export const SUPPORT_EMAIL = "magadhrecipe@gmail.com";
 export const SUPPORT_PHONE = "+91-6207197364";
 export const BRAND_ADDRESS = "Patna, Bihar, India";
 
+/** FSSAI registration number (Food Safety & Standards Act, 2006). */
+export const FSSAI_REGISTRATION_NUMBER = "20425001001230";
+
 // ==================== Commerce ====================
 
 export const FREE_SHIPPING_THRESHOLD = 499; // INR
@@ -82,7 +85,8 @@ export const SOCIAL_LINKS = {
   facebook: "https://www.facebook.com/magadhrecipe/",
   twitter: "https://twitter.com/magadhrecipe",
   youtube: "https://youtube.com/@magadhrecipe",
-  whatsapp: "https://wa.me/916207197364",
+  whatsapp:
+    "https://wa.me/916207197364?text=Hi%2C%20I%27d%20like%20to%20place%20an%20order%20from%20Magadh%20Recipe",
 };
 
 // ==================== Trust Badges ====================
@@ -109,14 +113,14 @@ export const TRUST_BADGES = [
     description: "Delivered across India in 3-7 days",
   },
   {
-    icon: "↩️",
-    title: "Easy Returns",
-    description: "7-day hassle-free return policy",
+    icon: "✅",
+    title: "FSSAI Registered",
+    description: `Lic. no. ${FSSAI_REGISTRATION_NUMBER}`,
   },
   {
     icon: "⭐",
     title: "Quality Assured",
-    description: "FSSAI certified kitchens",
+    description: "Small-batch, hygiene-first kitchens",
   },
 ];
 

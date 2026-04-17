@@ -16,14 +16,14 @@ export function CategoriesSection() {
   return (
     <section
       ref={ref}
-      className="relative py-10 md:py-20 overflow-hidden"
+      className="relative pt-8 pb-6 md:pt-12 md:pb-8 lg:pt-14 lg:pb-10 overflow-hidden"
       style={{ background: "linear-gradient(180deg, #0d0603 0%, #1a0c06 50%, #120804 100%)" }}
     >
       <div className="hero-grain-overlay absolute inset-0 pointer-events-none" />
 
       <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-16 relative z-10">
         {/* Header */}
-        <div className="mb-10 md:mb-16 max-w-xl">
+        <div className="mb-6 md:mb-8 max-w-xl">
           <p className="fade-up section-label text-brand-400/50 mb-4" data-reveal>Collections</p>
           <h2 className="fade-up font-serif text-3xl md:text-5xl lg:text-[3.5rem] font-bold text-white leading-[1.08] mb-5" data-reveal data-delay="1">
             Shop by <span className="shimmer-text">Category</span>
@@ -57,7 +57,7 @@ export function CategoriesSection() {
           ))}
         </div>
 
-        <div className="text-center mt-8 md:mt-12" data-reveal>
+        <div className="text-center mt-5 md:mt-7" data-reveal>
           <Link href="/products" className="fade-up inline-flex items-center gap-2 border border-white/[0.08] hover:border-brand-400/30 text-white/40 hover:text-brand-300 font-semibold text-sm px-8 py-3.5 rounded-full transition-all duration-300 group hover:bg-white/[0.02]">
             View All Products
             <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />

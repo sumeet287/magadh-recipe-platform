@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { Instagram, Facebook, Youtube, Twitter, Phone, Mail, MapPin } from "lucide-react";
-import { APP_NAME, SOCIAL_LINKS, SUPPORT_EMAIL, SUPPORT_PHONE, BRAND_ADDRESS } from "@/lib/constants";
+import {
+  APP_NAME,
+  SOCIAL_LINKS,
+  SUPPORT_EMAIL,
+  SUPPORT_PHONE,
+  BRAND_ADDRESS,
+  FSSAI_REGISTRATION_NUMBER,
+} from "@/lib/constants";
 
 const footerLinks = {
   "Quick Links": [
@@ -21,7 +28,6 @@ const footerLinks = {
   "Policies": [
     { label: "Privacy Policy", href: "/legal/privacy" },
     { label: "Terms & Conditions", href: "/legal/terms" },
-    { label: "Refund Policy", href: "/legal/refund" },
     { label: "Shipping Policy", href: "/legal/shipping" },
     { label: "FAQ", href: "/contact#faq" },
   ],
@@ -145,15 +151,15 @@ export function Footer() {
             <p>
               © {new Date().getFullYear()} {APP_NAME}. All rights reserved. Made with ❤️ in Bihar.
             </p>
-            <div className="flex items-center gap-4">
-              <span>FSSAI Certified</span>
-              <span>•</span>
-              <span>Secure Payments</span>
-              <span>•</span>
-              <div className="flex items-center gap-1.5">
-                <span>We accept:</span>
-                <span className="text-cream-200">Razorpay • UPI • COD</span>
-              </div>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-center sm:text-left">
+              <span>
+                FSSAI Reg. No.{" "}
+                <span className="text-cream-100 font-medium tabular-nums">{FSSAI_REGISTRATION_NUMBER}</span>
+              </span>
+              <span className="hidden sm:inline">•</span>
+              <span>Secure online payments</span>
+              <span className="hidden sm:inline">•</span>
+              <span className="text-cream-200">Razorpay · UPI</span>
             </div>
           </div>
         </div>

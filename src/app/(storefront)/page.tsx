@@ -7,12 +7,12 @@ import { CategoriesSection } from "@/components/storefront/categories-section";
 import { ProductGrid } from "@/components/product/product-grid";
 import { ProductGridSkeleton } from "@/components/ui/skeleton";
 import { prisma } from "@/lib/prisma";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import type { ProductCardData } from "@/types";
 import { storefrontListingWhere } from "@/lib/storefront-products";
 import { getSiteUrl } from "@/lib/site-url";
+import { FSSAI_REGISTRATION_NUMBER } from "@/lib/constants";
 
 const IngredientReveal = dynamic(() => import("@/components/storefront/ingredient-reveal").then(m => m.IngredientReveal));
 const ProcessStory = dynamic(() => import("@/components/storefront/process-story").then(m => m.ProcessStory));
@@ -198,6 +198,27 @@ async function getNewArrivals(): Promise<ProductCardData[]> {
   }
 }
 
+function mergeSpotlightProducts(
+  featured: ProductCardData[],
+  bestsellers: ProductCardData[]
+): ProductCardData[] {
+  const seen = new Set<string>();
+  const out: ProductCardData[] = [];
+  for (const p of featured) {
+    if (!seen.has(p.id)) {
+      seen.add(p.id);
+      out.push(p);
+    }
+  }
+  for (const p of bestsellers) {
+    if (!seen.has(p.id)) {
+      seen.add(p.id);
+      out.push(p);
+    }
+  }
+  return out.slice(0, 8);
+}
+
 function ProductSection({
   title,
   subtitle,
@@ -248,41 +269,6 @@ function ProductSection({
   );
 }
 
-function FestiveBanner() {
-  return (
-    <section className="py-4 px-6 sm:px-8 lg:px-16" style={{ background: "#0d0603" }}>
-      <div className="max-w-[1400px] mx-auto">
-        <div className="relative overflow-hidden rounded-[2rem] bg-[#1a0c06]">
-          <div className="absolute inset-0">
-            <Image src="/images/brand/banner.webp" alt="" fill className="object-cover opacity-15" sizes="100vw" loading="lazy" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#1a0c06] via-[#1a0c06]/85 to-transparent" />
-          </div>
-          <div className="hero-grain-overlay absolute inset-0 pointer-events-none" />
-          <div className="relative flex flex-col sm:flex-row items-center justify-between gap-8 p-8 md:p-14">
-            <div>
-              <span className="inline-flex items-center gap-2.5 text-brand-400/70 text-[10px] font-bold tracking-[0.2em] uppercase mb-4">
-                <span className="w-5 h-px bg-brand-500" /> Festival Special
-              </span>
-              <h3 className="font-serif text-2xl md:text-4xl font-bold leading-[1.1] text-white">
-                Share Maa&apos;s Love —<br />
-                <span className="bg-gradient-to-r from-brand-400 to-turmeric-300 bg-clip-text text-transparent">10% Off Gift Hampers</span>
-              </h3>
-              <p className="text-white/30 text-sm mt-4">
-                Use code{" "}
-                <strong className="text-brand-400 bg-brand-500/8 border border-brand-500/20 px-2.5 py-1 rounded-lg font-mono text-xs">FESTIVE10</strong>{" "}
-                at checkout
-              </p>
-            </div>
-            <Link href="/products?category=gift-boxes" className="shrink-0 group inline-flex items-center gap-2.5 bg-gradient-to-r from-brand-500 to-brand-400 hover:from-brand-400 hover:to-brand-300 text-white font-semibold text-sm px-8 py-4 rounded-full shadow-[0_4px_30px_rgba(212,132,58,0.35)] hover:shadow-[0_8px_40px_rgba(212,132,58,0.5)] transition-all duration-300 hover:-translate-y-0.5">
-              Shop Gift Boxes
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-            </Link>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
 function StructuredData() {
   const site = getSiteUrl();
   const orgSchema = {
@@ -315,6 +301,11 @@ function StructuredData() {
       "https://twitter.com/magadhrecipe",
       "https://youtube.com/@magadhrecipe",
     ],
+    identifier: {
+      "@type": "PropertyValue",
+      name: "FSSAI Registration",
+      value: FSSAI_REGISTRATION_NUMBER,
+    },
     aggregateRating: {
       "@type": "AggregateRating",
       ratingValue: "4.9",
@@ -362,6 +353,7 @@ export default async function HomePage() {
     getBestsellers(),
     getNewArrivals(),
   ]);
+  const spotlightProducts = mergeSpotlightProducts(featuredProducts, bestsellers);
 
   return (
     <>
@@ -379,23 +371,12 @@ export default async function HomePage() {
       {/* Ingredient Marquee */}
       <IngredientReveal />
 
-      {/* Featured Products */}
+      {/* Featured + bestsellers (deduped) */}
       <ProductSection
-        title="Featured Products"
-        subtitle="Hand-picked for you"
-        href="/products?isFeatured=true"
-        products={featuredProducts}
-      />
-
-      {/* Festive Banner */}
-      <FestiveBanner />
-
-      {/* Bestsellers */}
-      <ProductSection
-        title="Bestsellers"
-        subtitle="Customer Favourites"
-        href="/products?isBestseller=true"
-        products={bestsellers}
+        title="Featured & bestsellers"
+        subtitle="Hand-picked favourites"
+        href="/products"
+        products={spotlightProducts}
       />
 
       {/* Our Process storytelling */}

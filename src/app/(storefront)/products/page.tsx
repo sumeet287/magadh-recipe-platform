@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useCallback, Suspense } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useSearchParams, useRouter } from "next/navigation";
 import { ProductGrid } from "@/components/product/product-grid";
 import { Pagination } from "@/components/ui/pagination";
@@ -243,10 +244,34 @@ function FilterSidebar({
 function ProductsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [products, setProducts] = useState<ProductCardData[]>([]);
-  const [meta, setMeta] = useState<PaginationMeta | null>(null);
-  const [loading, setLoading] = useState(true);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+  const listingQueryKey = searchParams.toString();
+
+  const { data, isPending } = useQuery({
+    queryKey: ["products", "listing", listingQueryKey],
+    queryFn: async (): Promise<{
+      products: ProductCardData[];
+      meta: PaginationMeta | null;
+    }> => {
+      try {
+        const qs = buildQueryString(Object.fromEntries(searchParams));
+        const res = await fetch(`/api/products${qs}`);
+        const json = await res.json();
+        if (!json.success) {
+          return { products: [], meta: null };
+        }
+        return { products: json.data, meta: json.meta };
+      } catch {
+        return { products: [], meta: null };
+      }
+    },
+    staleTime: 60_000,
+    placeholderData: (prev) => prev,
+  });
+
+  const products = data?.products ?? [];
+  const meta = data?.meta ?? null;
 
   const getParams = useCallback(() => {
     const params: Record<string, string> = {};
@@ -270,26 +295,6 @@ function ProductsContent() {
     },
     [router, searchParams]
   );
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        const qs = buildQueryString(Object.fromEntries(searchParams));
-        const res = await fetch(`/api/products${qs}`);
-        const data = await res.json();
-        if (data.success) {
-          setProducts(data.data);
-          setMeta(data.meta);
-        }
-      } catch {
-        setProducts([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts();
-  }, [searchParams]);
 
   const activeFilterCount = [
     params.tags,
@@ -389,7 +394,7 @@ function ProductsContent() {
 
           {/* Products */}
           <div className="flex-1 min-w-0">
-            <ProductGrid products={products} loading={loading} />
+            <ProductGrid products={products} loading={isPending} />
 
             {meta && meta.totalPages > 1 && (
               <Pagination

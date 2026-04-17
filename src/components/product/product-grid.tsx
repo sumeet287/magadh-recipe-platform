@@ -1,4 +1,5 @@
 import { ProductCard } from "./product-card";
+import { ProductGridEmpty } from "./product-grid-empty";
 import { ProductGridSkeleton } from "@/components/ui/skeleton";
 import type { ProductCardData } from "@/types";
 
@@ -20,17 +21,7 @@ export function ProductGrid({
   }
 
   if (!products.length) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="text-5xl mb-4">🫙</div>
-        <h3 className="font-serif font-semibold text-earth-dark text-xl mb-2">
-          No products found
-        </h3>
-        <p className="text-gray-500 text-sm">
-          Try adjusting your filters or search terms
-        </p>
-      </div>
-    );
+    return <ProductGridEmpty />;
   }
 
   return (

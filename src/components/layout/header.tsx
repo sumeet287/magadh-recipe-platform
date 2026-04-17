@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
+import { SOCIAL_LINKS } from "@/lib/constants";
 import { useCartStore } from "@/store/cart-store";
 import { useUIStore } from "@/store/ui-store";
 import dynamic from "next/dynamic";
@@ -73,7 +74,7 @@ export function Header() {
       {/* Announcement Bar — cinematic marquee */}
       <div className="relative overflow-hidden bg-[#0f0802] text-cream-200/90 py-2 px-4 text-xs font-medium tracking-wide">
         <div className="flex whitespace-nowrap marquee-track gap-0">
-          {[0,1].map((k) => (
+          {[0, 1].map((k) => (
             <span key={k} className="flex items-center gap-0 mr-0">
               {[
                 "✦  Free Shipping above ₹499",
@@ -82,12 +83,21 @@ export function Header() {
                 "✦  50,000+ Happy Families",
                 "✦  FSSAI Certified · 100% Natural",
                 "✦  Traditional Recipes · Handcrafted with Love",
-                "✦  Order on WhatsApp @ +916207197364",
               ].map((item, i) => (
                 <span key={i} className="inline-flex items-center gap-6 pr-12">
                   <span className={i % 3 === 1 ? "text-brand-400 font-semibold" : ""}>{item}</span>
                 </span>
               ))}
+              <span className="inline-flex items-center gap-6 pr-12">
+                <a
+                  href={SOCIAL_LINKS.whatsapp}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand-400 font-semibold hover:text-brand-300 transition-colors"
+                >
+                  ✦  Order on WhatsApp @ +916207197364
+                </a>
+              </span>
             </span>
           ))}
         </div>

@@ -114,18 +114,40 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
   // Structured data for product
   const defaultVariant = pickPrimaryVariant(product.variants);
-  const primaryImage = product.images.find((i) => i.isPrimary) ?? product.images[0];
+  const site = getSiteUrl();
+  const productPath = `/products/${slug}`;
+  const productUrl = `${site}${productPath}`;
+  const absImage = (url: string) =>
+    url.startsWith("http") ? url : `${site}${url.startsWith("/") ? "" : "/"}${url}`;
+
+  const reviewSchema =
+    product.reviews.length > 0
+      ? product.reviews.slice(0, 12).map((r) => ({
+          "@type": "Review",
+          reviewRating: {
+            "@type": "Rating",
+            ratingValue: r.rating,
+            bestRating: 5,
+            worstRating: 1,
+          },
+          author: { "@type": "Person", name: r.user?.name?.trim() || "Verified buyer" },
+          reviewBody: [r.title, r.body].filter(Boolean).join(". ").slice(0, 5000),
+          datePublished: r.createdAt.toISOString().split("T")[0],
+        }))
+      : undefined;
 
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
     description: product.shortDescription ?? product.description ?? "",
-    image: product.images.map((i) => i.url),
+    url: productUrl,
+    image: product.images.map((i) => absImage(i.url)),
     brand: { "@type": "Brand", name: "Magadh Recipe" },
     ...(defaultVariant && {
       offers: {
         "@type": "Offer",
+        url: productUrl,
         price: defaultVariant.price,
         priceCurrency: "INR",
         availability:
@@ -144,6 +166,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         worstRating: "1",
       },
     }),
+    ...(reviewSchema && { review: reviewSchema }),
   };
 
   const relatedCardData = relatedProducts.map((p) => ({

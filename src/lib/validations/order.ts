@@ -19,7 +19,7 @@ export const checkoutSchema = z.object({
   })).min(1),
   addressId: z.string().optional(),
   address: addressShape.optional(),
-  paymentMethod: z.enum(["RAZORPAY", "COD", "UPI"]).default("RAZORPAY"),
+  paymentMethod: z.enum(["RAZORPAY", "UPI"]).default("RAZORPAY"),
   couponCode: z.string().optional(),
   giftNote: z.string().max(500).optional(),
   isGiftOrder: z.boolean().default(false),
