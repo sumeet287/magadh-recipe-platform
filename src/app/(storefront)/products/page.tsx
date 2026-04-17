@@ -1,13 +1,21 @@
 "use client";
 
-import { useState, useCallback, Suspense, useMemo } from "react";
+import {
+  useState,
+  useCallback,
+  Suspense,
+  useMemo,
+  useEffect,
+  useRef,
+  useLayoutEffect,
+} from "react";
+import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams, useRouter } from "next/navigation";
 import { ProductGrid } from "@/components/product/product-grid";
 import { Pagination } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { cn, buildQueryString } from "@/lib/utils";
 import { SORT_OPTIONS } from "@/lib/constants";
 import {
@@ -16,7 +24,6 @@ import {
   X,
   ChevronDown,
   ChevronUp,
-  Search,
 } from "lucide-react";
 import type { ProductCardData, PaginationMeta } from "@/types";
 
@@ -64,7 +71,549 @@ const PRICE_RANGES = [
   { label: "Above ₹700", min: 700, max: 99999 },
 ];
 
-// Sidebar filter — categories from DB (new admin categories appear automatically)
+type FilterMenuKey = "shop" | "type" | "spice" | "price" | "more" | "sort" | null;
+
+const dropdownPanelClass =
+  "rounded-2xl border border-earth-200/50 bg-white/[0.97] backdrop-blur-2xl py-2 shadow-[0_28px_70px_-18px_rgba(44,24,16,0.28)] overflow-hidden";
+
+function DropdownOptionRow({
+  active,
+  onPick,
+  children,
+}: {
+  active: boolean;
+  onPick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onPick}
+      className={cn(
+        "w-full flex items-center justify-between gap-3 px-4 py-2.5 text-sm text-left transition-colors",
+        active
+          ? "bg-gradient-to-r from-brand-50 to-amber-50/40 text-earth-dark font-semibold"
+          : "text-earth-700 hover:bg-cream-50/90"
+      )}
+    >
+      <span className="flex items-center gap-2.5 min-w-0">{children}</span>
+      {active && <span className="text-brand-500 text-xs shrink-0">✓</span>}
+    </button>
+  );
+}
+
+function LuxuryFilterDropdown({
+  id,
+  openId,
+  setOpenId,
+  sectionLabel,
+  summary,
+  children,
+  alignEnd,
+  onClear,
+}: {
+  id: NonNullable<FilterMenuKey>;
+  openId: FilterMenuKey;
+  setOpenId: (k: FilterMenuKey) => void;
+  sectionLabel: string;
+  summary: string;
+  children: (close: () => void) => React.ReactNode;
+  alignEnd?: boolean;
+  /** When set, shows a compact reset control on the trigger (clears only this facet). */
+  onClear?: () => void;
+}) {
+  const open = openId === id;
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [portalPos, setPortalPos] = useState<{
+    top: number;
+    left: number;
+    width: number;
+  } | null>(null);
+
+  const updatePortalPos = useCallback(() => {
+    const el = triggerRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const maxW = 19.5 * 16;
+    const panelW = Math.min(window.innerWidth - 32, maxW);
+    let left = alignEnd ? r.right - panelW : r.left;
+    left = Math.max(8, Math.min(left, window.innerWidth - panelW - 8));
+    setPortalPos({ top: r.bottom + 8, left, width: panelW });
+  }, [alignEnd]);
+
+  useLayoutEffect(() => {
+    if (!open) {
+      setPortalPos(null);
+      return;
+    }
+    updatePortalPos();
+    window.addEventListener("scroll", updatePortalPos, true);
+    window.addEventListener("resize", updatePortalPos);
+    return () => {
+      window.removeEventListener("scroll", updatePortalPos, true);
+      window.removeEventListener("resize", updatePortalPos);
+    };
+  }, [open, updatePortalPos]);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (wrapRef.current?.contains(t)) return;
+      if (panelRef.current?.contains(t)) return;
+      setOpenId(null);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [open, setOpenId]);
+
+  const close = () => setOpenId(null);
+  const panelBody = children(close);
+
+  const panelScrollClass =
+    "max-h-[min(70vh,440px)] overflow-y-auto overscroll-contain";
+
+  return (
+    <div className="relative shrink-0" ref={wrapRef}>
+      <div
+        ref={triggerRef}
+        className={cn(
+          "flex min-w-[152px] sm:min-w-[162px] items-stretch rounded-xl border border-earth-200/65 bg-white/[0.96] shadow-sm transition-all",
+          "hover:border-brand-300/45 hover:shadow-[0_6px_22px_-8px_rgba(212,132,58,0.22)]",
+          open && "border-brand-400/45 ring-2 ring-brand-500/15 shadow-md"
+        )}
+      >
+        <button
+          type="button"
+          onClick={() => setOpenId(open ? null : id)}
+          className={cn(
+            "flex flex-1 min-w-0 items-center gap-1.5 py-2 pl-3 text-left",
+            onClear ? "pr-1" : "pr-2.5"
+          )}
+          aria-expanded={open}
+        >
+          <div className="flex flex-col min-w-0 flex-1">
+            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-brand-600/65 leading-tight">
+              {sectionLabel}
+            </span>
+            <span className="font-serif text-sm font-semibold text-earth-dark truncate leading-snug">
+              {summary}
+            </span>
+          </div>
+          <ChevronDown
+            className={cn("w-4 h-4 text-earth-400 shrink-0 transition-transform", open && "rotate-180")}
+          />
+        </button>
+        {onClear && (
+          <>
+            <div className="w-px shrink-0 self-stretch bg-earth-200/50 my-2" aria-hidden />
+            <button
+              type="button"
+              className={cn(
+                "group/clear shrink-0 flex items-center justify-center px-2 rounded-r-[0.65rem]",
+                "text-earth-400 hover:text-brand-700 hover:bg-brand-50/90 transition-colors",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/40 focus-visible:ring-inset"
+              )}
+              aria-label={`Clear ${sectionLabel}`}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onClear();
+                setOpenId(null);
+              }}
+            >
+              <span className="flex h-7 w-7 items-center justify-center rounded-full border border-earth-200/70 bg-cream-50/80 shadow-sm transition-all group-hover/clear:border-brand-300/60 group-hover/clear:bg-white group-hover/clear:shadow-[0_2px_10px_rgba(212,132,58,0.15)]">
+                <X className="w-3.5 h-3.5 stroke-[2.5]" />
+              </span>
+            </button>
+          </>
+        )}
+      </div>
+      {open &&
+        portalPos &&
+        createPortal(
+          <div
+            ref={panelRef}
+            className={cn(dropdownPanelClass, panelScrollClass, "fixed z-[100]")}
+            style={{
+              top: portalPos.top,
+              left: portalPos.left,
+              width: portalPos.width,
+            }}
+          >
+            {panelBody}
+          </div>,
+          document.body
+        )}
+    </div>
+  );
+}
+
+function ProductsFilterRail({
+  params,
+  onUpdate,
+  currentSort,
+  onSortChange,
+  onOpenMobileDrawer,
+  activeFilterCount,
+  tagFilterLabel,
+  filterCategories,
+}: {
+  params: Record<string, string>;
+  onUpdate: (updates: Record<string, string>) => void;
+  currentSort: string;
+  onSortChange: (sort: string) => void;
+  onOpenMobileDrawer: () => void;
+  activeFilterCount: number;
+  tagFilterLabel: string | null;
+  filterCategories: CategoryFilterItem[];
+}) {
+  const [openMenu, setOpenMenu] = useState<FilterMenuKey>(null);
+
+  const hasActive =
+    !!params.category ||
+    !!params.tags ||
+    !!params.spiceLevel ||
+    !!params.minPrice ||
+    !!params.inStock ||
+    !!params.isBestseller ||
+    !!params.isVeg ||
+    !!params.isNewArrival;
+
+  const shopSummary = params.category
+    ? filterCategories.find((c) => c.slug === params.category)?.name ?? params.category
+    : "All collections";
+
+  const typeSummary = params.tags ? tagFilterLabel ?? params.tags : "Any type";
+
+  const spiceSummary =
+    SPICE_LEVELS.find((s) => s.value === params.spiceLevel)?.label ?? "Any heat";
+
+  const priceBand = PRICE_RANGES.find(
+    (r) => params.minPrice === String(r.min) && params.maxPrice === String(r.max)
+  );
+  const priceSummary = priceBand?.label ?? "Any price";
+
+  const moreLabels: string[] = [];
+  if (params.isVeg === "true") moreLabels.push("Vegetarian");
+  if (params.isBestseller === "true") moreLabels.push("Bestsellers");
+  if (params.inStock === "true") moreLabels.push("In stock");
+  if (params.isNewArrival === "true") moreLabels.push("New");
+  const moreSummary =
+    moreLabels.length === 0
+      ? "Any"
+      : moreLabels.length <= 2
+        ? moreLabels.join(" · ")
+        : `${moreLabels.length} filters`;
+
+  const sortSummary =
+    SORT_OPTIONS.find((o) => o.value === currentSort)?.label ?? "Featured";
+
+  const moreFilterRows = [
+    { label: "Vegetarian", key: "isVeg" as const, value: "true" },
+    { label: "Bestsellers", key: "isBestseller" as const, value: "true" },
+    { label: "In stock", key: "inStock" as const, value: "true" },
+    { label: "New", key: "isNewArrival" as const, value: "true" },
+  ];
+
+  return (
+    <div
+      className={cn(
+        "sticky top-16 z-40 rounded-[1.25rem] border border-earth-200/55",
+        "bg-gradient-to-br from-white/98 via-cream-50/95 to-white/98 shadow-[0_12px_48px_-16px_rgba(44,24,16,0.14)]",
+        "backdrop-blur-md backdrop-saturate-150 p-4 md:p-6"
+      )}
+    >
+      <div className="min-w-0 w-full">
+        <div className="-mx-1 overflow-x-auto px-1 pb-1 scrollbar-hide [overscroll-behavior-x:contain] [-webkit-overflow-scrolling:touch] lg:mx-0 lg:overflow-x-auto lg:overflow-y-visible lg:px-0 lg:pb-0">
+          <div className="flex w-max max-w-none flex-nowrap items-center gap-1 sm:gap-1.5">
+            <LuxuryFilterDropdown
+              id="shop"
+              openId={openMenu}
+              setOpenId={setOpenMenu}
+              sectionLabel="Shop"
+              summary={shopSummary}
+              onClear={
+                params.category
+                  ? () => onUpdate({ category: "", page: "1" })
+                  : undefined
+              }
+            >
+              {(close) => (
+                <>
+                  <DropdownOptionRow
+                    active={!params.category && !params.tags}
+                    onPick={() => {
+                      onUpdate({ category: "", tags: "", page: "1" });
+                      close();
+                    }}
+                  >
+                    All
+                  </DropdownOptionRow>
+                  {filterCategories.map((cat) => (
+                    <DropdownOptionRow
+                      key={cat.id}
+                      active={params.category === cat.slug}
+                      onPick={() => {
+                        onUpdate({ category: cat.slug, tags: "", page: "1" });
+                        close();
+                      }}
+                    >
+                      <span className="flex items-center gap-2 min-w-0">
+                        <span className="truncate">{cat.name}</span>
+                        {cat._count?.products > 0 && (
+                          <span className="text-xs font-normal text-earth-500 shrink-0 tabular-nums">
+                            ({cat._count.products})
+                          </span>
+                        )}
+                      </span>
+                    </DropdownOptionRow>
+                  ))}
+                </>
+              )}
+            </LuxuryFilterDropdown>
+
+            <LuxuryFilterDropdown
+              id="type"
+              openId={openMenu}
+              setOpenId={setOpenMenu}
+              sectionLabel="Pickle type"
+              summary={typeSummary}
+              onClear={params.tags ? () => onUpdate({ tags: "", page: "1" }) : undefined}
+            >
+              {(close) => (
+                <>
+                  <DropdownOptionRow
+                    active={!params.tags}
+                    onPick={() => {
+                      onUpdate({ tags: "", page: "1" });
+                      close();
+                    }}
+                  >
+                    Any type
+                  </DropdownOptionRow>
+                  {TAG_FILTERS.map((t) => (
+                    <DropdownOptionRow
+                      key={t.value}
+                      active={params.tags === t.value}
+                      onPick={() => {
+                        onUpdate({ tags: t.value, category: "", page: "1" });
+                        close();
+                      }}
+                    >
+                      <span className="text-base leading-none shrink-0" aria-hidden>
+                        {t.icon}
+                      </span>
+                      <span className="truncate">{t.label}</span>
+                    </DropdownOptionRow>
+                  ))}
+                </>
+              )}
+            </LuxuryFilterDropdown>
+
+            <LuxuryFilterDropdown
+              id="spice"
+              openId={openMenu}
+              setOpenId={setOpenMenu}
+              sectionLabel="Spice"
+              summary={spiceSummary}
+              onClear={
+                params.spiceLevel
+                  ? () => onUpdate({ spiceLevel: "", page: "1" })
+                  : undefined
+              }
+            >
+              {(close) => (
+                <>
+                  <DropdownOptionRow
+                    active={!params.spiceLevel}
+                    onPick={() => {
+                      onUpdate({ spiceLevel: "", page: "1" });
+                      close();
+                    }}
+                  >
+                    Any heat
+                  </DropdownOptionRow>
+                  {SPICE_LEVELS.map((s) => (
+                    <DropdownOptionRow
+                      key={s.value}
+                      active={params.spiceLevel === s.value}
+                      onPick={() => {
+                        onUpdate({
+                          spiceLevel: params.spiceLevel === s.value ? "" : s.value,
+                          page: "1",
+                        });
+                        close();
+                      }}
+                    >
+                      {s.label}
+                    </DropdownOptionRow>
+                  ))}
+                </>
+              )}
+            </LuxuryFilterDropdown>
+
+            <LuxuryFilterDropdown
+              id="price"
+              openId={openMenu}
+              setOpenId={setOpenMenu}
+              sectionLabel="Price"
+              summary={priceSummary}
+              onClear={
+                params.minPrice || params.maxPrice
+                  ? () => onUpdate({ minPrice: "", maxPrice: "", page: "1" })
+                  : undefined
+              }
+            >
+              {(close) => (
+                <>
+                  <DropdownOptionRow
+                    active={!params.minPrice && !params.maxPrice}
+                    onPick={() => {
+                      onUpdate({ minPrice: "", maxPrice: "", page: "1" });
+                      close();
+                    }}
+                  >
+                    Any price
+                  </DropdownOptionRow>
+                  {PRICE_RANGES.map((r) => (
+                    <DropdownOptionRow
+                      key={r.label}
+                      active={
+                        params.minPrice === String(r.min) && params.maxPrice === String(r.max)
+                      }
+                      onPick={() => {
+                        onUpdate({
+                          minPrice: String(r.min),
+                          maxPrice: String(r.max),
+                          page: "1",
+                        });
+                        close();
+                      }}
+                    >
+                      {r.label}
+                    </DropdownOptionRow>
+                  ))}
+                </>
+              )}
+            </LuxuryFilterDropdown>
+
+            <LuxuryFilterDropdown
+              id="more"
+              openId={openMenu}
+              setOpenId={setOpenMenu}
+              sectionLabel="More"
+              summary={moreSummary}
+              onClear={
+                moreLabels.length > 0
+                  ? () =>
+                      onUpdate({
+                        inStock: "",
+                        isBestseller: "",
+                        isVeg: "",
+                        isNewArrival: "",
+                        page: "1",
+                      })
+                  : undefined
+              }
+            >
+              {(close) => (
+                <>
+                  {moreFilterRows.map((f) => (
+                    <DropdownOptionRow
+                      key={f.key}
+                      active={params[f.key] === f.value}
+                      onPick={() => {
+                        onUpdate({
+                          [f.key]: params[f.key] === f.value ? "" : f.value,
+                          page: "1",
+                        });
+                        close();
+                      }}
+                    >
+                      {f.label}
+                    </DropdownOptionRow>
+                  ))}
+                </>
+              )}
+            </LuxuryFilterDropdown>
+
+            <LuxuryFilterDropdown
+              id="sort"
+              openId={openMenu}
+              setOpenId={setOpenMenu}
+              sectionLabel="Sort by"
+              summary={sortSummary}
+              alignEnd
+              onClear={
+                params.sort ? () => onUpdate({ sort: "", page: "1" }) : undefined
+              }
+            >
+              {(close) => (
+                <>
+                  {SORT_OPTIONS.map((opt) => (
+                    <DropdownOptionRow
+                      key={opt.value}
+                      active={opt.value === currentSort}
+                      onPick={() => {
+                        onSortChange(opt.value);
+                        close();
+                      }}
+                    >
+                      {opt.label}
+                    </DropdownOptionRow>
+                  ))}
+                </>
+              )}
+            </LuxuryFilterDropdown>
+
+            {hasActive && (
+              <button
+                type="button"
+                onClick={() =>
+                  onUpdate({
+                    category: "",
+                    tags: "",
+                    spiceLevel: "",
+                    minPrice: "",
+                    maxPrice: "",
+                    inStock: "",
+                    isBestseller: "",
+                    isVeg: "",
+                    isNewArrival: "",
+                    page: "1",
+                  })
+                }
+                className="self-center text-xs font-semibold text-brand-600 hover:text-brand-700 underline-offset-2 hover:underline whitespace-nowrap pl-1 pr-0.5 py-2 shrink-0"
+              >
+                Clear all
+              </button>
+            )}
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onOpenMobileDrawer}
+              className="lg:hidden shrink-0 self-center border-earth-200 text-earth-700 rounded-xl whitespace-nowrap"
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              All filters
+              {activeFilterCount > 0 && (
+                <Badge variant="default" className="ml-1 text-[10px] px-1.5 py-0">
+                  {activeFilterCount}
+                </Badge>
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Sidebar filter — mobile drawer only (full accordion)
 function FilterSidebar({
   params,
   onUpdate,
@@ -345,7 +894,6 @@ function ProductsContent() {
       }
     },
     staleTime: 60_000,
-    placeholderData: (prev) => prev,
   });
 
   const products = data?.products ?? [];
@@ -406,103 +954,50 @@ function ProductsContent() {
           <h1 className="font-serif text-3xl md:text-4xl font-bold">
             {categoryTitle ?? "All Products"}
           </h1>
-          {meta && (
-            <p className="text-cream-400 text-sm mt-2">
-              {meta.total} products found
-            </p>
+          {isPending ? (
+            <div className="mt-3 h-4 w-36 rounded bg-cream-200/20 animate-pulse" aria-hidden />
+          ) : (
+            meta && (
+              <p className="text-cream-400 text-sm mt-2">{meta.total} products found</p>
+            )
           )}
         </div>
       </div>
 
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 py-8">
-        {/* Toolbar */}
-        <div className="flex items-center justify-between gap-4 mb-6">
-          {/* Mobile filter button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowMobileFilters(true)}
-            className="lg:hidden flex items-center gap-2"
-          >
-            <SlidersHorizontal className="w-4 h-4" />
-            Filters
-            {activeFilterCount > 0 && (
-              <Badge variant="default" className="ml-1 text-[10px] px-1.5 py-0.5">
-                {activeFilterCount}
-              </Badge>
-            )}
-          </Button>
+        <ProductsFilterRail
+          params={params}
+          onUpdate={updateParams}
+          filterCategories={filterCategories}
+          currentSort={currentSort}
+          onSortChange={(sort) => updateParams({ sort, page: "1" })}
+          onOpenMobileDrawer={() => setShowMobileFilters(true)}
+          activeFilterCount={activeFilterCount}
+          tagFilterLabel={tagFilterLabel}
+        />
 
-          {/* Active filter tags */}
-          <div className="flex-1 flex flex-wrap gap-2 items-center">
-            {params.category && (
-              <Badge
-                variant="outline"
-                className="text-xs cursor-pointer"
-                onClick={() => updateParams({ category: "" })}
-              >
-                {filterCategories.find((c) => c.slug === params.category)?.name ?? params.category}
-                <X className="w-3 h-3 ml-1" />
-              </Badge>
-            )}
-            {params.tags && (
-              <Badge
-                variant="outline"
-                className="text-xs cursor-pointer"
-                onClick={() => updateParams({ tags: "" })}
-              >
-                {tagFilterLabel}
-                <X className="w-3 h-3 ml-1" />
-              </Badge>
-            )}
-            {params.spiceLevel && (
-              <Badge
-                variant="outline"
-                className="text-xs cursor-pointer"
-                onClick={() => updateParams({ spiceLevel: "" })}
-              >
-                🌶️ {params.spiceLevel}
-                <X className="w-3 h-3 ml-1" />
-              </Badge>
-            )}
-          </div>
-
-          {/* Sort */}
-          <select
-            value={currentSort}
-            onChange={(e) => updateParams({ sort: e.target.value, page: "1" })}
-            className="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 bg-white text-earth-dark"
-          >
-            {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+        <div
+          className={cn(
+            "relative z-0 mt-8 transition-opacity duration-300 ease-out",
+            isPending ? "opacity-70 pointer-events-none" : "opacity-100"
+          )}
+        >
+          <ProductGrid
+            products={products}
+            loading={isPending}
+            skeletonCount={12}
+            className="grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5"
+          />
         </div>
 
-        <div className="flex gap-8">
-          {/* Desktop Sidebar */}
-          <aside className="hidden lg:block w-64 shrink-0">
-            <FilterSidebar params={params} onUpdate={updateParams} categories={filterCategories} />
-          </aside>
-
-          {/* Products */}
-          <div className="flex-1 min-w-0">
-            <ProductGrid products={products} loading={isPending} />
-
-            {meta && meta.totalPages > 1 && (
-              <Pagination
-                currentPage={currentPage}
-                totalPages={meta.totalPages}
-                onPageChange={(page) =>
-                  updateParams({ page: String(page) }, { scroll: true })
-                }
-                className="mt-10"
-              />
-            )}
-          </div>
-        </div>
+        {!isPending && meta && meta.totalPages > 1 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={meta.totalPages}
+            onPageChange={(page) => updateParams({ page: String(page) }, { scroll: true })}
+            className="mt-10"
+          />
+        )}
       </div>
 
       {/* Mobile filter drawer */}
