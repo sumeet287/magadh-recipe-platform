@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, Suspense } from "react";
+import { useState, useCallback, Suspense, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams, useRouter } from "next/navigation";
 import { ProductGrid } from "@/components/product/product-grid";
@@ -27,6 +27,12 @@ type CategoryFilterItem = {
   sortOrder: number;
   _count: { products: number };
 };
+
+/**
+ * “Shop categories” on /products — only these two parent collections (not masala / combo / gift).
+ * Names still come from the database; slugs must match `categories` table.
+ */
+const PRODUCTS_SHOP_CATEGORY_SLUGS = ["pickles", "regional-specials"] as const;
 
 /** Quick filters by product `tags` (same as header / search links). */
 const TAG_FILTERS: { label: string; value: string; icon: string }[] = [
@@ -307,7 +313,18 @@ function ProductsContent() {
     },
     staleTime: 300_000,
   });
-  const filterCategories = categoriesRaw ?? [];
+  const filterCategories = useMemo(() => {
+    const raw = categoriesRaw ?? [];
+    const order = PRODUCTS_SHOP_CATEGORY_SLUGS;
+    const allowed = new Set<string>(order);
+    return raw
+      .filter((c) => allowed.has(c.slug))
+      .sort(
+        (a, b) =>
+          order.indexOf(a.slug as (typeof order)[number]) -
+          order.indexOf(b.slug as (typeof order)[number])
+      );
+  }, [categoriesRaw]);
 
   const { data, isPending } = useQuery({
     queryKey: ["products", "listing", listingQueryKey],
