@@ -20,20 +20,13 @@ import {
 } from "lucide-react";
 import type { ProductCardData, PaginationMeta } from "@/types";
 
-const CATEGORIES = [
-  { label: "All", value: "" },
-  { label: "Amra Pickle", value: "amra", icon: "🍑" },
-  { label: "Badhal Pickle", value: "badhal", icon: "🌿" },
-  { label: "Garlic", value: "garlic", icon: "🧄" },
-  { label: "Green Chilli", value: "green-chilli", icon: "🌶️" },
-  { label: "Karonda", value: "karonda", icon: "🫒" },
-  { label: "Kathal Pickle", value: "kathal", icon: "🍈" },
-  { label: "Lemon", value: "lemon", icon: "🍋" },
-  { label: "Mango", value: "mango", icon: "🥭" },
-  { label: "Mixed Pickle", value: "mixed", icon: "🥗" },
-  { label: "Oal Pickle", value: "oal", icon: "🫚" },
-  { label: "Red Chilli", value: "chilli", icon: "🌶️" },
-];
+type CategoryFilterItem = {
+  id: string;
+  name: string;
+  slug: string;
+  sortOrder: number;
+  _count: { products: number };
+};
 
 const SPICE_LEVELS = [
   { label: "Mild", value: "MILD" },
@@ -49,15 +42,17 @@ const PRICE_RANGES = [
   { label: "Above ₹700", min: 700, max: 99999 },
 ];
 
-// Sidebar filter
+// Sidebar filter — categories from DB (new admin categories appear automatically)
 function FilterSidebar({
   params,
   onUpdate,
   onClose,
+  categories,
 }: {
   params: Record<string, string>;
   onUpdate: (updates: Record<string, string>) => void;
   onClose?: () => void;
+  categories: CategoryFilterItem[];
 }) {
   const [openSections, setOpenSections] = useState<string[]>(["category", "price", "spice"]);
 
@@ -107,7 +102,7 @@ function FilterSidebar({
             </button>
           )}
           {Object.keys(params).some((k) =>
-            ["category", "tags", "spiceLevel", "minPrice", "maxPrice", "inStock", "isBestseller", "isVeg"].includes(k)
+            ["category", "tags", "spiceLevel", "minPrice", "maxPrice", "inStock", "isBestseller", "isVeg", "isNewArrival"].includes(k)
           ) && (
             <button
               type="button"
@@ -121,6 +116,7 @@ function FilterSidebar({
                   inStock: "",
                   isBestseller: "",
                   isVeg: "",
+                  isNewArrival: "",
                 })
               }
               className="text-xs text-spice-500 hover:text-spice-600 font-medium"
@@ -131,23 +127,34 @@ function FilterSidebar({
         </div>
       </div>
 
-      {/* Category */}
+      {/* Category — uses category slug (admin); legacy ?tags= URLs still work via API */}
       <FilterSection title="Category" id="category">
         <div className="space-y-1">
-          {CATEGORIES.map((cat) => (
+          <button
+            type="button"
+            onClick={() => onUpdate({ category: "", tags: "", page: "1" })}
+            className={cn(
+              "w-full text-left px-3 py-2 rounded-lg text-sm transition-colors",
+              !params.category && !params.tags
+                ? "bg-brand-50 text-brand-600 font-medium"
+                : "text-earth-700 hover:bg-cream-200"
+            )}
+          >
+            All
+          </button>
+          {categories.map((cat) => (
             <button
               type="button"
-              key={cat.value}
-              onClick={() => onUpdate({ tags: cat.value, category: "", page: "1" })}
+              key={cat.id}
+              onClick={() => onUpdate({ category: cat.slug, tags: "", page: "1" })}
               className={cn(
-                "w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2",
-                params.tags === cat.value || (!params.tags && !cat.value)
+                "w-full text-left px-3 py-2 rounded-lg text-sm transition-colors",
+                params.category === cat.slug
                   ? "bg-brand-50 text-brand-600 font-medium"
                   : "text-earth-700 hover:bg-cream-200"
               )}
             >
-              {"icon" in cat && cat.icon && <span className="text-base">{cat.icon}</span>}
-              {cat.label}
+              {cat.name}
             </button>
           ))}
         </div>
@@ -248,6 +255,18 @@ function ProductsContent() {
 
   const listingQueryKey = searchParams.toString();
 
+  const { data: categoriesRaw } = useQuery({
+    queryKey: ["categories", "storefront-filters"],
+    queryFn: async (): Promise<CategoryFilterItem[]> => {
+      const res = await fetch("/api/categories");
+      const json = await res.json();
+      if (!json.success || !Array.isArray(json.data)) return [];
+      return json.data.filter((c: CategoryFilterItem) => c._count?.products > 0);
+    },
+    staleTime: 300_000,
+  });
+  const filterCategories = categoriesRaw ?? [];
+
   const { data, isPending } = useQuery({
     queryKey: ["products", "listing", listingQueryKey],
     queryFn: async (): Promise<{
@@ -297,13 +316,21 @@ function ProductsContent() {
   );
 
   const activeFilterCount = [
+    params.category,
     params.tags,
     params.spiceLevel,
     params.minPrice,
     params.inStock,
     params.isBestseller,
     params.isVeg,
+    params.isNewArrival,
   ].filter(Boolean).length;
+
+  const categoryTitle = params.category
+    ? filterCategories.find((c) => c.slug === params.category)?.name ?? params.category
+    : params.tags
+      ? `Tag: ${params.tags}`
+      : null;
 
   const currentSort = params.sort ?? "featured";
   const currentPage = Number(params.page ?? 1);
@@ -317,9 +344,7 @@ function ProductsContent() {
             Browse
           </p>
           <h1 className="font-serif text-3xl md:text-4xl font-bold">
-            {params.tags
-              ? CATEGORIES.find((c) => c.value === params.tags)?.label ?? "Products"
-              : "All Products"}
+            {categoryTitle ?? "All Products"}
           </h1>
           {meta && (
             <p className="text-cream-400 text-sm mt-2">
@@ -350,13 +375,23 @@ function ProductsContent() {
 
           {/* Active filter tags */}
           <div className="flex-1 flex flex-wrap gap-2 items-center">
+            {params.category && (
+              <Badge
+                variant="outline"
+                className="text-xs cursor-pointer"
+                onClick={() => updateParams({ category: "" })}
+              >
+                {filterCategories.find((c) => c.slug === params.category)?.name ?? params.category}
+                <X className="w-3 h-3 ml-1" />
+              </Badge>
+            )}
             {params.tags && (
               <Badge
                 variant="outline"
                 className="text-xs cursor-pointer"
                 onClick={() => updateParams({ tags: "" })}
               >
-                {CATEGORIES.find((c) => c.value === params.tags)?.label ?? params.tags}
+                Tag: {params.tags}
                 <X className="w-3 h-3 ml-1" />
               </Badge>
             )}
@@ -389,7 +424,7 @@ function ProductsContent() {
         <div className="flex gap-8">
           {/* Desktop Sidebar */}
           <aside className="hidden lg:block w-64 shrink-0">
-            <FilterSidebar params={params} onUpdate={updateParams} />
+            <FilterSidebar params={params} onUpdate={updateParams} categories={filterCategories} />
           </aside>
 
           {/* Products */}
@@ -425,6 +460,7 @@ function ProductsContent() {
                 setShowMobileFilters(false);
               }}
               onClose={() => setShowMobileFilters(false)}
+              categories={filterCategories}
             />
           </div>
         </div>

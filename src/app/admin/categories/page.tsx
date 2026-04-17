@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { FolderOpen, Plus, Pencil, Package } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const metadata = { title: "Categories | Magadh Recipe Admin" };
 
@@ -12,11 +13,17 @@ export default async function AdminCategoriesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="font-serif text-2xl font-bold text-white">Categories</h1>
           <p className="text-gray-400 text-sm mt-1">{categories.length} total categories</p>
         </div>
+        <Button asChild className="bg-brand-600 hover:bg-brand-500">
+          <Link href="/admin/categories/new" className="inline-flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+            Add category
+          </Link>
+        </Button>
       </div>
 
       <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
@@ -28,6 +35,7 @@ export default async function AdminCategoriesPage() {
               <th className="px-6 py-3 font-medium">Products</th>
               <th className="px-6 py-3 font-medium">Status</th>
               <th className="px-6 py-3 font-medium">Sort Order</th>
+              <th className="px-6 py-3 font-medium w-24">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-800">
@@ -61,6 +69,15 @@ export default async function AdminCategoriesPage() {
                   </span>
                 </td>
                 <td className="px-6 py-4 text-gray-400">{cat.sortOrder}</td>
+                <td className="px-6 py-4">
+                  <Link
+                    href={`/admin/categories/${cat.id}/edit`}
+                    className="inline-flex items-center gap-1 text-sm text-brand-400 hover:text-brand-300 font-medium"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                    Edit
+                  </Link>
+                </td>
               </tr>
             ))}
           </tbody>
