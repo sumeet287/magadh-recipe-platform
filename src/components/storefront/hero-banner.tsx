@@ -52,15 +52,10 @@ const SLIDES = [
 export function HeroBanner() {
   const [cur, setCur] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
-  const [loaded, setLoaded] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const imgRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
   const raf = useRef(0);
-
-  useEffect(() => {
-    requestAnimationFrame(() => setLoaded(true));
-  }, []);
 
   const handleMouse = useCallback((e: React.MouseEvent<HTMLElement>) => {
     if (window.innerWidth < 1024) return;
@@ -125,13 +120,27 @@ export function HeroBanner() {
 
           {/* LEFT */}
           <div className={cn("transition-all duration-500", transitioning ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0")}>
-            <div className={cn("flex items-center gap-3 mb-5 sm:mb-8 transition-all duration-700 delay-100", loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
+            {/* Mobile LCP: image was desktop-only; Lighthouse LCP was delayed text ("50K+"). Priority image improves LCP + Speed Index. */}
+            <div className="lg:hidden relative w-full aspect-[4/3] max-h-[min(40vh,300px)] rounded-2xl overflow-hidden mb-6 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)] ring-1 ring-white/[0.06]">
+              <Image
+                src={s.img}
+                alt="Magadh Recipe premium pickles"
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 460px"
+                priority
+                fetchPriority="high"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0d0603]/55 via-transparent to-[#0d0603]/15 pointer-events-none" />
+            </div>
+
+            <div className="flex items-center gap-3 mb-5 sm:mb-8">
               <span className="inline-flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.06] text-brand-300/80 text-[10px] font-bold tracking-[0.2em] uppercase px-4 py-2 rounded-full backdrop-blur-sm">
                 <Star className="w-3 h-3 fill-brand-400 text-brand-400" />{s.tag}
               </span>
             </div>
 
-            <h1 className="font-serif mb-5 sm:mb-8 hero-initial-reveal">
+            <h1 className="font-serif mb-5 sm:mb-8">
               <span className="block text-white/90 text-4xl sm:text-5xl lg:text-6xl xl:text-[4.25rem] font-bold leading-[1.08] tracking-tight" style={{ textShadow: "0 4px 30px rgba(0,0,0,0.4)" }}>
                 {s.line1}
               </span>
@@ -140,13 +149,16 @@ export function HeroBanner() {
               </span>
             </h1>
 
-            <div className={cn("w-16 h-[2px] rounded-full mb-5 sm:mb-8 transition-all duration-700 delay-[400ms]", loaded ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0")} style={{ background: "linear-gradient(90deg, #D4843A, #f0c579, transparent)", transformOrigin: "left" }} />
+            <div
+              className="w-16 h-[2px] rounded-full mb-5 sm:mb-8 scale-x-100"
+              style={{ background: "linear-gradient(90deg, #D4843A, #f0c579, transparent)", transformOrigin: "left" }}
+            />
 
-            <p className={cn("text-white/40 text-sm sm:text-lg leading-relaxed mb-6 sm:mb-10 max-w-[480px] transition-all duration-700 delay-500", loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6")}>
+            <p className="text-white/40 text-sm sm:text-lg leading-relaxed mb-6 sm:mb-10 max-w-[480px]">
               {s.sub}
             </p>
 
-            <div className={cn("flex flex-wrap gap-4 mb-8 sm:mb-16 transition-all duration-700 delay-[600ms]", loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6")}>
+            <div className="flex flex-wrap gap-4 mb-8 sm:mb-16">
               <Link href={s.cta.href} className="group inline-flex items-center gap-2.5 bg-gradient-to-r from-brand-500 to-brand-400 hover:from-brand-400 hover:to-brand-300 text-white font-semibold text-sm px-8 py-4 rounded-full shadow-[0_4px_30px_rgba(212,132,58,0.35)] hover:shadow-[0_8px_40px_rgba(212,132,58,0.5)] transition-all duration-300 hover:-translate-y-0.5">
                 {s.cta.label}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
@@ -156,7 +168,7 @@ export function HeroBanner() {
               </Link>
             </div>
 
-            <div className={cn("flex gap-8 sm:gap-12 transition-all duration-700 delay-700", loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6")}>
+            <div className="flex gap-8 sm:gap-12">
               {s.stats.map((st, i) => (
                 <div key={st.label} className="relative">
                   {i > 0 && <div className="absolute -left-4 sm:-left-6 top-1 bottom-1 w-px bg-white/[0.06]" />}
@@ -176,14 +188,21 @@ export function HeroBanner() {
           </div>
 
           {/* RIGHT */}
-          <div className={cn("hidden lg:flex items-center justify-center relative transition-all duration-1000 delay-300", loaded ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-95")}>
+          <div className="hidden lg:flex items-center justify-center relative">
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="w-[420px] h-[420px] rounded-full" style={{ background: "radial-gradient(circle, rgba(212,132,58,0.12) 0%, rgba(212,132,58,0.03) 50%, transparent 70%)", filter: "blur(40px)" }} />
             </div>
 
             <div ref={imgRef} className="relative will-change-transform" style={{ width: "min(460px, 92%)", transformStyle: "preserve-3d" }}>
               <div className="relative rounded-[2.5rem] overflow-hidden aspect-[3/4]" style={{ boxShadow: "0 50px 100px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,132,58,0.06), 0 0 80px -20px rgba(212,132,58,0.12)" }}>
-                <Image src={s.img} alt="Magadh Recipe premium pickles" fill className="object-cover" sizes="460px" loading="eager" />
+                <Image
+                  src={s.img}
+                  alt="Magadh Recipe premium pickles"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1280px) 460px, 520px"
+                  loading="eager"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0d0603]/70 via-transparent to-[#0d0603]/10" />
                 <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 40%)" }} />
 
