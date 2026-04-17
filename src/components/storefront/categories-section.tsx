@@ -39,7 +39,14 @@ export function CategoriesSection() {
           {CATEGORIES.map((cat, i) => (
             <Link key={cat.slug} href={`/products?category=${cat.slug}`} className="fade-up group relative rounded-[1.5rem] overflow-hidden h-80 md:h-[420px]" data-reveal data-delay={String(i + 1)}>
               <div className="absolute inset-0 overflow-hidden">
-                <Image src={cat.image} alt={cat.name} fill className="object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-110" sizes="(max-width: 768px) calc(100vw - 48px), 680px" loading="lazy" />
+                <Image
+                  src={cat.image}
+                  alt={cat.name}
+                  fill
+                  className="object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-110"
+                  sizes="(max-width: 768px) min(100vw - 32px, 720px), (max-width: 1280px) 46vw, 620px"
+                  loading="lazy"
+                />
               </div>
               <div className="absolute inset-0 bg-gradient-to-t from-[#0d0603] via-[#0d0603]/30 to-transparent" />
               <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-10">

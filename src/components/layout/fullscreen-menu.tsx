@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { X, ArrowRight, User, LogIn, Package, Heart, Shield } from "lucide-react";
@@ -64,7 +65,14 @@ export function FullscreenMenu() {
       {/* Top bar */}
       <div className="relative z-10 flex items-center justify-between px-6 sm:px-10 lg:px-16 py-5 border-b border-white/[0.04]">
         <Link href="/" onClick={handleClose} className="flex items-center gap-3">
-          <img src="/images/brand/logo.png" alt="Magadh Recipe" className="w-9 h-9 rounded-xl object-contain shadow-[0_2px_12px_rgba(212,132,58,0.4)]" />
+          <Image
+            src="/images/brand/logo.png"
+            alt="Magadh Recipe"
+            width={36}
+            height={36}
+            sizes="36px"
+            className="w-9 h-9 rounded-xl object-contain shadow-[0_2px_12px_rgba(212,132,58,0.4)]"
+          />
           <span className="font-serif font-bold text-white text-base">Magadh Recipe</span>
         </Link>
         <button

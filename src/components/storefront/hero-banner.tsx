@@ -127,7 +127,8 @@ export function HeroBanner() {
                 alt="Magadh Recipe premium pickles"
                 fill
                 className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 460px"
+                sizes="(max-width: 1023px) min(92vw, 520px), 460px"
+                quality={72}
                 priority
                 fetchPriority="high"
               />

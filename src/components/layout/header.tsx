@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
@@ -116,9 +117,12 @@ export function Header() {
           <div className="flex h-16 items-center justify-between gap-4">
             {/* Logo */}
             <Link href="/" onClick={(e) => handleNavClick(e, "/")} className="flex items-center gap-2 sm:gap-3 shrink-0 group">
-              <img
+              <Image
                 src="/images/brand/logo.png"
                 alt="Magadh Recipe"
+                width={40}
+                height={40}
+                sizes="40px"
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-contain shadow-[0_3px_16px_rgba(212,132,58,0.5)] group-hover:shadow-[0_4px_24px_rgba(212,132,58,0.7)] transition-all duration-300 group-hover:scale-105"
               />
               <div>

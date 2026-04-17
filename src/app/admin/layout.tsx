@@ -1,10 +1,11 @@
 import { type ReactNode } from "react";
 import Link from "next/link";
+import NextImage from "next/image";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import {
   LayoutDashboard, Package, FolderOpen, ShoppingBag, Users,
-  Tag, Image, Star, BarChart3, Settings, ChevronRight, MessageSquare,
+  Tag, Image as ImageIcon, Star, BarChart3, Settings, ChevronRight, MessageSquare,
 } from "lucide-react";
 
 const navGroups = [
@@ -33,7 +34,7 @@ const navGroups = [
   {
     label: "Content",
     items: [
-      { href: "/admin/banners", label: "Banners", icon: Image },
+      { href: "/admin/banners", label: "Banners", icon: ImageIcon },
       { href: "/admin/reviews", label: "Reviews", icon: Star },
       { href: "/admin/inquiries", label: "Contact Inquiries", icon: MessageSquare },
     ],
@@ -59,9 +60,12 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         {/* Logo */}
         <div className="px-5 py-4 border-b border-gray-800">
           <Link href="/admin" className="flex items-center gap-2.5">
-            <img
+            <NextImage
               src="/images/brand/logo.png"
               alt="Magadh Recipe"
+              width={36}
+              height={36}
+              sizes="36px"
               className="w-9 h-9 rounded-lg object-contain shadow-[0_2px_12px_rgba(212,132,58,0.4)]"
             />
             <div>

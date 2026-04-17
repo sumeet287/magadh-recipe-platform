@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Instagram, Facebook, Youtube, Twitter, Phone, Mail, MapPin } from "lucide-react";
 import {
   APP_NAME,
@@ -42,9 +43,13 @@ export function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center gap-2.5 mb-5">
-              <img
+              <Image
                 src="/images/brand/logo.png"
                 alt="Magadh Recipe"
+                width={40}
+                height={40}
+                sizes="40px"
+                loading="lazy"
                 className="w-10 h-10 rounded-xl object-contain shadow-[0_3px_16px_rgba(212,132,58,0.4)]"
               />
               <div>
