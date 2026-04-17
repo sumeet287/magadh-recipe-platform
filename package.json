@@ -48,6 +48,7 @@
     "@radix-ui/react-tooltip": "^1.1.6",
     "@tanstack/react-query": "^5.62.8",
     "@tanstack/react-query-devtools": "^5.62.8",
+    "@vercel/analytics": "^2.0.1",
     "autoprefixer": "^10.4.27",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
