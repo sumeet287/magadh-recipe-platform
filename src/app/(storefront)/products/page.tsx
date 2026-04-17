@@ -28,6 +28,22 @@ type CategoryFilterItem = {
   _count: { products: number };
 };
 
+/** Quick filters by product `tags` (same as header / search links). */
+const TAG_FILTERS: { label: string; value: string; icon: string }[] = [
+  { label: "Amla Pickle", value: "amla", icon: "🫒" },
+  { label: "Amra Pickle", value: "amra", icon: "🍑" },
+  { label: "Badhal Pickle", value: "badhal", icon: "🌿" },
+  { label: "Garlic", value: "garlic", icon: "🧄" },
+  { label: "Green Chilli", value: "green-chilli", icon: "🌶️" },
+  { label: "Karonda", value: "karonda", icon: "🫒" },
+  { label: "Kathal Pickle", value: "kathal", icon: "🍈" },
+  { label: "Lemon", value: "lemon", icon: "🍋" },
+  { label: "Mango", value: "mango", icon: "🥭" },
+  { label: "Mixed Pickle", value: "mixed", icon: "🥗" },
+  { label: "Oal Pickle", value: "oal", icon: "🫚" },
+  { label: "Red Chilli", value: "chilli", icon: "🌶️" },
+];
+
 const SPICE_LEVELS = [
   { label: "Mild", value: "MILD" },
   { label: "Medium", value: "MEDIUM" },
@@ -127,7 +143,7 @@ function FilterSidebar({
         </div>
       </div>
 
-      {/* Category — uses category slug (admin); legacy ?tags= URLs still work via API */}
+      {/* Category: tag shortcuts + every active shop category from DB (no hiding empty parents) */}
       <FilterSection title="Category" id="category">
         <div className="space-y-1">
           <button
@@ -142,21 +158,47 @@ function FilterSidebar({
           >
             All
           </button>
-          {categories.map((cat) => (
+          {TAG_FILTERS.map((t) => (
             <button
               type="button"
-              key={cat.id}
-              onClick={() => onUpdate({ category: cat.slug, tags: "", page: "1" })}
+              key={t.value}
+              onClick={() => onUpdate({ tags: t.value, category: "", page: "1" })}
               className={cn(
-                "w-full text-left px-3 py-2 rounded-lg text-sm transition-colors",
-                params.category === cat.slug
+                "w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2",
+                params.tags === t.value && !params.category
                   ? "bg-brand-50 text-brand-600 font-medium"
                   : "text-earth-700 hover:bg-cream-200"
               )}
             >
-              {cat.name}
+              <span className="text-base">{t.icon}</span>
+              {t.label}
             </button>
           ))}
+          {categories.length > 0 && (
+            <>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 px-3 pt-3 pb-1">
+                Shop categories
+              </p>
+              {categories.map((cat) => (
+                <button
+                  type="button"
+                  key={cat.id}
+                  onClick={() => onUpdate({ category: cat.slug, tags: "", page: "1" })}
+                  className={cn(
+                    "w-full text-left px-3 py-2 rounded-lg text-sm transition-colors",
+                    params.category === cat.slug
+                      ? "bg-brand-50 text-brand-600 font-medium"
+                      : "text-earth-700 hover:bg-cream-200"
+                  )}
+                >
+                  {cat.name}
+                  {cat._count?.products > 0 && (
+                    <span className="text-gray-400 font-normal ml-1">({cat._count.products})</span>
+                  )}
+                </button>
+              ))}
+            </>
+          )}
         </div>
       </FilterSection>
 
@@ -261,7 +303,7 @@ function ProductsContent() {
       const res = await fetch("/api/categories");
       const json = await res.json();
       if (!json.success || !Array.isArray(json.data)) return [];
-      return json.data.filter((c: CategoryFilterItem) => c._count?.products > 0);
+      return json.data as CategoryFilterItem[];
     },
     staleTime: 300_000,
   });
@@ -326,11 +368,12 @@ function ProductsContent() {
     params.isNewArrival,
   ].filter(Boolean).length;
 
+  const tagFilterLabel = params.tags
+    ? TAG_FILTERS.find((t) => t.value === params.tags)?.label ?? params.tags
+    : null;
   const categoryTitle = params.category
     ? filterCategories.find((c) => c.slug === params.category)?.name ?? params.category
-    : params.tags
-      ? `Tag: ${params.tags}`
-      : null;
+    : tagFilterLabel;
 
   const currentSort = params.sort ?? "featured";
   const currentPage = Number(params.page ?? 1);
@@ -391,7 +434,7 @@ function ProductsContent() {
                 className="text-xs cursor-pointer"
                 onClick={() => updateParams({ tags: "" })}
               >
-                Tag: {params.tags}
+                {tagFilterLabel}
                 <X className="w-3 h-3 ml-1" />
               </Badge>
             )}
