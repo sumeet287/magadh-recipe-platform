@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { handleApiError, UnauthorizedError, NotFoundError, ValidationError } from "@/lib/errors";
@@ -107,9 +107,18 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Send confirmation emails + WhatsApp
-    sendOrderNotifications(order, session.user.email ?? undefined)
-      .catch((e) => console.error("[Email] sendOrderNotifications failed:", e));
+    // Send confirmation emails + WhatsApp after the response is sent.
+    // Using `after()` ensures the serverless function stays alive until the
+    // notifications finish, unlike plain fire-and-forget which gets killed
+    // the moment the response returns on Vercel.
+    const customerEmailForNotif = session.user.email ?? undefined;
+    after(async () => {
+      try {
+        await sendOrderNotifications(order, customerEmailForNotif);
+      } catch (e) {
+        console.error("[Email] sendOrderNotifications failed:", e);
+      }
+    });
 
     return NextResponse.json(successResponse({ orderId }));
   } catch (err) {

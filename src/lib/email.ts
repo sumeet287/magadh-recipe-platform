@@ -559,14 +559,15 @@ export async function sendWhatsAppOrderNotification(order: PrismaOrderForEmail) 
 
   console.log(`[WhatsApp] Sending order notification for ${order.orderNumber} to ${adminPhone}`);
 
+  // WhatsApp template parameters cannot contain newlines, tabs, or more than
+  // 4 consecutive spaces (Meta error 132018). Keep everything on one line
+  // with " | " separators instead of "\n".
   const items = order.items
     .map((i) => `${i.productName} (${i.variantName}) x${i.quantity}`)
     .join(", ");
 
-  const details = [
-    items,
-    `${order.shipping?.recipientName ?? "Customer"} | ${order.shipping?.phone ?? "N/A"} | ${order.shipping?.city ?? ""}, ${order.shipping?.state ?? ""}`,
-  ].join("\n");
+  const customerLine = `${order.shipping?.recipientName ?? "Customer"}, ${order.shipping?.phone ?? "N/A"}, ${order.shipping?.city ?? ""} ${order.shipping?.state ?? ""}`.trim();
+  const details = `${items} | ${customerLine}`.replace(/\s{2,}/g, " ");
 
   try {
     const res = await fetch(`${META_GRAPH_URL}/${phoneNumberId}/messages`, {
