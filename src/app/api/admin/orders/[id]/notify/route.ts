@@ -38,14 +38,24 @@ export async function POST(
 
   const customerEmail = order.user?.email ?? undefined;
 
-  console.log(`[Admin] Re-triggering notifications for order ${order.orderNumber} to ${customerEmail}`);
+  // "includeCustomer" query param — default false (admin-only resend).
+  // Customer confirmation is sent once during checkout; the resend button is
+  // meant to re-deliver admin email + WhatsApp when those are missed.
+  const includeCustomer = req.nextUrl.searchParams.get("includeCustomer") === "true";
 
-  await sendOrderNotifications(order, customerEmail);
+  console.log(
+    `[Admin] Re-triggering notifications for order ${order.orderNumber} | admin=yes customer=${
+      includeCustomer ? customerEmail : "skipped"
+    }`
+  );
+
+  await sendOrderNotifications(order, customerEmail, { skipCustomer: !includeCustomer });
 
   return NextResponse.json({
     success: true,
     orderNumber: order.orderNumber,
-    sentTo: customerEmail,
+    sentTo: includeCustomer ? customerEmail : null,
     adminEmail: process.env.ADMIN_NOTIFICATION_EMAIL ?? process.env.FROM_EMAIL ?? "magadhrecipe@gmail.com",
+    whatsappSent: !!process.env.WHATSAPP_ACCESS_TOKEN,
   });
 }

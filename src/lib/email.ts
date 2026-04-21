@@ -507,15 +507,24 @@ export function orderCancelledHtml(data: { orderNumber: string; customerName: st
 
 // ---- Helper to send admin + WhatsApp notification for new orders ----
 
-export async function sendOrderNotifications(order: PrismaOrderForEmail, customerEmail?: string) {
+export async function sendOrderNotifications(
+  order: PrismaOrderForEmail,
+  customerEmail?: string,
+  options?: { skipCustomer?: boolean }
+) {
   const emailData = mapOrderToEmailData(order);
   const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL ?? process.env.FROM_EMAIL ?? "magadhrecipe@gmail.com";
   const fromEmail = process.env.FROM_EMAIL ?? "noreply@magadhrecipe.com";
   const customerPhone = order.shipping?.phone ?? "";
+  const skipCustomer = options?.skipCustomer ?? false;
 
-  console.log(`[Email] Sending notifications for order ${order.orderNumber} | from=${fromEmail} admin=${adminEmail} customer=${customerEmail ?? "none"}`);
+  console.log(
+    `[Email] Sending notifications for order ${order.orderNumber} | from=${fromEmail} admin=${adminEmail} customer=${
+      skipCustomer ? "skipped" : customerEmail ?? "none"
+    }`
+  );
 
-  if (customerEmail) {
+  if (customerEmail && !skipCustomer) {
     const res = await sendMail({
       to: customerEmail,
       subject: `Order Confirmed – #${order.orderNumber}`,

@@ -17,6 +17,7 @@ import {
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { ORDER_STATUS_CONFIG } from "@/lib/constants";
 import { OrderActions } from "./order-actions";
+import { ResendNotificationButton } from "./resend-notification-button";
 
 function getStatusBadgeClasses(status: string): string {
   switch (status) {
@@ -506,6 +507,9 @@ export default async function AdminOrderDetailPage({
 
           {/* Actions */}
           <OrderActions orderId={order.id} currentStatus={order.status} hasShiprocket={!!order.shipping?.shiprocketOrderId} />
+
+          {/* Resend admin notification */}
+          <ResendNotificationButton orderId={order.id} />
         </div>
       </div>
     </div>
