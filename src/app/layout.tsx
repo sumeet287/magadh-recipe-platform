@@ -5,6 +5,8 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { Providers } from "@/providers/providers";
 import { getSiteUrl } from "@/lib/site-url";
+import { JsonLd } from "@/components/seo/json-ld";
+import { organizationSchema, websiteSchema } from "@/lib/schema";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -112,6 +114,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${cormorant.variable} font-sans antialiased bg-cream-100 text-earth-dark`}
       >
+        <JsonLd data={[organizationSchema(), websiteSchema()]} id="site-root" />
         <Providers>
           {children}
         </Providers>

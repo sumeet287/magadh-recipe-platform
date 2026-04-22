@@ -11,8 +11,8 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import type { ProductCardData } from "@/types";
 import { storefrontListingWhere } from "@/lib/storefront-products";
-import { getSiteUrl } from "@/lib/site-url";
-import { FSSAI_REGISTRATION_NUMBER } from "@/lib/constants";
+import { JsonLd } from "@/components/seo/json-ld";
+import { breadcrumbSchema } from "@/lib/schema";
 
 const IngredientReveal = dynamic(() => import("@/components/storefront/ingredient-reveal").then(m => m.IngredientReveal));
 const ProcessStory = dynamic(() => import("@/components/storefront/process-story").then(m => m.ProcessStory));
@@ -270,80 +270,13 @@ function ProductSection({
 }
 
 function StructuredData() {
-  const site = getSiteUrl();
-  const orgSchema = {
-    "@context": "https://schema.org",
-    "@type": "OnlineStore",
-    name: "Magadh Recipe",
-    alternateName: "Magadh Recipe — माँ के हाथ का स्वाद",
-    description: "Premium handcrafted pickles, achars, masalas and regional food products born from a mother's kitchen in Bihar. No preservatives, FSSAI certified, 50,000+ happy families.",
-    url: site,
-    logo: `${site}/images/brand/logo.png`,
-    image: `${site}/images/og-image.jpg`,
-    priceRange: "₹₹",
-    contactPoint: {
-      "@type": "ContactPoint",
-      telephone: "+91-6207197364",
-      contactType: "customer service",
-      areaServed: "IN",
-      availableLanguage: ["Hindi", "English"],
-    },
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: "Patna",
-      addressRegion: "Bihar",
-      postalCode: "800001",
-      addressCountry: "IN",
-    },
-    sameAs: [
-      "https://instagram.com/magadhrecipe",
-      "https://facebook.com/magadhrecipe",
-      "https://twitter.com/magadhrecipe",
-      "https://youtube.com/@magadhrecipe",
-    ],
-    identifier: {
-      "@type": "PropertyValue",
-      name: "FSSAI Registration",
-      value: FSSAI_REGISTRATION_NUMBER,
-    },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.9",
-      reviewCount: "12400",
-      bestRating: "5",
-      worstRating: "1",
-    },
-    hasOfferCatalog: {
-      "@type": "OfferCatalog",
-      name: "Magadh Recipe Products",
-      itemListElement: [
-        { "@type": "OfferCatalog", name: "Pickles & Achars" },
-        { "@type": "OfferCatalog", name: "Masalas & Spices" },
-        { "@type": "OfferCatalog", name: "Combo Packs" },
-        { "@type": "OfferCatalog", name: "Gift Hampers" },
-      ],
-    },
-  };
-
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: site },
-    ],
-  };
-
+  // Organization + WebSite are injected globally by `app/layout.tsx`.
+  // Only emit page-specific schemas here.
   return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
-    </>
+    <JsonLd
+      data={breadcrumbSchema([{ label: "Home", href: "/" }])}
+      id="home-breadcrumb"
+    />
   );
 }
 

@@ -4,6 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { storefrontListingWhere } from "@/lib/storefront-products";
 import { getSiteUrl } from "@/lib/site-url";
 import { ProductDetailClient } from "./product-detail-client";
+import { JsonLd } from "@/components/seo/json-ld";
+import { breadcrumbSchema, faqSchema, type FaqItem } from "@/lib/schema";
+import type { Product } from "@prisma/client";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -188,11 +191,23 @@ export default async function ProductDetailPage({ params }: PageProps) {
     reviewCount: p._count.reviews,
   }));
 
+  const breadcrumbs = breadcrumbSchema([
+    { label: "Home", href: "/" },
+    { label: "Shop", href: "/products" },
+    {
+      label: product.category.name,
+      href: `/products?category=${product.category.slug}`,
+    },
+    { label: product.name, href: productPath },
+  ]);
+
+  const faqItems = buildProductFaqItems(product);
+
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      <JsonLd
+        data={[productSchema, breadcrumbs, faqSchema(faqItems)]}
+        id="product-detail"
       />
       <ProductDetailClient
         product={product}
@@ -201,4 +216,49 @@ export default async function ProductDetailPage({ params }: PageProps) {
       />
     </>
   );
+}
+
+/**
+ * Derive useful FAQ entries from product content fields. Only emits items that
+ * actually have data, so we never publish empty/boilerplate FAQ schema.
+ */
+function buildProductFaqItems(product: Product & { category: { name: string } }): FaqItem[] {
+  const items: FaqItem[] = [];
+
+  if (product.ingredients) {
+    items.push({
+      question: `What are the ingredients in ${product.name}?`,
+      answer: product.ingredients,
+    });
+  }
+  if (product.storageInstructions) {
+    items.push({
+      question: `How should I store ${product.name}?`,
+      answer: product.storageInstructions,
+    });
+  }
+  if (product.shelfLife) {
+    items.push({
+      question: `How long does ${product.name} stay fresh?`,
+      answer: product.shelfLife,
+    });
+  }
+  if (product.usageSuggestions) {
+    items.push({
+      question: `How do I enjoy ${product.name}?`,
+      answer: product.usageSuggestions,
+    });
+  }
+  if (product.isVeg) {
+    items.push({
+      question: `Is ${product.name} vegetarian?`,
+      answer: `Yes — ${product.name} is 100% vegetarian.`,
+    });
+  }
+  items.push({
+    question: `Does ${product.name} contain preservatives?`,
+    answer: `No. ${product.name}, like every Magadh Recipe product, is handcrafted without artificial preservatives, colours or flavours. We rely on traditional techniques, cold-pressed mustard oil, and whole spices for natural preservation.`,
+  });
+
+  return items;
 }
