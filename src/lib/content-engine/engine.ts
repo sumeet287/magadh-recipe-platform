@@ -14,6 +14,7 @@ import { revalidatePath } from "next/cache";
 import { slugify } from "@/lib/utils";
 import { pickNextTopic, type TopicBucket, type TopicSeed } from "./topics";
 import { generateBlogPayload, type BlogPayload } from "./generator";
+import { fetchCoverImage } from "./image-fetcher";
 
 export type EngineTriggerSource = "cron" | "manual" | "backfill";
 
@@ -99,9 +100,19 @@ async function resolveTopic(opts: EngineRunOptions): Promise<TopicSeed | null> {
   });
 }
 
-function selectCoverImage(topic: TopicSeed): string | null {
-  const base = process.env.CONTENT_ENGINE_DEFAULT_COVER;
-  return base && base.trim().length > 0 ? base.trim() : null;
+async function selectCoverImage(
+  topic: TopicSeed,
+): Promise<{ url: string | null; alt: string | null }> {
+  try {
+    const img = await fetchCoverImage(topic);
+    if (img?.url) {
+      return { url: img.url, alt: img.alt || null };
+    }
+  } catch {
+    // fall through to default
+  }
+  const fallback = process.env.CONTENT_ENGINE_DEFAULT_COVER?.trim();
+  return { url: fallback && fallback.length > 0 ? fallback : null, alt: null };
 }
 
 export async function runContentEngine(
@@ -123,7 +134,9 @@ export async function runContentEngine(
   const status: "PUBLISHED" | "DRAFT" = autoPublish ? "PUBLISHED" : "DRAFT";
 
   const recipe = payload.recipe ?? null;
-  const coverImage = selectCoverImage(topic);
+  const cover = await selectCoverImage(topic);
+  const coverImage = cover.url;
+  const coverImageAlt = cover.alt || payload.coverImageAlt;
 
   const tags = Array.from(
     new Set([...(payload.tags ?? []), "auto-generated", topic.bucket]),
@@ -137,7 +150,7 @@ export async function runContentEngine(
       excerpt: payload.excerpt,
       content: payload.content,
       coverImage,
-      coverImageAlt: payload.coverImageAlt,
+      coverImageAlt,
       categoryId,
       tags,
       readTimeMinutes: payload.readTimeMinutes,

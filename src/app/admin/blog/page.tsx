@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { formatDate, formatRelativeTime } from "@/lib/utils";
 import { BlogGenerateButton } from "@/components/admin/blog-generate-button";
+import { BlogBackfillImagesButton } from "@/components/admin/blog-backfill-images-button";
 import { TOPIC_SEEDS } from "@/lib/content-engine/topics";
 
 export const metadata = { title: "Blog | Magadh Recipe Admin" };
@@ -48,6 +49,7 @@ export default async function AdminBlogPage() {
     published: posts.filter((p) => p.status === "PUBLISHED").length,
     drafts: posts.filter((p) => p.status === "DRAFT").length,
     auto: posts.filter((p) => p.tags.includes("auto-generated")).length,
+    missingCover: posts.filter((p) => !p.coverImage).length,
   };
 
   const lastAutoPost = posts.find((p) => p.tags.includes("auto-generated"));
@@ -75,6 +77,7 @@ export default async function AdminBlogPage() {
               Categories
             </Link>
           </Button>
+          <BlogBackfillImagesButton missingCount={counts.missingCover} />
           <BlogGenerateButton />
           <Button asChild className="bg-brand-600 hover:bg-brand-500">
             <Link href="/admin/blog/new" className="inline-flex items-center gap-2">
