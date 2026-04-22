@@ -9,11 +9,13 @@ import {
   BRAND_ADDRESS,
   FSSAI_REGISTRATION_NUMBER,
 } from "@/lib/constants";
+import { prisma } from "@/lib/prisma";
 
-const footerLinks = {
+const staticFooterLinks = {
   "Quick Links": [
     { label: "Home", href: "/" },
     { label: "All Products", href: "/products" },
+    { label: "Stories", href: "/blog" },
     { label: "About Us", href: "/about" },
     { label: "Contact Us", href: "/contact" },
     { label: "Track Order", href: "/account/orders" },
@@ -34,7 +36,35 @@ const footerLinks = {
   ],
 };
 
-export function Footer() {
+async function getRecentStories(): Promise<{ label: string; href: string }[]> {
+  try {
+    const posts = await prisma.blogPost.findMany({
+      where: { status: "PUBLISHED" },
+      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+      take: 5,
+      select: { slug: true, title: true },
+    });
+    return posts.map((p) => ({
+      label: p.title.length > 48 ? `${p.title.slice(0, 45)}…` : p.title,
+      href: `/blog/${p.slug}`,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export async function Footer() {
+  const recentStories = await getRecentStories();
+  const footerLinks: Record<string, { label: string; href: string }[]> = {
+    ...staticFooterLinks,
+  };
+  if (recentStories.length > 0) {
+    footerLinks["Latest Stories"] = [
+      ...recentStories,
+      { label: "View all stories →", href: "/blog" },
+    ];
+  }
+
   return (
     <footer className="bg-earth-dark text-cream-200">
       {/* Main Footer */}

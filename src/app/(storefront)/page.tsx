@@ -13,6 +13,7 @@ import type { ProductCardData } from "@/types";
 import { storefrontListingWhere } from "@/lib/storefront-products";
 import { JsonLd } from "@/components/seo/json-ld";
 import { breadcrumbSchema } from "@/lib/schema";
+import { LatestStories } from "@/components/storefront/latest-stories";
 
 const IngredientReveal = dynamic(() => import("@/components/storefront/ingredient-reveal").then(m => m.IngredientReveal));
 const ProcessStory = dynamic(() => import("@/components/storefront/process-story").then(m => m.ProcessStory));
@@ -330,6 +331,9 @@ export default async function HomePage() {
 
       {/* Brand Story */}
       <BrandStory />
+
+      {/* Latest Stories from the blog */}
+      <LatestStories />
 
       {/* Testimonials */}
       <Testimonials />

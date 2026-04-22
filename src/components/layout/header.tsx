@@ -39,6 +39,7 @@ const NAV_LINKS = [
       { label: "Mixed Pickle", href: "/products?tags=mixed" },
     ],
   },
+  { label: "Stories", href: "/blog" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
 ];

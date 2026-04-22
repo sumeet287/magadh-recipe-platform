@@ -21,6 +21,7 @@ const LINKS = [
     { label: "Mixed Pickle", href: "/products?tags=mixed" },
     { label: "Oal Pickle", href: "/products?tags=oal" },
   ]},
+  { label: "Stories", href: "/blog" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
 ];
