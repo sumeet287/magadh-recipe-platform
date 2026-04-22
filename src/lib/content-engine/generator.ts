@@ -177,7 +177,7 @@ async function generateWithGemini(topic: TopicSeed): Promise<string> {
       "GEMINI_API_KEY is not set. Get a free key at https://aistudio.google.com/apikey",
     );
   }
-  const model = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
     model,
   )}:generateContent?key=${encodeURIComponent(apiKey)}`;
