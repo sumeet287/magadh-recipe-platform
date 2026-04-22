@@ -170,14 +170,11 @@ const SHARED_SCHEMA = {
 /* GEMINI (default, free tier)                                         */
 /* ------------------------------------------------------------------ */
 
-async function generateWithGemini(topic: TopicSeed): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error(
-      "GEMINI_API_KEY is not set. Get a free key at https://aistudio.google.com/apikey",
-    );
-  }
-  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+async function callGeminiOnce(model: string, apiKey: string, topic: TopicSeed): Promise<string> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
     model,
   )}:generateContent?key=${encodeURIComponent(apiKey)}`;
@@ -206,7 +203,11 @@ async function generateWithGemini(topic: TopicSeed): Promise<string> {
 
   if (!res.ok) {
     const errText = await res.text().catch(() => "");
-    throw new Error(`Gemini API ${res.status}: ${errText.slice(0, 600)}`);
+    const err = new Error(`Gemini API ${res.status}: ${errText.slice(0, 600)}`) as Error & {
+      status: number;
+    };
+    err.status = res.status;
+    throw err;
   }
 
   const json = (await res.json()) as {
@@ -227,6 +228,57 @@ async function generateWithGemini(topic: TopicSeed): Promise<string> {
 
   if (!text) throw new Error("Gemini returned empty content");
   return text;
+}
+
+function isRetryableStatus(status?: number): boolean {
+  // 503 = overloaded, 429 = rate limit, 500/502/504 = transient server issues.
+  return status === 503 || status === 429 || status === 500 || status === 502 || status === 504;
+}
+
+async function generateWithGemini(topic: TopicSeed): Promise<string> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error(
+      "GEMINI_API_KEY is not set. Get a free key at https://aistudio.google.com/apikey",
+    );
+  }
+
+  const primaryModel = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  // Fallbacks are tried if the primary is overloaded / rate-limited. These are
+  // all free-tier eligible models with decent quality.
+  const fallbackModels = [
+    "gemini-2.5-flash-lite",
+    "gemini-1.5-flash",
+    "gemini-1.5-flash-8b",
+  ].filter((m) => m !== primaryModel);
+
+  const models = [primaryModel, ...fallbackModels];
+  const maxRetriesPerModel = 2;
+
+  let lastError: unknown = null;
+
+  for (const model of models) {
+    for (let attempt = 0; attempt < maxRetriesPerModel; attempt += 1) {
+      try {
+        return await callGeminiOnce(model, apiKey, topic);
+      } catch (err) {
+        lastError = err;
+        const status = (err as { status?: number })?.status;
+        if (!isRetryableStatus(status)) {
+          // Non-retryable (e.g. 400 bad request, 401 bad key, safety block).
+          throw err;
+        }
+        // Retryable — wait then try again on same model, or move to next model.
+        const backoffMs = 1500 * Math.pow(2, attempt); // 1.5s, 3s
+        await sleep(backoffMs);
+      }
+    }
+    // Exhausted retries on this model — try next.
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("Gemini generation failed after all retries");
 }
 
 /* ------------------------------------------------------------------ */
