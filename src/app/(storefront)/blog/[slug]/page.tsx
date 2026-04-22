@@ -24,39 +24,49 @@ interface PageProps {
 }
 
 async function getPost(slug: string) {
-  return prisma.blogPost.findFirst({
-    where: {
-      slug,
-      status: "PUBLISHED",
-      publishedAt: { not: null, lte: new Date() },
-    },
-    include: {
-      category: { select: { name: true, slug: true } },
-    },
-  });
+  try {
+    return await prisma.blogPost.findFirst({
+      where: {
+        slug,
+        status: "PUBLISHED",
+        publishedAt: { not: null, lte: new Date() },
+      },
+      include: {
+        category: { select: { name: true, slug: true } },
+      },
+    });
+  } catch (err) {
+    console.error("[/blog/[slug]] failed to load post:", err);
+    return null;
+  }
 }
 
 async function getRelatedPosts(categoryId: string | null, excludeId: string) {
-  return prisma.blogPost.findMany({
-    where: {
-      id: { not: excludeId },
-      status: "PUBLISHED",
-      publishedAt: { not: null, lte: new Date() },
-      ...(categoryId ? { categoryId } : {}),
-    },
-    orderBy: { publishedAt: "desc" },
-    take: 3,
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      excerpt: true,
-      coverImage: true,
-      coverImageAlt: true,
-      publishedAt: true,
-      readTimeMinutes: true,
-    },
-  });
+  try {
+    return await prisma.blogPost.findMany({
+      where: {
+        id: { not: excludeId },
+        status: "PUBLISHED",
+        publishedAt: { not: null, lte: new Date() },
+        ...(categoryId ? { categoryId } : {}),
+      },
+      orderBy: { publishedAt: "desc" },
+      take: 3,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        excerpt: true,
+        coverImage: true,
+        coverImageAlt: true,
+        publishedAt: true,
+        readTimeMinutes: true,
+      },
+    });
+  } catch (err) {
+    console.error("[/blog/[slug]] failed to load related posts:", err);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

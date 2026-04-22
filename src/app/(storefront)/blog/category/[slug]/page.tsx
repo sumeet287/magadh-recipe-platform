@@ -15,9 +15,14 @@ interface PageProps {
 }
 
 async function getCategory(slug: string) {
-  return prisma.blogCategory.findUnique({
-    where: { slug },
-  });
+  try {
+    return await prisma.blogCategory.findUnique({
+      where: { slug },
+    });
+  } catch (err) {
+    console.error("[/blog/category/[slug]] failed to load category:", err);
+    return null;
+  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -38,14 +43,19 @@ export default async function BlogCategoryPage({ params }: PageProps) {
   const category = await getCategory(slug);
   if (!category) notFound();
 
-  const posts = await prisma.blogPost.findMany({
-    where: {
-      status: "PUBLISHED",
-      publishedAt: { not: null, lte: new Date() },
-      categoryId: category.id,
-    },
-    orderBy: { publishedAt: "desc" },
-  });
+  let posts: Awaited<ReturnType<typeof prisma.blogPost.findMany>> = [];
+  try {
+    posts = await prisma.blogPost.findMany({
+      where: {
+        status: "PUBLISHED",
+        publishedAt: { not: null, lte: new Date() },
+        categoryId: category.id,
+      },
+      orderBy: { publishedAt: "desc" },
+    });
+  } catch (err) {
+    console.error("[/blog/category/[slug]] failed to load posts:", err);
+  }
 
   return (
     <div>

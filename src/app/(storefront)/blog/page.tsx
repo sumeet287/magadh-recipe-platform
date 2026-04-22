@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+import type { Prisma } from "@prisma/client";
 import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
-import { getSiteUrl } from "@/lib/site-url";
 import { formatDate } from "@/lib/utils";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -25,18 +25,28 @@ export const metadata: Metadata = {
   },
 };
 
-async function getPublishedPosts() {
-  return prisma.blogPost.findMany({
-    where: { status: "PUBLISHED", publishedAt: { not: null, lte: new Date() } },
-    orderBy: { publishedAt: "desc" },
-    include: {
-      category: { select: { name: true, slug: true } },
-    },
-  });
+type BlogPostWithCategory = Prisma.BlogPostGetPayload<{
+  include: { category: { select: { name: true; slug: true } } };
+}>;
+
+async function getPublishedPosts(): Promise<BlogPostWithCategory[]> {
+  try {
+    return await prisma.blogPost.findMany({
+      where: { status: "PUBLISHED", publishedAt: { not: null, lte: new Date() } },
+      orderBy: { publishedAt: "desc" },
+      include: {
+        category: { select: { name: true, slug: true } },
+      },
+    });
+  } catch (err) {
+    // Swallow "table does not exist" + connectivity errors so a fresh deploy
+    // (before migrations have run) doesn't brick the storefront.
+    console.error("[/blog] failed to load posts:", err);
+    return [];
+  }
 }
 
 export default async function BlogIndexPage() {
-  const site = getSiteUrl();
   const posts = await getPublishedPosts();
 
   const categories = Array.from(
