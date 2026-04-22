@@ -1,9 +1,11 @@
 import Link from "next/link";
 import NextImage from "next/image";
-import { FileText, Plus, Pencil, ExternalLink, Clock } from "lucide-react";
+import { FileText, Plus, Pencil, ExternalLink, Clock, Sparkles, CalendarClock } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatRelativeTime } from "@/lib/utils";
+import { BlogGenerateButton } from "@/components/admin/blog-generate-button";
+import { TOPIC_SEEDS } from "@/lib/content-engine/topics";
 
 export const metadata = { title: "Blog | Magadh Recipe Admin" };
 
@@ -12,6 +14,28 @@ const STATUS_STYLE: Record<string, string> = {
   DRAFT: "bg-amber-900/40 text-amber-400",
   ARCHIVED: "bg-gray-800 text-gray-400",
 };
+
+function nextCronRunLabel(): string {
+  // Matches vercel.json schedule: Mon/Wed/Fri 03:30 UTC (≈ 9:00 AM IST).
+  const now = new Date();
+  const target = new Date(now);
+  for (let i = 0; i < 7; i += 1) {
+    const day = target.getUTCDay(); // 0=Sun..6=Sat
+    if ([1, 3, 5].includes(day)) {
+      target.setUTCHours(3, 30, 0, 0);
+      if (target.getTime() > now.getTime()) break;
+    }
+    target.setUTCDate(target.getUTCDate() + 1);
+  }
+  return target.toLocaleString("en-IN", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Kolkata",
+  });
+}
 
 export default async function AdminBlogPage() {
   const posts = await prisma.blogPost.findMany({
@@ -23,7 +47,12 @@ export default async function AdminBlogPage() {
     total: posts.length,
     published: posts.filter((p) => p.status === "PUBLISHED").length,
     drafts: posts.filter((p) => p.status === "DRAFT").length,
+    auto: posts.filter((p) => p.tags.includes("auto-generated")).length,
   };
+
+  const lastAutoPost = posts.find((p) => p.tags.includes("auto-generated"));
+  const publishedSlugs = new Set(posts.map((p) => p.slug));
+  const remainingTopics = TOPIC_SEEDS.filter((t) => !publishedSlugs.has(t.slug)).length;
 
   return (
     <div className="space-y-6">
@@ -32,6 +61,7 @@ export default async function AdminBlogPage() {
           <h1 className="font-serif text-2xl font-bold text-white">Blog</h1>
           <p className="text-gray-400 text-sm mt-1">
             {counts.total} posts · {counts.published} published · {counts.drafts} drafts
+            {counts.auto > 0 ? ` · ${counts.auto} AI-generated` : ""}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -45,12 +75,56 @@ export default async function AdminBlogPage() {
               Categories
             </Link>
           </Button>
+          <BlogGenerateButton />
           <Button asChild className="bg-brand-600 hover:bg-brand-500">
             <Link href="/admin/blog/new" className="inline-flex items-center gap-2">
               <Plus className="w-4 h-4" />
               New post
             </Link>
           </Button>
+        </div>
+      </div>
+
+      <div className="bg-gradient-to-br from-amber-500/10 via-gray-900 to-brand-600/10 border border-amber-500/20 rounded-2xl p-5">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0">
+            <Sparkles className="w-5 h-5 text-amber-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-white font-semibold">Autonomous Content Engine</h2>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-900/40 text-green-400 font-medium uppercase tracking-wider">
+                Active
+              </span>
+            </div>
+            <p className="text-sm text-gray-400 mt-1">
+              Auto-publishes 3 SEO-optimised blogs per week — no manual input needed.
+              Topics rotate across cultural stories, recipes and comparisons.
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-gray-500">Schedule</p>
+                <p className="text-sm text-white font-medium mt-0.5">Mon · Wed · Fri · 9:00 AM IST</p>
+              </div>
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-gray-500">Next run</p>
+                <p className="text-sm text-white font-medium mt-0.5 flex items-center gap-1">
+                  <CalendarClock className="w-3.5 h-3.5 text-amber-400" />
+                  {nextCronRunLabel()}
+                </p>
+              </div>
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-gray-500">Topics in queue</p>
+                <p className="text-sm text-white font-medium mt-0.5">{remainingTopics} ready</p>
+              </div>
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-gray-500">Last generated</p>
+                <p className="text-sm text-white font-medium mt-0.5">
+                  {lastAutoPost ? formatRelativeTime(lastAutoPost.createdAt) : "—"}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
