@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { useCartStore } from "@/store/cart-store";
 import { formatCurrency } from "@/lib/utils";
 import { addressShape, type CheckoutInput } from "@/lib/validations/order";
+import { INDIAN_STATES_AND_UTS } from "@/lib/constants";
 import { z } from "zod";
 
 const addressFormSchema = z.object({ address: addressShape });
@@ -51,12 +52,6 @@ type Step = "address" | "review";
 const STEPS: { key: Step; label: string }[] = [
   { key: "address", label: "Address" },
   { key: "review", label: "Review & Pay" },
-];
-
-const INDIAN_STATES = [
-  "Andhra Pradesh", "Bihar", "Delhi", "Gujarat", "Jharkhand", "Karnataka",
-  "Kerala", "Madhya Pradesh", "Maharashtra", "Odisha", "Punjab", "Rajasthan",
-  "Tamil Nadu", "Telangana", "Uttar Pradesh", "Uttarakhand", "West Bengal",
 ];
 
 export default function CheckoutPage() {
@@ -297,7 +292,7 @@ export default function CheckoutPage() {
                       <label className="block text-sm font-medium text-earth-dark mb-1.5">State</label>
                       <select {...register("address.state")} className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
                         <option value="">Select state</option>
-                        {INDIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+                        {INDIAN_STATES_AND_UTS.map((s) => <option key={s} value={s}>{s}</option>)}
                       </select>
                     </div>
                     {savedAddresses.length > 0 && (

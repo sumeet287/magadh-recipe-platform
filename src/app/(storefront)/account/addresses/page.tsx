@@ -8,13 +8,8 @@ import { Modal, ConfirmDialog } from "@/components/ui/modal";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addressSchema, type AddressInput } from "@/lib/validations/address";
+import { INDIAN_STATES_AND_UTS } from "@/lib/constants";
 import type { Address } from "@prisma/client";
-
-const INDIAN_STATES = [
-  "Andhra Pradesh", "Bihar", "Delhi", "Gujarat", "Jharkhand", "Karnataka",
-  "Kerala", "Madhya Pradesh", "Maharashtra", "Odisha", "Punjab", "Rajasthan",
-  "Tamil Nadu", "Telangana", "Uttar Pradesh", "Uttarakhand", "West Bengal",
-];
 
 export default function AddressesPage() {
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -157,7 +152,7 @@ export default function AddressesPage() {
               className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm text-earth-dark focus:outline-none focus:ring-2 focus:ring-brand-500"
             >
               <option value="">Select state</option>
-              {INDIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+              {INDIAN_STATES_AND_UTS.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
             {errors.state && <p className="text-xs text-spice-600 mt-1">{errors.state.message}</p>}
           </div>

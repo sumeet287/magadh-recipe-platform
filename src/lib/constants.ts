@@ -53,6 +53,51 @@ export const ORDER_STATUS_CONFIG: Record<string, { label: string; color: string;
   FAILED: { label: "Failed", color: "text-red-300 bg-red-500/20 border border-red-400/30", description: "Payment/order failed" },
 };
 
+// ==================== Indian States & UTs ====================
+
+/**
+ * All 28 Indian states + 8 Union Territories, sorted alphabetically.
+ * Used for address form dropdowns across checkout and account pages.
+ */
+export const INDIAN_STATES_AND_UTS = [
+  "Andaman and Nicobar Islands",
+  "Andhra Pradesh",
+  "Arunachal Pradesh",
+  "Assam",
+  "Bihar",
+  "Chandigarh",
+  "Chhattisgarh",
+  "Dadra and Nagar Haveli and Daman and Diu",
+  "Delhi",
+  "Goa",
+  "Gujarat",
+  "Haryana",
+  "Himachal Pradesh",
+  "Jammu and Kashmir",
+  "Jharkhand",
+  "Karnataka",
+  "Kerala",
+  "Ladakh",
+  "Lakshadweep",
+  "Madhya Pradesh",
+  "Maharashtra",
+  "Manipur",
+  "Meghalaya",
+  "Mizoram",
+  "Nagaland",
+  "Odisha",
+  "Puducherry",
+  "Punjab",
+  "Rajasthan",
+  "Sikkim",
+  "Tamil Nadu",
+  "Telangana",
+  "Tripura",
+  "Uttar Pradesh",
+  "Uttarakhand",
+  "West Bengal",
+] as const;
+
 // ==================== Product Regions ====================
 
 export const PRODUCT_REGIONS = [
