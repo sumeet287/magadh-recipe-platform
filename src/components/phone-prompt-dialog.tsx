@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { Phone, MessageCircle, X } from "lucide-react";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 
-const DISMISS_COOLDOWN_DAYS = 7;
+const DISMISS_COOLDOWN_DAYS = 3;
 const SESSION_SHOWN_KEY = "mr:phone-prompt-shown";
 
 type ProfileData = {
@@ -17,12 +17,23 @@ type ProfileData = {
   phonePromptDismissedAt: string | null;
 };
 
+type PromptMode = "phone-missing" | "optin-missing";
+
 const PHONE_REGEX = /^[6-9]\d{9}$/;
+
+function maskPhone(phone: string | null): string {
+  if (!phone) return "";
+  const last10 = phone.replace(/\D/g, "").slice(-10);
+  if (last10.length < 10) return phone;
+  return `+91 ${last10.slice(0, 2)}${"X".repeat(5)}${last10.slice(-3)}`;
+}
 
 export function PhonePromptDialog() {
   const { data: session, update, status } = useSession();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<PromptMode>("phone-missing");
+  const [existingPhone, setExistingPhone] = useState<string | null>(null);
   const [phone, setPhone] = useState("");
   const [optIn, setOptIn] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -45,7 +56,10 @@ export function PhonePromptDialog() {
         const json = await res.json();
         const data = json?.data as ProfileData | undefined;
         if (cancelled || !data) return;
-        if (data.phone) return;
+
+        const needsPhone = !data.phone;
+        const needsOptIn = Boolean(data.phone) && !data.marketingOptIn;
+        if (!needsPhone && !needsOptIn) return;
 
         if (data.phonePromptDismissedAt) {
           const dismissedAt = new Date(data.phonePromptDismissedAt).getTime();
@@ -53,6 +67,8 @@ export function PhonePromptDialog() {
           if (Date.now() - dismissedAt < threshold) return;
         }
 
+        setMode(needsPhone ? "phone-missing" : "optin-missing");
+        setExistingPhone(data.phone);
         setOpen(true);
         sessionStorage.setItem(SESSION_SHOWN_KEY, "1");
       } catch {
@@ -67,18 +83,27 @@ export function PhonePromptDialog() {
     };
   }, [status, session?.user?.id, pathname]);
 
+  const maskedPhone = useMemo(() => maskPhone(existingPhone), [existingPhone]);
+
   const handleSubmit = async () => {
     setError(null);
-    if (!PHONE_REGEX.test(phone)) {
+
+    if (mode === "phone-missing" && !PHONE_REGEX.test(phone)) {
       setError("Enter a valid 10-digit Indian mobile number (starts with 6-9).");
       return;
     }
+
     setSubmitting(true);
     try {
+      const payload: Record<string, unknown> =
+        mode === "phone-missing"
+          ? { phone, marketingOptIn: optIn }
+          : { marketingOptIn: true };
+
       const res = await fetch("/api/users/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, marketingOptIn: optIn }),
+        body: JSON.stringify(payload),
       });
       const json = await res.json();
       if (!res.ok) {
@@ -86,7 +111,12 @@ export function PhonePromptDialog() {
         setSubmitting(false);
         return;
       }
-      await update({ phone, marketingOptIn: optIn });
+
+      await update(
+        mode === "phone-missing"
+          ? { phone, marketingOptIn: optIn }
+          : { marketingOptIn: true }
+      );
       setOpen(false);
     } catch {
       setError("Network error. Please try again.");
@@ -133,45 +163,81 @@ export function PhonePromptDialog() {
           </div>
           <div>
             <h2 className="font-serif text-lg font-bold text-earth-dark leading-tight">
-              Update Your Mobile Number
+              {mode === "phone-missing"
+                ? "Update Your Mobile Number"
+                : "Get Exclusive WhatsApp Offers"}
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">
-              So you never miss order updates or offers
+              {mode === "phone-missing"
+                ? "So you never miss order updates or offers"
+                : "Early access to new launches & festive deals"}
             </p>
           </div>
         </div>
 
-        <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-          Add your mobile number and we&apos;ll send you order confirmations,
-          shipping updates, and exclusive WhatsApp offers.
-        </p>
+        {mode === "phone-missing" ? (
+          <>
+            <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+              Add your mobile number and we&apos;ll send you order confirmations,
+              shipping updates, and exclusive WhatsApp offers.
+            </p>
 
-        <div className="space-y-3">
-          <Input
-            label="Mobile Number"
-            type="tel"
-            inputMode="numeric"
-            maxLength={10}
-            placeholder="10-digit mobile number"
-            leftIcon={<Phone className="w-4 h-4 text-gray-400" />}
-            value={phone}
-            onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-            error={error ?? undefined}
-          />
+            <div className="space-y-3">
+              <Input
+                label="Mobile Number"
+                type="tel"
+                inputMode="numeric"
+                maxLength={10}
+                placeholder="10-digit mobile number"
+                leftIcon={<Phone className="w-4 h-4 text-gray-400" />}
+                value={phone}
+                onChange={(e) =>
+                  setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))
+                }
+                error={error ?? undefined}
+              />
 
-          <label className="flex items-start gap-2.5 p-3 rounded-xl bg-white/70 border border-brand-100 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={optIn}
-              onChange={(e) => setOptIn(e.target.checked)}
-              className="mt-0.5 rounded text-brand-500 focus:ring-brand-500"
-            />
-            <span className="text-xs text-gray-600 leading-relaxed">
-              Send me exclusive offers, new product launches, and recipe tips on
-              WhatsApp (you can opt out anytime).
-            </span>
-          </label>
-        </div>
+              <label className="flex items-start gap-2.5 p-3 rounded-xl bg-white/70 border border-brand-100 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={optIn}
+                  onChange={(e) => setOptIn(e.target.checked)}
+                  className="mt-0.5 rounded text-brand-500 focus:ring-brand-500"
+                />
+                <span className="text-xs text-gray-600 leading-relaxed">
+                  Send me exclusive offers, new product launches, and recipe tips
+                  on WhatsApp (you can opt out anytime).
+                </span>
+              </label>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+              We&apos;ll send early access to new product launches, festive
+              discounts, and recipe tips straight to your WhatsApp.
+            </p>
+
+            <div className="p-3 rounded-xl bg-white/70 border border-brand-100 mb-2">
+              <p className="text-xs text-gray-500">We&apos;ll message you on</p>
+              <p className="text-sm font-medium text-earth-dark mt-0.5 flex items-center gap-2">
+                <Phone className="w-4 h-4 text-brand-500" />
+                {maskedPhone || "your mobile number"}
+              </p>
+            </div>
+
+            <p className="text-[11px] text-gray-400 leading-relaxed">
+              Usually 1-2 messages a month. You can opt out anytime from your
+              account settings or by replying STOP.
+            </p>
+
+            {error && (
+              <p className="text-xs text-spice-700 bg-spice-50 border border-spice-200 rounded-lg px-3 py-2 mt-3">
+                {error}
+              </p>
+            )}
+          </>
+        )}
 
         <div className="flex gap-2.5 mt-5">
           <Button
@@ -180,7 +246,7 @@ export function PhonePromptDialog() {
             onClick={handleDismiss}
             disabled={submitting || dismissing}
           >
-            Not now
+            {mode === "phone-missing" ? "Not now" : "No thanks"}
           </Button>
           <Button
             variant="premium"
@@ -189,7 +255,7 @@ export function PhonePromptDialog() {
             loading={submitting}
             disabled={dismissing}
           >
-            Save Number
+            {mode === "phone-missing" ? "Save Number" : "Yes, Subscribe"}
           </Button>
         </div>
 

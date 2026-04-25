@@ -73,6 +73,9 @@ export async function PATCH(req: NextRequest) {
         data.marketingOptInAt = new Date();
       } else if (!marketingOptIn && current.marketingOptIn) {
         data.marketingOptInAt = null;
+        // Give a grace period so the phone-prompt popup doesn't immediately
+        // nag the user right after they opted out from the account page.
+        data.phonePromptDismissedAt = new Date();
       }
     }
 
