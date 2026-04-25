@@ -116,19 +116,19 @@ export function PhonePromptDialog() {
       hideCloseButton
       className="!rounded-3xl"
     >
-      <div className="-m-6 p-6 sm:p-8 bg-gradient-to-br from-brand-50 to-cream-50">
+      <div className="relative -m-6 p-6 sm:p-8 bg-gradient-to-br from-brand-50 to-cream-50">
         <button
           type="button"
           onClick={handleDismiss}
           disabled={dismissing || submitting}
           aria-label="Close"
-          className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-white/60 text-gray-500 transition-colors"
+          className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <X className="w-4 h-4" />
+          <X className="w-4 h-4" strokeWidth={2.5} />
         </button>
 
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-11 h-11 rounded-full bg-brand-500/15 flex items-center justify-center">
+        <div className="flex items-center gap-3 mb-5 pr-10">
+          <div className="w-11 h-11 rounded-full bg-brand-500/15 flex items-center justify-center shrink-0">
             <MessageCircle className="w-5 h-5 text-brand-600" />
           </div>
           <div>
@@ -136,14 +136,14 @@ export function PhonePromptDialog() {
               Update Your Mobile Number
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">
-              Taaki order updates aur offers miss na ho
+              So you never miss order updates or offers
             </p>
           </div>
         </div>
 
         <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-          Apna mobile number add karein — hum aapko order confirmations, shipping
-          updates aur special WhatsApp offers bhejenge.
+          Add your mobile number and we&apos;ll send you order confirmations,
+          shipping updates, and exclusive WhatsApp offers.
         </p>
 
         <div className="space-y-3">
@@ -167,8 +167,8 @@ export function PhonePromptDialog() {
               className="mt-0.5 rounded text-brand-500 focus:ring-brand-500"
             />
             <span className="text-xs text-gray-600 leading-relaxed">
-              Send me exclusive offers, new product launches, and recipe tips on WhatsApp
-              (you can opt out anytime).
+              Send me exclusive offers, new product launches, and recipe tips on
+              WhatsApp (you can opt out anytime).
             </span>
           </label>
         </div>
@@ -180,7 +180,7 @@ export function PhonePromptDialog() {
             onClick={handleDismiss}
             disabled={submitting || dismissing}
           >
-            Baad me
+            Not now
           </Button>
           <Button
             variant="premium"
