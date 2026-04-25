@@ -552,67 +552,24 @@ export async function sendOrderNotifications(
   }
 }
 
-// ---- WhatsApp Integration (Meta Cloud API) ----
+// ---- WhatsApp Integration (delegates to src/lib/whatsapp.ts) ----
+// Kept as a thin wrapper for backwards compatibility with existing callers
+// (sendOrderNotifications + admin resend). All new code should call the helpers
+// in `@/lib/whatsapp` directly.
 
-const META_GRAPH_URL = "https://graph.facebook.com/v21.0";
+import { sendOrderNotificationToAdmin } from "@/lib/whatsapp";
 
 export async function sendWhatsAppOrderNotification(order: PrismaOrderForEmail) {
-  const token = process.env.WHATSAPP_ACCESS_TOKEN;
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  const adminPhone = process.env.WHATSAPP_ADMIN_PHONE;
+  const result = await sendOrderNotificationToAdmin({
+    orderNumber: order.orderNumber,
+    totalAmount: order.totalAmount,
+    items: order.items,
+    shipping: order.shipping ?? null,
+  });
 
-  if (!token || !phoneNumberId || !adminPhone) {
-    console.log("[WhatsApp] Skipped — missing env vars", { token: !!token, phoneNumberId: !!phoneNumberId, adminPhone: !!adminPhone });
-    return;
-  }
-
-  console.log(`[WhatsApp] Sending order notification for ${order.orderNumber} to ${adminPhone}`);
-
-  // WhatsApp template parameters cannot contain newlines, tabs, or more than
-  // 4 consecutive spaces (Meta error 132018). Keep everything on one line
-  // with " | " separators instead of "\n".
-  const items = order.items
-    .map((i) => `${i.productName} (${i.variantName}) x${i.quantity}`)
-    .join(", ");
-
-  const customerLine = `${order.shipping?.recipientName ?? "Customer"}, ${order.shipping?.phone ?? "N/A"}, ${order.shipping?.city ?? ""} ${order.shipping?.state ?? ""}`.trim();
-  const details = `${items} | ${customerLine}`.replace(/\s{2,}/g, " ");
-
-  try {
-    const res = await fetch(`${META_GRAPH_URL}/${phoneNumberId}/messages`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        messaging_product: "whatsapp",
-        to: adminPhone,
-        type: "template",
-        template: {
-          name: "order_notification",
-          language: { code: "en" },
-          components: [
-            {
-              type: "body",
-              parameters: [
-                { type: "text", text: `#${order.orderNumber}` },
-                { type: "text", text: `Rs.${order.totalAmount}` },
-                { type: "text", text: details },
-              ],
-            },
-          ],
-        },
-      }),
-    });
-
-    if (!res.ok) {
-      const err = await res.text();
-      console.error("[WhatsApp] API error:", res.status, err);
-    } else {
-      console.log("[WhatsApp] Sent successfully for", order.orderNumber);
-    }
-  } catch (error) {
-    console.error("[WhatsApp] Failed to send notification:", error);
+  if (result.success) {
+    console.log("[WhatsApp] Sent successfully for", order.orderNumber, result.messageId ?? "");
+  } else {
+    console.error("[WhatsApp] Failed for", order.orderNumber, result.error);
   }
 }

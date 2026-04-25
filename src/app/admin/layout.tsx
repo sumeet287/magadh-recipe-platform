@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import {
   LayoutDashboard, Package, FolderOpen, ShoppingBag, Users,
   Tag, Image as ImageIcon, Star, BarChart3, Settings, ChevronRight, MessageSquare,
-  FileText,
+  FileText, Megaphone,
 } from "lucide-react";
 
 const navGroups = [
@@ -40,6 +40,12 @@ const navGroups = [
       { href: "/admin/blog", label: "Blog", icon: FileText },
       { href: "/admin/reviews", label: "Reviews", icon: Star },
       { href: "/admin/inquiries", label: "Contact Inquiries", icon: MessageSquare },
+    ],
+  },
+  {
+    label: "Marketing",
+    items: [
+      { href: "/admin/broadcasts", label: "WhatsApp Broadcasts", icon: Megaphone },
     ],
   },
   {

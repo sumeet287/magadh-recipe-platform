@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
-import { SOCIAL_LINKS } from "@/lib/constants";
+import { SOCIAL_LINKS, WHATSAPP_NUMBER } from "@/lib/constants";
 import { useCartStore } from "@/store/cart-store";
 import { useUIStore } from "@/store/ui-store";
 import dynamic from "next/dynamic";
@@ -97,7 +97,7 @@ export function Header() {
                   rel="noopener noreferrer"
                   className="text-brand-400 font-semibold hover:text-brand-300 transition-colors"
                 >
-                  ✦  Order on WhatsApp @ +916207197364
+                  ✦  Order on WhatsApp @ +{WHATSAPP_NUMBER}
                 </a>
               </span>
             </span>

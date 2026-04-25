@@ -67,6 +67,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name: user.name,
           image: user.image,
           role: user.role,
+          phone: user.phone,
+          phoneVerified: user.phoneVerified,
+          marketingOptIn: user.marketingOptIn,
         };
       },
     }),
@@ -84,12 +87,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async jwt({ token, user, trigger, session }) {
       if (user) {
-        token.id = user.id;
-        token.role = (user as { role?: string }).role ?? "CUSTOMER";
+        const u = user as {
+          id?: string;
+          role?: string;
+          phone?: string | null;
+          phoneVerified?: boolean;
+          marketingOptIn?: boolean;
+        };
+        token.id = u.id ?? token.id;
+        token.role = u.role ?? "CUSTOMER";
+        token.phone = u.phone ?? null;
+        token.phoneVerified = u.phoneVerified ?? false;
+        token.marketingOptIn = u.marketingOptIn ?? false;
       }
       if (trigger === "update" && session) {
-        token.name = session.name;
-        token.image = session.image;
+        if (session.name !== undefined) token.name = session.name;
+        if (session.image !== undefined) token.image = session.image;
+        if (session.phone !== undefined) token.phone = session.phone;
+        if (session.phoneVerified !== undefined) token.phoneVerified = session.phoneVerified;
+        if (session.marketingOptIn !== undefined) token.marketingOptIn = session.marketingOptIn;
+        if (session.phonePromptDismissedAt !== undefined) {
+          token.phonePromptDismissedAt = session.phonePromptDismissedAt;
+        }
       }
       return token;
     },
@@ -97,6 +116,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        session.user.phone = (token.phone as string | null | undefined) ?? null;
+        session.user.phoneVerified = (token.phoneVerified as boolean | undefined) ?? false;
+        session.user.marketingOptIn = (token.marketingOptIn as boolean | undefined) ?? false;
+        session.user.phonePromptDismissedAt =
+          (token.phonePromptDismissedAt as string | null | undefined) ?? null;
       }
       return session;
     },

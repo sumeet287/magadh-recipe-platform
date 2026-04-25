@@ -24,6 +24,7 @@ export const checkoutSchema = z.object({
   giftNote: z.string().max(500).optional(),
   isGiftOrder: z.boolean().default(false),
   notes: z.string().max(500).optional(),
+  checkoutSessionId: z.string().optional(),
 });
 
 export const verifyPaymentSchema = z.object({

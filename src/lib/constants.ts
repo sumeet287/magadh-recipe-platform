@@ -9,6 +9,11 @@ export const SUPPORT_EMAIL = "magadhrecipe@gmail.com";
 export const SUPPORT_PHONE = "+91-6207197364";
 export const BRAND_ADDRESS = "Patna, Bihar, India";
 
+// WhatsApp click-to-chat number (E.164 without +, e.g. "916207197364").
+// Configurable via NEXT_PUBLIC_WHATSAPP_NUMBER so we can swap numbers without a redeploy of constants.
+export const WHATSAPP_NUMBER =
+  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.replace(/\D/g, "") || "916207197364";
+
 /** FSSAI registration number (Food Safety & Standards Act, 2006). */
 export const FSSAI_REGISTRATION_NUMBER = "20425001001230";
 
@@ -130,8 +135,7 @@ export const SOCIAL_LINKS = {
   facebook: "https://www.facebook.com/magadhrecipe/",
   twitter: "https://twitter.com/magadhrecipe",
   youtube: "https://youtube.com/@magadhrecipe",
-  whatsapp:
-    "https://wa.me/916207197364?text=Hi%2C%20I%27d%20like%20to%20place%20an%20order%20from%20Magadh%20Recipe",
+  whatsapp: `https://wa.me/${WHATSAPP_NUMBER}?text=Hi%2C%20I%27d%20like%20to%20place%20an%20order%20from%20Magadh%20Recipe`,
 };
 
 // ==================== Trust Badges ====================

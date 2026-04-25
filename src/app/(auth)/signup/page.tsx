@@ -23,14 +23,23 @@ export default function SignupPage() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<SignUpInput>({ resolver: zodResolver(signUpSchema) });
+  } = useForm<SignUpInput>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: { marketingOptIn: true },
+  });
 
   const onSubmit = async (data: SignUpInput) => {
     setServerError(null);
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: data.name, email: data.email, phone: data.phone, password: data.password }),
+      body: JSON.stringify({
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        password: data.password,
+        marketingOptIn: data.marketingOptIn,
+      }),
     });
 
     const json = await res.json();
@@ -207,6 +216,19 @@ export default function SignupPage() {
           error={errors.confirmPassword?.message}
           {...register("confirmPassword")}
         />
+
+        <label className="flex items-start gap-2.5 cursor-pointer">
+          <input
+            type="checkbox"
+            defaultChecked
+            className="mt-0.5 rounded text-brand-500 focus:ring-brand-500"
+            {...register("marketingOptIn")}
+          />
+          <span className="text-xs text-gray-500 leading-relaxed">
+            Send me exclusive offers, new product launches, and recipe tips on WhatsApp
+            &amp; email (you can opt out anytime).
+          </span>
+        </label>
 
         <p className="text-xs text-gray-400">
           By creating an account, you agree to our{" "}

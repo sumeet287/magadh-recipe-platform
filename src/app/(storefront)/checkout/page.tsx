@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -54,6 +54,8 @@ const STEPS: { key: Step; label: string }[] = [
   { key: "review", label: "Review & Pay" },
 ];
 
+const CHECKOUT_SESSION_STORAGE_KEY = "mr:checkout-session-id";
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { data: session } = useSession();
@@ -66,8 +68,10 @@ export default function CheckoutPage() {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [useNewAddress, setUseNewAddress] = useState(false);
+  const checkoutSessionIdRef = useRef<string | null>(null);
+  const heartbeatTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { register, handleSubmit, getValues, formState: { errors } } = useForm<{ address: CheckoutInput["address"] }>({
+  const { register, handleSubmit, getValues, watch, formState: { errors } } = useForm<{ address: CheckoutInput["address"] }>({
     resolver: zodResolver(addressFormSchema),
   });
 
@@ -85,7 +89,6 @@ export default function CheckoutPage() {
       });
   }, [session]);
 
-  // Load Razorpay script
   useEffect(() => {
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
@@ -93,6 +96,89 @@ export default function CheckoutPage() {
     document.body.appendChild(script);
     return () => { document.body.removeChild(script); };
   }, []);
+
+  // ---- Checkout session (abandoned checkout recovery) ----
+  useEffect(() => {
+    if (items.length === 0) return;
+
+    let cancelled = false;
+    const storedId =
+      typeof window !== "undefined"
+        ? sessionStorage.getItem(CHECKOUT_SESSION_STORAGE_KEY)
+        : null;
+
+    const itemSnapshot = items.map((i) => ({
+      productId: i.productId,
+      variantId: i.variantId,
+      productName: i.product.name,
+      variantName: i.variant.name,
+      quantity: i.quantity,
+      unitPrice: i.variant.price,
+      imageUrl: i.product.image ?? null,
+    }));
+
+    fetch("/api/checkout/session/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sessionId: storedId ?? undefined,
+        items: itemSnapshot,
+        totalAmount: total,
+        phone: session?.user?.phone ?? undefined,
+        email: session?.user?.email ?? undefined,
+        name: session?.user?.name ?? undefined,
+      }),
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        if (cancelled) return;
+        const id = json?.data?.id as string | undefined;
+        if (!id) return;
+        checkoutSessionIdRef.current = id;
+        try {
+          sessionStorage.setItem(CHECKOUT_SESSION_STORAGE_KEY, id);
+        } catch {
+          // ignore storage errors
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+    // Fire once per mount (items length captured in snapshot); reactive updates go through heartbeat.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const watchedAddress = watch("address");
+  useEffect(() => {
+    const id = checkoutSessionIdRef.current;
+    if (!id) return;
+
+    if (heartbeatTimerRef.current) clearTimeout(heartbeatTimerRef.current);
+    heartbeatTimerRef.current = setTimeout(() => {
+      const name = watchedAddress?.name || selectedAddress?.name || session?.user?.name || "";
+      const phone = watchedAddress?.phone || selectedAddress?.phone || session?.user?.phone || "";
+
+      const email = session?.user?.email || "";
+
+      fetch("/api/checkout/session/heartbeat", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId: id,
+          name: name || undefined,
+          phone: phone || undefined,
+          email: email || undefined,
+        }),
+      }).catch(() => {});
+    }, 1500);
+
+    return () => {
+      if (heartbeatTimerRef.current) clearTimeout(heartbeatTimerRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watchedAddress?.name, watchedAddress?.phone, selectedAddressId, session?.user?.phone]);
 
   if (items.length === 0) {
     return (
@@ -145,6 +231,7 @@ export default function CheckoutPage() {
         address: addressData,
         couponCode: coupon?.code,
         paymentMethod,
+        checkoutSessionId: checkoutSessionIdRef.current ?? undefined,
       }),
     });
 
@@ -185,6 +272,11 @@ export default function CheckoutPage() {
         });
         if (verifyRes.ok) {
           clearCart();
+          try {
+            sessionStorage.removeItem(CHECKOUT_SESSION_STORAGE_KEY);
+          } catch {
+            // ignore
+          }
           router.push(`/checkout/success?orderId=${order.id}`);
         } else {
           setError("Payment verification failed. Contact support.");

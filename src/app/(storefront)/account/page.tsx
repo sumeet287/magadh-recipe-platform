@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { User, Mail, Phone, Save } from "lucide-react";
+import { User, Mail, Phone, Save, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { updateProfileSchema, type UpdateProfileInput } from "@/lib/validations/auth";
@@ -13,18 +13,49 @@ export default function AccountPage() {
   const { data: session, update } = useSession();
   const [saved, setSaved] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   const {
     register,
     handleSubmit,
+    reset,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<UpdateProfileInput>({
     resolver: zodResolver(updateProfileSchema),
     defaultValues: {
       name: session?.user?.name ?? "",
-      phone: (session?.user as { phone?: string })?.phone ?? "",
+      phone: session?.user?.phone ?? "",
+      marketingOptIn: session?.user?.marketingOptIn ?? false,
     },
   });
+
+  const optIn = watch("marketingOptIn");
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const res = await fetch("/api/users/profile");
+        if (!res.ok) return;
+        const json = await res.json();
+        const data = json?.data;
+        if (cancelled || !data) return;
+        reset({
+          name: data.name ?? "",
+          phone: data.phone ?? "",
+          marketingOptIn: Boolean(data.marketingOptIn),
+        });
+      } finally {
+        if (!cancelled) setLoaded(true);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [reset]);
 
   const onSubmit = async (data: UpdateProfileInput) => {
     setServerError(null);
@@ -36,11 +67,15 @@ export default function AccountPage() {
 
     const json = await res.json();
     if (!res.ok) {
-      setServerError(json.message ?? "Failed to update profile.");
+      setServerError(json.error ?? json.message ?? "Failed to update profile.");
       return;
     }
 
-    await update({ name: data.name });
+    await update({
+      name: data.name,
+      phone: data.phone ?? null,
+      marketingOptIn: data.marketingOptIn ?? false,
+    });
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
@@ -87,8 +122,29 @@ export default function AccountPage() {
           placeholder="10-digit mobile number"
           leftIcon={<Phone className="w-4 h-4 text-gray-400" />}
           error={errors.phone?.message}
+          hint="We'll send order updates and offers via WhatsApp"
           {...register("phone")}
         />
+
+        <label className="flex items-start gap-3 p-4 rounded-xl border border-gray-100 bg-cream-50 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={Boolean(optIn)}
+            onChange={(e) => setValue("marketingOptIn", e.target.checked, { shouldDirty: true })}
+            className="mt-0.5 rounded text-brand-500 focus:ring-brand-500"
+            disabled={!loaded}
+          />
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <MessageCircle className="w-4 h-4 text-brand-500" />
+              <p className="text-sm font-medium text-earth-dark">WhatsApp Marketing</p>
+            </div>
+            <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+              Get exclusive offers, new product launches, and recipe tips on WhatsApp.
+              You can opt out anytime.
+            </p>
+          </div>
+        </label>
 
         <Button type="submit" loading={isSubmitting} className="flex items-center gap-2">
           <Save className="w-4 h-4" />

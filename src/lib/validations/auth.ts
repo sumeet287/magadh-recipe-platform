@@ -13,6 +13,7 @@ const signUpBase = z.object({
     .min(8, "Password must be at least 8 characters")
     .regex(/[A-Z]/, "Must contain at least one uppercase letter")
     .regex(/[0-9]/, "Must contain at least one number"),
+  marketingOptIn: z.boolean().optional().default(false),
 });
 
 // Frontend: includes confirmPassword for client-side match check
@@ -58,6 +59,7 @@ export const updateProfileSchema = z.object({
     .optional()
     .or(z.literal("")),
   image: z.string().url().optional().or(z.literal("")),
+  marketingOptIn: z.boolean().optional(),
 });
 
 export type SignUpInput = z.infer<typeof signUpSchema>;

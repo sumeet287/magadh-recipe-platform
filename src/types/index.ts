@@ -216,14 +216,25 @@ declare module "next-auth" {
       email?: string | null;
       image?: string | null;
       role: string;
+      phone?: string | null;
+      phoneVerified?: boolean;
+      marketingOptIn?: boolean;
+      phonePromptDismissedAt?: string | null;
     };
   }
   interface User {
     role?: string;
     id?: string;
+    phone?: string | null;
+    phoneVerified?: boolean;
+    marketingOptIn?: boolean;
   }
   interface JWT {
     id: string;
     role: string;
+    phone?: string | null;
+    phoneVerified?: boolean;
+    marketingOptIn?: boolean;
+    phonePromptDismissedAt?: string | null;
   }
 }

@@ -13,31 +13,37 @@ datasource db {
 // ==================== AUTH ====================
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  phone         String?   @unique
-  phoneVerified Boolean   @default(false)
-  passwordHash  String?
-  role          UserRole  @default(CUSTOMER)
-  isActive      Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                     String    @id @default(cuid())
+  name                   String?
+  email                  String    @unique
+  emailVerified          DateTime?
+  image                  String?
+  phone                  String?   @unique
+  phoneVerified          Boolean   @default(false)
+  phoneVerifiedAt        DateTime?
+  marketingOptIn         Boolean   @default(false)
+  marketingOptInAt       DateTime?
+  phonePromptDismissedAt DateTime?
+  passwordHash           String?
+  role                   UserRole  @default(CUSTOMER)
+  isActive               Boolean   @default(true)
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
 
-  accounts    Account[]
-  sessions    Session[]
-  addresses   Address[]
-  cart        Cart?
-  orders      Order[]
-  wishlist    WishlistItem[]
-  reviews     Review[]
-  couponsUsed CouponUsage[]
-  auditLogs   AuditLog[]
+  accounts         Account[]
+  sessions         Session[]
+  addresses        Address[]
+  cart             Cart?
+  orders           Order[]
+  wishlist         WishlistItem[]
+  reviews          Review[]
+  couponsUsed      CouponUsage[]
+  auditLogs        AuditLog[]
+  checkoutSessions CheckoutSession[]
 
   @@index([email])
   @@index([role])
+  @@index([marketingOptIn])
   @@map("users")
 }
 
@@ -307,8 +313,9 @@ model Coupon {
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 
-  usages CouponUsage[]
-  orders Order[]
+  usages           CouponUsage[]
+  orders           Order[]
+  checkoutSessions CheckoutSession[]
 
   @@index([code])
   @@index([isActive])
@@ -328,6 +335,79 @@ model CouponUsage {
   @@index([couponId])
   @@index([userId])
   @@map("coupon_usages")
+}
+
+// ==================== CHECKOUT SESSIONS (Abandoned Recovery) ====================
+
+model CheckoutSession {
+  id             String          @id @default(cuid())
+  userId         String?
+  phone          String?
+  email          String?
+  name           String?
+  cartSnapshot   Json
+  totalAmount    Float
+  status         CheckoutStatus  @default(STARTED)
+  lastActivityAt DateTime        @default(now())
+  couponSentAt   DateTime?
+  couponId       String?
+  orderId        String?
+  recoveredAt    DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  coupon Coupon? @relation(fields: [couponId], references: [id])
+
+  @@index([status, lastActivityAt])
+  @@index([phone])
+  @@index([userId])
+  @@map("checkout_sessions")
+}
+
+// ==================== BROADCASTS (Admin WhatsApp Campaigns) ====================
+
+model Broadcast {
+  id              String          @id @default(cuid())
+  name            String
+  templateName    String
+  templateLanguage String         @default("en")
+  templateParams  Json
+  audienceFilter  Json
+  totalRecipients Int             @default(0)
+  sentCount       Int             @default(0)
+  failedCount     Int             @default(0)
+  status          BroadcastStatus @default(PENDING)
+  createdBy       String
+  errorMessage    String?
+  createdAt       DateTime        @default(now())
+  startedAt       DateTime?
+  completedAt     DateTime?
+  updatedAt       DateTime        @updatedAt
+
+  recipients BroadcastRecipient[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("broadcasts")
+}
+
+model BroadcastRecipient {
+  id          String    @id @default(cuid())
+  broadcastId String
+  userId      String?
+  phone       String
+  status      String    @default("PENDING")
+  messageId   String?
+  error       String?
+  sentAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  broadcast Broadcast @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+
+  @@index([broadcastId, status])
+  @@index([phone])
+  @@map("broadcast_recipients")
 }
 
 // ==================== ORDERS ====================
@@ -769,4 +849,20 @@ enum BlogSchemaType {
   ARTICLE
   RECIPE
   HOWTO
+}
+
+enum CheckoutStatus {
+  STARTED
+  ABANDONED
+  RECOVERED
+  EXPIRED
+}
+
+enum BroadcastStatus {
+  PENDING
+  SENDING
+  COMPLETED
+  PARTIAL
+  FAILED
+  CANCELLED
 }

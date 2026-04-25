@@ -19,21 +19,33 @@ export async function POST(req: NextRequest) {
     const parsed = registerSchema.safeParse(body);
     if (!parsed.success) throw new ValidationError(parsed.error.errors[0].message);
 
-    const { name, email, password, phone } = parsed.data;
+    const { name, email, password, phone, marketingOptIn } = parsed.data;
     const normalizedEmail = email.toLowerCase();
+    const normalizedPhone = phone && phone.length > 0 ? phone : null;
 
     const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (existing) throw new ConflictError("An account with this email already exists.");
 
+    if (normalizedPhone) {
+      const phoneTaken = await prisma.user.findFirst({
+        where: { phone: normalizedPhone },
+        select: { id: true },
+      });
+      if (phoneTaken) throw new ConflictError("This mobile number is already in use.");
+    }
+
     const hashedPassword = await bcrypt.hash(password, 12);
+    const now = new Date();
 
     const user = await prisma.user.create({
       data: {
         name,
         email: normalizedEmail,
         passwordHash: hashedPassword,
-        phone: phone ?? null,
+        phone: normalizedPhone,
         role: "CUSTOMER",
+        marketingOptIn: marketingOptIn ?? false,
+        marketingOptInAt: marketingOptIn ? now : null,
       },
     });
 

@@ -1,6 +1,7 @@
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { WhatsAppFloat } from "@/components/layout/whatsapp-float";
+import { PhonePromptDialog } from "@/components/phone-prompt-dialog";
 
 export default function StorefrontLayout({
   children,
@@ -13,6 +14,7 @@ export default function StorefrontLayout({
       <main className="flex-1">{children}</main>
       <Footer />
       <WhatsAppFloat />
+      <PhonePromptDialog />
     </div>
   );
 }

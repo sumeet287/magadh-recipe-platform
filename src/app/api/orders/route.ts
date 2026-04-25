@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     const parsed = checkoutSchema.safeParse(body);
     if (!parsed.success) throw new ValidationError(parsed.error.errors[0].message);
 
-    const { items, address, couponCode, paymentMethod } = parsed.data;
+    const { items, address, couponCode, paymentMethod, checkoutSessionId } = parsed.data;
 
     if (!address) throw new ValidationError("Delivery address is required");
 
@@ -134,6 +134,23 @@ export async function POST(req: NextRequest) {
       if (coupon) {
         await tx.coupon.update({ where: { id: coupon.id }, data: { usedCount: { increment: 1 } } });
         await tx.couponUsage.create({ data: { couponId: coupon.id, userId: session.user.id, orderId: newOrder.id } });
+      }
+
+      if (checkoutSessionId) {
+        const cs = await tx.checkoutSession.findUnique({
+          where: { id: checkoutSessionId },
+          select: { id: true, status: true },
+        });
+        if (cs && cs.status !== "RECOVERED") {
+          await tx.checkoutSession.update({
+            where: { id: cs.id },
+            data: {
+              status: "RECOVERED",
+              recoveredAt: new Date(),
+              orderId: newOrder.id,
+            },
+          });
+        }
       }
 
       return newOrder;
