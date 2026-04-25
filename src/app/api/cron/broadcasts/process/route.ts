@@ -1,6 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendWhatsAppTemplate } from "@/lib/whatsapp";
+import {
+  sendWhatsAppTemplate,
+  isWhatsappTemplatesReady,
+  TEMPLATES_NOT_READY_MESSAGE,
+} from "@/lib/whatsapp";
+import { BROADCAST_NAME_PLACEHOLDER } from "@/lib/constants";
+import { triggerBroadcastProcessor } from "@/lib/broadcast-trigger";
 
 /**
  * Vercel Cron: /api/cron/broadcasts/process
@@ -17,6 +23,8 @@ export const maxDuration = 60;
 const BATCH_SIZE = Number(process.env.BROADCAST_BATCH_SIZE ?? 40);
 const INTER_MESSAGE_DELAY_MS = Number(process.env.BROADCAST_THROTTLE_MS ?? 150);
 
+const NAME_FALLBACK = "there";
+
 function isAuthorized(req: NextRequest): boolean {
   if (req.headers.get("x-vercel-cron")) return true;
   const secret = process.env.CRON_SECRET;
@@ -25,11 +33,6 @@ function isAuthorized(req: NextRequest): boolean {
   if (header === `Bearer ${secret}`) return true;
   const queryToken = req.nextUrl.searchParams.get("token");
   return Boolean(queryToken) && queryToken === secret;
-}
-
-function templatesEnabled(): boolean {
-  const v = (process.env.WHATSAPP_TEMPLATES_READY ?? "").toLowerCase().trim();
-  return v === "true" || v === "1" || v === "yes";
 }
 
 function delay(ms: number) {
@@ -49,12 +52,11 @@ async function run(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!templatesEnabled()) {
+  if (!isWhatsappTemplatesReady()) {
     return NextResponse.json({
       ok: true,
       paused: true,
-      reason:
-        "WhatsApp templates are not approved yet. Set WHATSAPP_TEMPLATES_READY=true to enable sending.",
+      reason: TEMPLATES_NOT_READY_MESSAGE,
     });
   }
 
@@ -110,15 +112,40 @@ async function run(req: NextRequest) {
       ? (broadcast.templateParams as string[])
       : [];
 
+  const needsName = templateParams.some((p) => p === BROADCAST_NAME_PLACEHOLDER);
+
+  const userIds = pending
+    .map((r) => r.userId)
+    .filter((id): id is string => Boolean(id));
+
+  const nameMap = new Map<string, string>();
+  if (needsName && userIds.length > 0) {
+    const users = await prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, name: true },
+    });
+    for (const u of users) {
+      if (u.name) nameMap.set(u.id, u.name);
+    }
+  }
+
   let sent = 0;
   let failed = 0;
 
   for (const recipient of pending) {
+    const firstName = recipient.userId
+      ? nameMap.get(recipient.userId)?.split(" ")[0] ?? NAME_FALLBACK
+      : NAME_FALLBACK;
+
+    const resolvedParams = templateParams.map((p) =>
+      p === BROADCAST_NAME_PLACEHOLDER ? firstName : p
+    );
+
     const result = await sendWhatsAppTemplate({
       to: recipient.phone,
       templateName: broadcast.templateName,
       languageCode: broadcast.templateLanguage,
-      parameters: templateParams,
+      parameters: resolvedParams,
     });
 
     if (result.success) {
@@ -157,6 +184,13 @@ async function run(req: NextRequest) {
     where: { broadcastId: broadcast.id, status: "PENDING" },
   });
 
+  // Self-chain: if recipients still pending, fire off the next batch in a
+  // fresh invocation so sending continues under a new 60s timeout budget
+  // rather than waiting for the daily cron.
+  if (remaining > 0) {
+    after(() => triggerBroadcastProcessor());
+  }
+
   return NextResponse.json({
     ok: true,
     broadcastId: broadcast.id,
@@ -164,5 +198,6 @@ async function run(req: NextRequest) {
     sent,
     failed,
     remaining,
+    chained: remaining > 0,
   });
 }

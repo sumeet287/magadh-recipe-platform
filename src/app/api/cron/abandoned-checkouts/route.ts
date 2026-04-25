@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendAbandonedCheckoutCoupon, normalizeWhatsappNumber } from "@/lib/whatsapp";
+import {
+  sendAbandonedCheckoutCoupon,
+  normalizeWhatsappNumber,
+  isWhatsappTemplatesReady,
+  TEMPLATES_NOT_READY_MESSAGE,
+} from "@/lib/whatsapp";
 import { APP_URL } from "@/lib/constants";
 
 /**
@@ -39,11 +44,6 @@ function isAuthorized(req: NextRequest): boolean {
   if (header === `Bearer ${secret}`) return true;
   const queryToken = req.nextUrl.searchParams.get("token");
   return Boolean(queryToken) && queryToken === secret;
-}
-
-function templatesEnabled(): boolean {
-  const v = (process.env.WHATSAPP_TEMPLATES_READY ?? "").toLowerCase().trim();
-  return v === "true" || v === "1" || v === "yes";
 }
 
 function randomCouponCode(prefix: string): string {
@@ -158,12 +158,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!templatesEnabled()) {
+  if (!isWhatsappTemplatesReady()) {
     return NextResponse.json({
       ok: true,
       paused: true,
-      reason:
-        "WhatsApp templates are not approved yet. Set WHATSAPP_TEMPLATES_READY=true to enable sending.",
+      reason: TEMPLATES_NOT_READY_MESSAGE,
     });
   }
 

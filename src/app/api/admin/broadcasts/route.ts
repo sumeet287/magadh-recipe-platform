@@ -1,10 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { handleApiError, UnauthorizedError, ForbiddenError, ValidationError } from "@/lib/errors";
 import { paginatedResponse, successResponse } from "@/lib/api-response";
 import { broadcastCreateSchema } from "@/lib/validations/broadcast";
-import { normalizeWhatsappNumber } from "@/lib/whatsapp";
+import {
+  normalizeWhatsappNumber,
+  isWhatsappTemplatesReady,
+  TEMPLATES_NOT_READY_MESSAGE,
+} from "@/lib/whatsapp";
+import { triggerBroadcastProcessor } from "@/lib/broadcast-trigger";
 
 async function requireAdmin() {
   const session = await auth();
@@ -41,6 +46,13 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const session = await requireAdmin();
+
+    // Guard: don't let admins queue broadcasts while templates are still
+    // under Meta review — otherwise recipients would pile up with zero
+    // sends and no visible reason.
+    if (!isWhatsappTemplatesReady()) {
+      throw new ValidationError(TEMPLATES_NOT_READY_MESSAGE);
+    }
 
     const body = await req.json();
     const parsed = broadcastCreateSchema.safeParse(body);
@@ -94,6 +106,12 @@ export async function POST(req: NextRequest) {
 
       return created;
     });
+
+    // Kick off the processor right after this response is flushed so the
+    // first batch goes out within seconds. Each processor invocation
+    // self-chains for subsequent batches, and the daily cron acts as a
+    // safety net if the chain ever breaks.
+    after(() => triggerBroadcastProcessor());
 
     return NextResponse.json(successResponse(broadcast), { status: 201 });
   } catch (err) {

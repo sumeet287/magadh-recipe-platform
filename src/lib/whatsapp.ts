@@ -15,7 +15,23 @@ export const WHATSAPP_TEMPLATES = {
     process.env.WHATSAPP_TEMPLATE_ORDER_NOTIFICATION ?? "order_notification",
   abandonedCheckoutCoupon:
     process.env.WHATSAPP_TEMPLATE_ABANDONED_CHECKOUT ?? "abandoned_checkout_coupon",
+  marketingBroadcast:
+    process.env.WHATSAPP_TEMPLATE_MARKETING_BROADCAST ?? "marketing_broadcast",
 } as const;
+
+/**
+ * Kill switch guarding WhatsApp sending while templates are under Meta review.
+ * Set `WHATSAPP_TEMPLATES_READY=true` in env once templates are approved in
+ * Meta Business Manager. Until then, all cron sends + admin broadcasts are
+ * blocked so we don't pile up failures against unapproved templates.
+ */
+export function isWhatsappTemplatesReady(): boolean {
+  const v = (process.env.WHATSAPP_TEMPLATES_READY ?? "").toLowerCase().trim();
+  return v === "true" || v === "1" || v === "yes";
+}
+
+export const TEMPLATES_NOT_READY_MESSAGE =
+  "WhatsApp sending is paused — templates are still under Meta review. Enable WHATSAPP_TEMPLATES_READY=true in Vercel env once approved.";
 
 export type TemplateParam = { type: "text"; text: string };
 

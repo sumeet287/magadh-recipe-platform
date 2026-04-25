@@ -14,6 +14,13 @@ export const BRAND_ADDRESS = "Patna, Bihar, India";
 export const WHATSAPP_NUMBER =
   process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.replace(/\D/g, "") || "916207197364";
 
+// Sentinel used inside Broadcast.templateParams so the broadcast cron knows
+// to substitute the recipient's first name at send time (Meta template {{1}}
+// slot for `Hi {{1}}!` style templates). Keep in sync with both the broadcast
+// cron handler and the admin broadcasts page.
+export const BROADCAST_NAME_PLACEHOLDER = "__CUSTOMER_NAME__";
+export const DEFAULT_BROADCAST_TEMPLATE_NAME = "marketing_broadcast";
+
 /** FSSAI registration number (Food Safety & Standards Act, 2006). */
 export const FSSAI_REGISTRATION_NUMBER = "20425001001230";
 
