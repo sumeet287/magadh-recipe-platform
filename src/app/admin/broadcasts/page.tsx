@@ -78,12 +78,16 @@ interface AdvancedForm {
   limit: string;
 }
 
+// NOTE: `includeUnverifiedPhone` defaults to `true` for now because the OTP
+// verification flow (MSG91) hasn't been wired up yet, so every user currently
+// has phoneVerified=false. Once OTP lands, flip these defaults back to false
+// so admins opt-in to a broader audience explicitly.
 const EMPTY_QUICK: QuickForm = {
   name: "",
   body: "",
   url: "https://magadhrecipe.com",
   optedInOnly: true,
-  includeUnverifiedPhone: false,
+  includeUnverifiedPhone: true,
   limit: "",
 };
 
@@ -93,7 +97,7 @@ const EMPTY_ADV: AdvancedForm = {
   templateLanguage: "en",
   params: "",
   optedInOnly: true,
-  includeUnverifiedPhone: false,
+  includeUnverifiedPhone: true,
   limit: "",
 };
 
@@ -176,6 +180,9 @@ function AudienceGlanceCard({
   const { baseline } = audience;
   const reach = baseline.reachable;
   const low = reach < 10;
+  // OTP flow isn't live yet, so every user is "unverified". Surface this as
+  // the primary explanation when verified=0 but we do have users with phones.
+  const noOtp = baseline.verified === 0 && baseline.totalWithPhone > 0;
 
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
@@ -196,7 +203,17 @@ function AudienceGlanceCard({
           accent={low ? "amber" : "emerald"}
         />
       </div>
-      {low && (
+      {noOtp ? (
+        <p className="text-xs text-amber-400 mt-3 flex items-start gap-2">
+          <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+          <span>
+            Phone OTP verification isn&apos;t live yet — all{" "}
+            <strong>{baseline.totalWithPhone}</strong> users with a phone are
+            unverified. Enable <em>Include unverified phone numbers</em> in the
+            broadcast modal to reach them.
+          </span>
+        </p>
+      ) : low ? (
         <p className="text-xs text-amber-400 mt-3 flex items-start gap-2">
           <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
           <span>
@@ -206,7 +223,7 @@ function AudienceGlanceCard({
             targeted nudge or incentive.
           </span>
         </p>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -215,10 +232,12 @@ function AudienceInsights({
   audience,
   loading,
   showSample = true,
+  filters,
 }: {
   audience: AudiencePreview | null;
   loading: boolean;
   showSample?: boolean;
+  filters?: { optedInOnly: boolean; includeUnverifiedPhone: boolean };
 }) {
   if (!audience) {
     return (
@@ -295,13 +314,46 @@ function AudienceInsights({
         </span>
       </div>
 
-      {zero && (
-        <p className="text-xs text-amber-700 leading-relaxed">
-          <strong>No recipients match these filters.</strong> Either broaden
-          the filters above, or wait for more users to save their phone and
-          opt into marketing (via the account page or phone popup).
-        </p>
-      )}
+      {zero && (() => {
+        // Helpful, context-aware hints for why we got 0.
+        const hasPhoneUsers = baseline.totalWithPhone > 0;
+        const hasOptIns = baseline.optedIn > 0;
+        const noVerifiedUsers = baseline.verified === 0;
+        const unverifiedExcluded =
+          filters && !filters.includeUnverifiedPhone && noVerifiedUsers;
+        const optInExcluded = filters?.optedInOnly && !hasOptIns;
+
+        if (unverifiedExcluded && hasPhoneUsers) {
+          return (
+            <p className="text-xs text-amber-700 leading-relaxed">
+              <strong>No OTP-verified users yet.</strong> Phone OTP
+              verification isn&apos;t live yet, so all {baseline.totalWithPhone}{" "}
+              users with a phone are unverified. Enable{" "}
+              <em>Include unverified phone numbers</em> above to reach them.
+            </p>
+          );
+        }
+
+        if (optInExcluded) {
+          return (
+            <p className="text-xs text-amber-700 leading-relaxed">
+              <strong>No users have opted into marketing yet.</strong>{" "}
+              {baseline.totalWithPhone} users have a phone saved but none have
+              opted in. Ask users to opt in via the account page / phone
+              popup, or uncheck <em>Opted-in users only</em> (not recommended
+              for marketing content).
+            </p>
+          );
+        }
+
+        return (
+          <p className="text-xs text-amber-700 leading-relaxed">
+            <strong>No recipients match these filters.</strong> Broaden the
+            filters above, or wait for more users to save their phone and opt
+            into marketing.
+          </p>
+        );
+      })()}
 
       {showSample && sample.length > 0 && (
         <div className="pt-3 border-t border-gray-200 space-y-1.5">
@@ -743,6 +795,20 @@ export default function AdminBroadcastsPage() {
                   utility content.
                 </p>
               )}
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={quick.includeUnverifiedPhone}
+                  onChange={(e) =>
+                    setQuick({ ...quick, includeUnverifiedPhone: e.target.checked })
+                  }
+                />
+                Include unverified phone numbers
+              </label>
+              <p className="text-[11px] text-gray-500 leading-snug">
+                OTP verification isn&apos;t live yet, so most users are
+                currently unverified. Leave this on to reach them.
+              </p>
               <Input
                 label="Limit (optional)"
                 type="number"
@@ -775,6 +841,10 @@ export default function AdminBroadcastsPage() {
             <AudienceInsights
               audience={audience}
               loading={audienceLoading}
+              filters={{
+                optedInOnly: quick.optedInOnly,
+                includeUnverifiedPhone: quick.includeUnverifiedPhone,
+              }}
             />
           </div>
         </div>
@@ -867,6 +937,10 @@ export default function AdminBroadcastsPage() {
               />
               Include unverified phone numbers
             </label>
+            <p className="text-[11px] text-gray-500 leading-snug">
+              OTP verification isn&apos;t live yet — leave this on to reach
+              users whose numbers haven&apos;t been OTP-verified.
+            </p>
             {!adv.optedInOnly && (
               <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 leading-snug">
                 Sending to non-opted users risks Meta quality-rating drops and
@@ -884,7 +958,14 @@ export default function AdminBroadcastsPage() {
             />
           </div>
 
-          <AudienceInsights audience={audience} loading={audienceLoading} />
+          <AudienceInsights
+            audience={audience}
+            loading={audienceLoading}
+            filters={{
+              optedInOnly: adv.optedInOnly,
+              includeUnverifiedPhone: adv.includeUnverifiedPhone,
+            }}
+          />
 
           <div className="flex gap-2 pt-2">
             <Button
