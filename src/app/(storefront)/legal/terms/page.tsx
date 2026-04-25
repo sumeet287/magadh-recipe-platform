@@ -20,7 +20,7 @@ export default function TermsPage() {
         <h2 className="font-serif font-semibold text-earth-dark text-lg">Governing Law</h2>
         <p>These terms shall be governed by and construed in accordance with the laws of India, and any disputes shall be subject to the jurisdiction of courts in Patna, Bihar.</p>
         <h2 className="font-serif font-semibold text-earth-dark text-lg">Contact</h2>
-        <p>Questions about the Terms of Service may be sent to legal@magadhrecipe.com.</p>
+        <p>Questions about the Terms of Service may be sent to <a href="mailto:magadhrecipe@gmail.com" className="text-brand-primary underline">magadhrecipe@gmail.com</a>.</p>
       </div>
     </div>
   );

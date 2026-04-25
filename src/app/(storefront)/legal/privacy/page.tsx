@@ -24,7 +24,9 @@ export default function PrivacyPage() {
         <h2 className="font-serif font-semibold text-earth-dark text-lg">Data Sharing</h2>
         <p>We do not sell, trade, or otherwise transfer your personal information to third parties, except to trusted partners who assist us in operating our website, conducting our business, or serving you, as long as those parties agree to keep this information confidential.</p>
         <h2 className="font-serif font-semibold text-earth-dark text-lg">Contact Us</h2>
-        <p>If you have questions about this Privacy Policy, please contact us at privacy@magadhrecipe.com.</p>
+        <p>If you have questions about this Privacy Policy, please contact us at <a href="mailto:magadhrecipe@gmail.com" className="text-brand-primary underline">magadhrecipe@gmail.com</a>.</p>
+        <h2 className="font-serif font-semibold text-earth-dark text-lg">Data Deletion</h2>
+        <p>You can request deletion of your account and all associated data at any time by emailing <a href="mailto:magadhrecipe@gmail.com" className="text-brand-primary underline">magadhrecipe@gmail.com</a> with the subject line &quot;Delete my data&quot;. We will process your request and permanently delete your personal information within 7 business days.</p>
       </div>
     </div>
   );

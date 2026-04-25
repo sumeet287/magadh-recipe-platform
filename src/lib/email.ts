@@ -178,7 +178,7 @@ export function orderConfirmationHtml(data: {
         <!-- Footer -->
         <tr>
           <td style="background:#2C1810;padding:24px 40px;text-align:center;">
-            <p style="color:#f0c579;margin:0 0 8px;font-size:13px;">Questions? Contact us at <a href="mailto:support@magadhrecipe.com" style="color:#D4843A;">support@magadhrecipe.com</a></p>
+            <p style="color:#f0c579;margin:0 0 8px;font-size:13px;">Questions? Contact us at <a href="mailto:magadhrecipe@gmail.com" style="color:#D4843A;">magadhrecipe@gmail.com</a></p>
             <p style="color:#8B6040;margin:0;font-size:12px;">© ${new Date().getFullYear()} Magadh Recipe. All rights reserved.</p>
           </td>
         </tr>
@@ -256,7 +256,7 @@ export function verificationEmailHtml(data: { name?: string; verifyUrl: string }
         <!-- Footer -->
         <tr>
           <td style="background:#2C1810;padding:24px 40px;text-align:center;">
-            <p style="color:#f0c579;margin:0 0 8px;font-size:13px;">Questions? Contact us at <a href="mailto:support@magadhrecipe.com" style="color:#D4843A;">support@magadhrecipe.com</a></p>
+            <p style="color:#f0c579;margin:0 0 8px;font-size:13px;">Questions? Contact us at <a href="mailto:magadhrecipe@gmail.com" style="color:#D4843A;">magadhrecipe@gmail.com</a></p>
             <p style="color:#8B6040;margin:0;font-size:12px;">&copy; ${new Date().getFullYear()} Magadh Recipe. All rights reserved.</p>
           </td>
         </tr>
