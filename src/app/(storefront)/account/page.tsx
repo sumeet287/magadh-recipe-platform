@@ -137,7 +137,7 @@ export default function AccountPage() {
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <MessageCircle className="w-4 h-4 text-brand-500" />
-              <p className="text-sm font-medium text-earth-dark">WhatsApp Marketing</p>
+              <p className="text-sm font-medium text-earth-dark">WhatsApp Offers &amp; Updates</p>
             </div>
             <p className="text-xs text-gray-500 mt-1 leading-relaxed">
               Get exclusive offers, new product launches, and recipe tips on WhatsApp.
