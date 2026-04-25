@@ -27,6 +27,11 @@ function isAuthorized(req: NextRequest): boolean {
   return Boolean(queryToken) && queryToken === secret;
 }
 
+function templatesEnabled(): boolean {
+  const v = (process.env.WHATSAPP_TEMPLATES_READY ?? "").toLowerCase().trim();
+  return v === "true" || v === "1" || v === "yes";
+}
+
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -42,6 +47,15 @@ export async function POST(req: NextRequest) {
 async function run(req: NextRequest) {
   if (!isAuthorized(req)) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!templatesEnabled()) {
+    return NextResponse.json({
+      ok: true,
+      paused: true,
+      reason:
+        "WhatsApp templates are not approved yet. Set WHATSAPP_TEMPLATES_READY=true to enable sending.",
+    });
   }
 
   const broadcast = await prisma.broadcast.findFirst({
