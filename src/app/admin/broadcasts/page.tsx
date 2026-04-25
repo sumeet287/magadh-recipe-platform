@@ -3,13 +3,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Megaphone,
-  Plus,
   Loader2,
   Check,
   AlertTriangle,
   Trash2,
   Sparkles,
   Settings2,
+  Users,
+  ShieldCheck,
+  Phone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +21,29 @@ import {
   BROADCAST_NAME_PLACEHOLDER,
   DEFAULT_BROADCAST_TEMPLATE_NAME,
 } from "@/lib/constants";
+
+interface AudienceBaseline {
+  totalWithPhone: number;
+  verified: number;
+  optedIn: number;
+  reachable: number;
+}
+
+interface AudienceSampleUser {
+  id: string;
+  email: string;
+  phone: string;
+  name: string | null;
+  verified: boolean;
+  optedIn: boolean;
+}
+
+interface AudiencePreview {
+  baseline: AudienceBaseline;
+  current: number;
+  sample: AudienceSampleUser[];
+  sampleSize: number;
+}
 
 interface Broadcast {
   id: string;
@@ -99,6 +124,249 @@ function StatusBadge({ status }: { status: Broadcast["status"] }) {
   );
 }
 
+function GlanceStat({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: number;
+  accent?: "emerald" | "amber";
+}) {
+  const valueColor =
+    accent === "emerald"
+      ? "text-emerald-400"
+      : accent === "amber"
+      ? "text-amber-400"
+      : "text-white";
+  return (
+    <div>
+      <p className="text-[11px] uppercase text-gray-500 font-semibold tracking-wide">
+        {label}
+      </p>
+      <p className={`text-2xl font-bold tabular-nums mt-1 ${valueColor}`}>
+        {value.toLocaleString("en-IN")}
+      </p>
+    </div>
+  );
+}
+
+function AudienceGlanceCard({
+  audience,
+  loading,
+}: {
+  audience: AudiencePreview | null;
+  loading: boolean;
+}) {
+  if (!audience) {
+    return (
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 text-sm text-gray-500 flex items-center gap-2">
+        {loading ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Loading audience stats…
+          </>
+        ) : (
+          "Audience stats unavailable."
+        )}
+      </div>
+    );
+  }
+
+  const { baseline } = audience;
+  const reach = baseline.reachable;
+  const low = reach < 10;
+
+  return (
+    <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-sm font-semibold text-gray-300 flex items-center gap-2">
+          <Users className="w-4 h-4 text-brand-400" />
+          Audience at a glance
+        </h2>
+        <span className="text-[11px] text-gray-500">Live</span>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <GlanceStat label="Users with phone" value={baseline.totalWithPhone} />
+        <GlanceStat label="Verified (OTP)" value={baseline.verified} />
+        <GlanceStat label="Marketing opt-in" value={baseline.optedIn} />
+        <GlanceStat
+          label="Reachable now"
+          value={reach}
+          accent={low ? "amber" : "emerald"}
+        />
+      </div>
+      {low && (
+        <p className="text-xs text-amber-400 mt-3 flex items-start gap-2">
+          <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+          <span>
+            Only <strong>{reach}</strong> user{reach === 1 ? "" : "s"} reachable for
+            broadcast (verified phone + marketing opt-in). The phone-prompt
+            popup and account page are the main opt-in drivers — consider a
+            targeted nudge or incentive.
+          </span>
+        </p>
+      )}
+    </div>
+  );
+}
+
+function AudienceInsights({
+  audience,
+  loading,
+  showSample = true,
+}: {
+  audience: AudiencePreview | null;
+  loading: boolean;
+  showSample?: boolean;
+}) {
+  if (!audience) {
+    return (
+      <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-500 flex items-center gap-2">
+        {loading ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Checking audience…
+          </>
+        ) : (
+          "Audience preview unavailable."
+        )}
+      </div>
+    );
+  }
+
+  const { baseline, current, sample } = audience;
+  const zero = current === 0;
+  const containerCls = zero
+    ? "border-amber-200 bg-amber-50"
+    : "border-gray-200 bg-gray-50";
+
+  return (
+    <div className={`rounded-xl border p-4 space-y-3 ${containerCls}`}>
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold uppercase text-gray-500 tracking-wide">
+          Audience funnel
+        </p>
+        {loading && (
+          <Loader2 className="w-3 h-3 animate-spin text-gray-400" />
+        )}
+      </div>
+
+      <div className="grid grid-cols-[1fr_auto] gap-y-1 gap-x-4 text-sm">
+        <span className="text-gray-600 flex items-center gap-1.5">
+          <Users className="w-3.5 h-3.5" /> Users with phone
+        </span>
+        <span className="font-semibold text-gray-900 text-right tabular-nums">
+          {baseline.totalWithPhone}
+        </span>
+
+        <span className="text-gray-600 flex items-center gap-1.5">
+          <Phone className="w-3.5 h-3.5" /> Verified (OTP)
+        </span>
+        <span className="font-semibold text-gray-900 text-right tabular-nums">
+          {baseline.verified}
+        </span>
+
+        <span className="text-gray-600 flex items-center gap-1.5">
+          <Check className="w-3.5 h-3.5" /> Marketing opt-in
+        </span>
+        <span className="font-semibold text-gray-900 text-right tabular-nums">
+          {baseline.optedIn}
+        </span>
+
+        <span className="text-gray-700 flex items-center gap-1.5 font-medium border-t border-gray-200 pt-1">
+          <ShieldCheck className="w-3.5 h-3.5" /> Reachable (verified + opt-in)
+        </span>
+        <span className="font-bold text-emerald-700 text-right tabular-nums border-t border-gray-200 pt-1">
+          {baseline.reachable}
+        </span>
+      </div>
+
+      <div className="pt-2 border-t border-gray-200 flex items-center justify-between">
+        <span className="text-sm font-medium text-gray-700">
+          Will receive (current filters)
+        </span>
+        <span
+          className={`text-lg font-bold tabular-nums ${
+            zero ? "text-amber-700" : "text-brand-700"
+          }`}
+        >
+          {current.toLocaleString("en-IN")}
+        </span>
+      </div>
+
+      {zero && (
+        <p className="text-xs text-amber-700 leading-relaxed">
+          <strong>No recipients match these filters.</strong> Either broaden
+          the filters above, or wait for more users to save their phone and
+          opt into marketing (via the account page or phone popup).
+        </p>
+      )}
+
+      {showSample && sample.length > 0 && (
+        <div className="pt-3 border-t border-gray-200 space-y-1.5">
+          <p className="text-[11px] font-semibold uppercase text-gray-500 tracking-wide">
+            Sample — first {sample.length} of {current.toLocaleString("en-IN")}
+          </p>
+          <ul className="space-y-1 max-h-40 overflow-y-auto pr-1">
+            {sample.map((u) => (
+              <li
+                key={u.id}
+                className="flex items-center justify-between text-xs text-gray-600 gap-2"
+              >
+                <span className="truncate flex-1 min-w-0">{u.email}</span>
+                <span className="font-mono text-gray-500 whitespace-nowrap">
+                  {u.phone}
+                </span>
+                <span className="flex gap-1 flex-shrink-0">
+                  {u.optedIn ? (
+                    <span className="inline-block px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[10px]">
+                      opt-in
+                    </span>
+                  ) : (
+                    <span className="inline-block px-1.5 py-0.5 rounded bg-gray-200 text-gray-600 text-[10px]">
+                      no opt-in
+                    </span>
+                  )}
+                  {!u.verified && (
+                    <span className="inline-block px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px]">
+                      unverified
+                    </span>
+                  )}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+async function fetchAudiencePreview(params: {
+  optedInOnly: boolean;
+  includeUnverifiedPhone: boolean;
+}): Promise<AudiencePreview | null> {
+  const qs = new URLSearchParams({
+    optedInOnly: String(params.optedInOnly),
+    includeUnverifiedPhone: String(params.includeUnverifiedPhone),
+  });
+  try {
+    const res = await fetch(`/api/admin/broadcasts/audience-preview?${qs}`);
+    const json = await res.json();
+    const data = json?.data;
+    if (!data) return null;
+    return {
+      baseline: data.baseline,
+      current: data.current,
+      sample: data.sample ?? [],
+      sampleSize: data.sampleSize ?? 10,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export default function AdminBroadcastsPage() {
   const { addToast } = useUIStore();
   const [list, setList] = useState<Broadcast[]>([]);
@@ -107,8 +375,9 @@ export default function AdminBroadcastsPage() {
   const [quick, setQuick] = useState<QuickForm>(EMPTY_QUICK);
   const [adv, setAdv] = useState<AdvancedForm>(EMPTY_ADV);
   const [submitting, setSubmitting] = useState(false);
-  const [audienceCount, setAudienceCount] = useState<number | null>(null);
+  const [audience, setAudience] = useState<AudiencePreview | null>(null);
   const [audienceLoading, setAudienceLoading] = useState(false);
+  const [pageAudience, setPageAudience] = useState<AudiencePreview | null>(null);
 
   const fetchList = useCallback(async () => {
     setLoading(true);
@@ -123,9 +392,18 @@ export default function AdminBroadcastsPage() {
     }
   }, [addToast]);
 
+  const refreshPageAudience = useCallback(async () => {
+    const preview = await fetchAudiencePreview({
+      optedInOnly: true,
+      includeUnverifiedPhone: false,
+    });
+    setPageAudience(preview);
+  }, []);
+
   useEffect(() => {
     fetchList();
-  }, [fetchList]);
+    refreshPageAudience();
+  }, [fetchList, refreshPageAudience]);
 
   const activeAudience = useMemo(() => {
     if (mode === "quick") {
@@ -147,18 +425,10 @@ export default function AdminBroadcastsPage() {
     if (!activeAudience) return;
     let cancelled = false;
     setAudienceLoading(true);
-    const qs = new URLSearchParams({
-      optedInOnly: String(activeAudience.optedInOnly),
-      includeUnverifiedPhone: String(activeAudience.includeUnverifiedPhone),
-    });
-    fetch(`/api/admin/broadcasts/audience-preview?${qs.toString()}`)
-      .then((r) => r.json())
-      .then((json) => {
+    fetchAudiencePreview(activeAudience)
+      .then((preview) => {
         if (cancelled) return;
-        setAudienceCount(json?.data?.count ?? 0);
-      })
-      .catch(() => {
-        if (!cancelled) setAudienceCount(null);
+        setAudience(preview);
       })
       .finally(() => {
         if (!cancelled) setAudienceLoading(false);
@@ -170,13 +440,13 @@ export default function AdminBroadcastsPage() {
 
   const openQuick = () => {
     setQuick(EMPTY_QUICK);
-    setAudienceCount(null);
+    setAudience(null);
     setMode("quick");
   };
 
   const openAdvanced = () => {
     setAdv(EMPTY_ADV);
-    setAudienceCount(null);
+    setAudience(null);
     setMode("advanced");
   };
 
@@ -332,6 +602,8 @@ export default function AdminBroadcastsPage() {
         </div>
       </div>
 
+      <AudienceGlanceCard audience={pageAudience} loading={!pageAudience} />
+
       <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-gray-800/70 text-xs uppercase text-gray-400">
@@ -454,7 +726,7 @@ export default function AdminBroadcastsPage() {
 
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 space-y-2">
               <p className="text-xs font-semibold uppercase text-gray-500 tracking-wide">
-                Audience
+                Audience filters
               </p>
               <label className="flex items-center gap-2 text-sm text-gray-700">
                 <input
@@ -464,6 +736,13 @@ export default function AdminBroadcastsPage() {
                 />
                 Opted-in users only (recommended)
               </label>
+              {!quick.optedInOnly && (
+                <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 leading-snug">
+                  Sending to non-opted users risks Meta quality-rating drops
+                  and DPDP Act penalties. Only do this for transactional or
+                  utility content.
+                </p>
+              )}
               <Input
                 label="Limit (optional)"
                 type="number"
@@ -472,16 +751,6 @@ export default function AdminBroadcastsPage() {
                 placeholder="e.g. 50"
                 hint="Cap recipients — useful for testing"
               />
-              <div className="mt-1 flex items-center gap-2 text-sm">
-                <span className="text-gray-600">Estimated recipients:</span>
-                <span className="font-semibold text-gray-900">
-                  {audienceLoading
-                    ? "…"
-                    : audienceCount === null
-                    ? "—"
-                    : audienceCount.toLocaleString("en-IN")}
-                </span>
-              </div>
             </div>
           </div>
 
@@ -503,12 +772,10 @@ export default function AdminBroadcastsPage() {
               </p>
             </div>
 
-            {audienceCount === 0 && (
-              <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                <strong>No recipients match this audience right now.</strong> Ensure users
-                have saved their phone number and opted in via the account page or the popup.
-              </div>
-            )}
+            <AudienceInsights
+              audience={audience}
+              loading={audienceLoading}
+            />
           </div>
         </div>
 
@@ -521,7 +788,7 @@ export default function AdminBroadcastsPage() {
             className="flex-1"
             onClick={submitQuick}
             loading={submitting}
-            disabled={!audienceCount || audienceCount === 0}
+            disabled={!audience || audience.current === 0}
           >
             Queue Broadcast
           </Button>
@@ -580,7 +847,7 @@ export default function AdminBroadcastsPage() {
 
           <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 space-y-2">
             <p className="text-xs font-semibold uppercase text-gray-500 tracking-wide">
-              Audience
+              Audience filters
             </p>
             <label className="flex items-center gap-2 text-sm text-gray-700">
               <input
@@ -600,6 +867,13 @@ export default function AdminBroadcastsPage() {
               />
               Include unverified phone numbers
             </label>
+            {!adv.optedInOnly && (
+              <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 leading-snug">
+                Sending to non-opted users risks Meta quality-rating drops and
+                DPDP Act penalties. Only do this for transactional or utility
+                content.
+              </p>
+            )}
             <Input
               label="Limit (optional)"
               type="number"
@@ -608,17 +882,9 @@ export default function AdminBroadcastsPage() {
               placeholder="e.g. 500"
               hint="Cap the number of recipients for testing"
             />
-            <div className="mt-2 flex items-center gap-2 text-sm">
-              <span className="text-gray-600">Estimated recipients:</span>
-              <span className="font-semibold text-gray-900">
-                {audienceLoading
-                  ? "…"
-                  : audienceCount === null
-                  ? "—"
-                  : audienceCount.toLocaleString("en-IN")}
-              </span>
-            </div>
           </div>
+
+          <AudienceInsights audience={audience} loading={audienceLoading} />
 
           <div className="flex gap-2 pt-2">
             <Button
@@ -634,7 +900,7 @@ export default function AdminBroadcastsPage() {
               className="flex-1"
               onClick={submitAdvanced}
               loading={submitting}
-              disabled={!audienceCount || audienceCount === 0}
+              disabled={!audience || audience.current === 0}
             >
               Queue Broadcast
             </Button>
