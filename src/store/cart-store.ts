@@ -9,6 +9,39 @@ import {
   GST_RATE,
 } from "@/lib/constants";
 
+/** Legacy API / localStorage may use `discountValue` instead of `value`. */
+type CouponLike = CouponData & { discountValue?: number };
+
+function couponRuleAmount(coupon: CouponLike): number {
+  const raw = coupon.value ?? coupon.discountValue;
+  if (typeof raw === "number" && !Number.isNaN(raw)) return raw;
+  const n = Number(raw);
+  return Number.isNaN(n) ? NaN : n;
+}
+
+/** Ensures persisted coupons work after API shape changes. */
+function normalizeStoredCoupon(coupon: CouponLike | null): CouponData | null {
+  if (!coupon?.code || !coupon.type) return null;
+
+  if (coupon.type === "FREE_SHIPPING") {
+    return { ...coupon, value: 0 };
+  }
+
+  const rule = couponRuleAmount(coupon);
+  if (!Number.isNaN(rule)) {
+    return { ...coupon, value: rule };
+  }
+
+  const daRaw = coupon.discountAmount;
+  const daNum = daRaw != null ? Number(daRaw) : NaN;
+  if (!Number.isNaN(daNum)) {
+    // Leave `value` unset / invalid; totals use discountAmount until next apply.
+    return { ...coupon } as CouponData;
+  }
+
+  return null;
+}
+
 interface CartStore {
   items: CartItemDisplay[];
   coupon: CouponData | null;
@@ -51,13 +84,24 @@ function calculateCartTotals(
 
   let couponDiscount = 0;
   if (coupon) {
+    const c = coupon as CouponLike;
     if (coupon.type === "PERCENTAGE") {
-      couponDiscount = Math.round((subtotal * coupon.value) / 100);
-      if (coupon.maxDiscountAmount) {
-        couponDiscount = Math.min(couponDiscount, coupon.maxDiscountAmount);
+      const rule = couponRuleAmount(c);
+      if (!Number.isNaN(rule)) {
+        couponDiscount = Math.round((subtotal * rule) / 100);
+        if (coupon.maxDiscountAmount) {
+          couponDiscount = Math.min(couponDiscount, coupon.maxDiscountAmount);
+        }
+      } else if (coupon.discountAmount != null && !Number.isNaN(Number(coupon.discountAmount))) {
+        couponDiscount = Math.round(Number(coupon.discountAmount));
       }
     } else if (coupon.type === "FIXED") {
-      couponDiscount = Math.min(coupon.value, subtotal);
+      const rule = couponRuleAmount(c);
+      if (!Number.isNaN(rule)) {
+        couponDiscount = Math.min(rule, subtotal);
+      } else if (coupon.discountAmount != null && !Number.isNaN(Number(coupon.discountAmount))) {
+        couponDiscount = Math.min(Math.round(Number(coupon.discountAmount)), subtotal);
+      }
     }
   }
 
@@ -143,7 +187,16 @@ export const useCartStore = create<CartStore>()(
 
       applyCoupon: (coupon) => {
         set((state) => {
-          return { coupon, ...calculateCartTotals(state.items, coupon) };
+          const normalized =
+            normalizeStoredCoupon(coupon as CouponLike) ??
+            (((coupon as CouponLike)?.code
+              ? ({ ...(coupon as CouponLike) } as CouponData)
+              : null));
+
+          return {
+            coupon: normalized,
+            ...calculateCartTotals(state.items, normalized),
+          };
         });
       },
 
@@ -191,7 +244,7 @@ export const useCartStore = create<CartStore>()(
       merge: (persisted, current) => {
         const p = persisted as Partial<CartStore>;
         const items = p?.items ?? [];
-        const coupon = p?.coupon ?? null;
+        const coupon = normalizeStoredCoupon((p?.coupon as CouponLike) ?? null);
         return { ...current, items, coupon, ...calculateCartTotals(items, coupon) };
       },
     }

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRight, MapPin, CreditCard, ShoppingBag, Plus, AlertCircle } from "lucide-react";
+import { CouponCodeField } from "@/components/storefront/coupon-code-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCartStore } from "@/store/cart-store";
@@ -510,6 +511,7 @@ export default function CheckoutPage() {
           {/* Right: Summary */}
           <div className="bg-white rounded-2xl shadow-card p-5 sm:p-6 h-fit">
             <h3 className="font-semibold text-earth-dark text-lg mb-4">Order Summary</h3>
+            <CouponCodeField layout="embedded" />
             <div className="space-y-3">
               {items.map((item) => (
                 <div key={item.id} className="flex gap-3">

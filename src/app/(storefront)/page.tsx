@@ -14,6 +14,7 @@ import { storefrontListingWhere } from "@/lib/storefront-products";
 import { JsonLd } from "@/components/seo/json-ld";
 import { breadcrumbSchema } from "@/lib/schema";
 import { LatestStories } from "@/components/storefront/latest-stories";
+import { DEFAULT_OG_IMAGE_PATH } from "@/lib/og-defaults";
 
 const IngredientReveal = dynamic(() => import("@/components/storefront/ingredient-reveal").then(m => m.IngredientReveal));
 const ProcessStory = dynamic(() => import("@/components/storefront/process-story").then(m => m.ProcessStory));
@@ -29,9 +30,19 @@ export const metadata: Metadata = {
   description:
     "Discover Magadh Recipe — born from a mother's kitchen in Bihar. Shop authentic handcrafted pickles, achars, masalas & gift hampers. No preservatives, cold-pressed mustard oil, FSSAI certified. 50,000+ happy families. Free delivery above ₹499.",
   openGraph: {
+    type: "website",
+    url: "/",
     title: "Magadh Recipe — माँ के हाथ का स्वाद | Premium Pickles from Bihar",
     description:
       "Born from a mother's kitchen — authentic handcrafted pickles & achars. 50,000+ happy families. No preservatives. Free shipping above ₹499. Shop now!",
+    images: [{ url: DEFAULT_OG_IMAGE_PATH, alt: "Magadh Recipe — handcrafted pickles from Bihar" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Magadh Recipe — माँ के हाथ का स्वाद | Premium Pickles from Bihar",
+    description:
+      "Authentic handcrafted pickles & achars from Bihar. 50,000+ happy families. Free shipping above ₹499.",
+    images: [DEFAULT_OG_IMAGE_PATH],
   },
 };
 

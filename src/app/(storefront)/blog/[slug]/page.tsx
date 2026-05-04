@@ -16,6 +16,7 @@ import {
   faqSchema,
   type FaqItem,
 } from "@/lib/schema";
+import { DEFAULT_OG_IMAGE_PATH } from "@/lib/og-defaults";
 
 export const revalidate = 300;
 
@@ -76,7 +77,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const site = getSiteUrl();
   const canonical = `/blog/${post.slug}`;
-  const ogImage = post.ogImage ?? post.coverImage ?? undefined;
+  const rawOg = post.ogImage ?? post.coverImage ?? null;
+  const absoluteImage = rawOg
+    ? rawOg.startsWith("http")
+      ? rawOg
+      : `${site}${rawOg.startsWith("/") ? "" : "/"}${rawOg}`
+    : `${site}${DEFAULT_OG_IMAGE_PATH}`;
 
   return {
     title: post.metaTitle ?? `${post.title} | Magadh Recipe Journal`,
@@ -97,22 +103,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       modifiedTime: post.updatedAt.toISOString(),
       authors: post.authorName ? [post.authorName] : undefined,
       tags: post.tags,
-      images: ogImage
-        ? [
-            {
-              url: ogImage.startsWith("http") ? ogImage : `${site}${ogImage}`,
-              width: 1200,
-              height: 630,
-              alt: post.coverImageAlt ?? post.title,
-            },
-          ]
-        : undefined,
+      images: [
+        {
+          url: absoluteImage,
+          alt: post.coverImageAlt ?? post.title,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.excerpt ?? "",
-      images: ogImage ? [ogImage] : undefined,
+      images: [absoluteImage],
     },
   };
 }

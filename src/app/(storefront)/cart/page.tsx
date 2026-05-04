@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { Minus, Plus, Trash2, ShoppingBag, Tag, X } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { CouponCodeField } from "@/components/storefront/coupon-code-field";
 import { useCartStore } from "@/store/cart-store";
 import { formatCurrency } from "@/lib/utils";
 
@@ -21,34 +19,7 @@ export default function CartPage() {
     total,
     updateQuantity,
     removeItem,
-    applyCoupon,
-    removeCoupon,
   } = useCartStore();
-
-  const [couponInput, setCouponInput] = useState("");
-  const [couponError, setCouponError] = useState<string | null>(null);
-  const [couponLoading, setCouponLoading] = useState(false);
-
-  const handleCouponApply = async () => {
-    if (!couponInput.trim()) return;
-    setCouponError(null);
-    setCouponLoading(true);
-    const res = await fetch("/api/coupons/validate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code: couponInput.trim().toUpperCase(), subtotal }),
-    });
-    const data = await res.json();
-    setCouponLoading(false);
-
-    if (!res.ok || !data.success) {
-      setCouponError(data.message ?? "Invalid coupon");
-      return;
-    }
-
-    applyCoupon(data.data);
-    setCouponInput("");
-  };
 
   if (items.length === 0) {
     return (
@@ -141,40 +112,7 @@ export default function CartPage() {
 
           {/* Order Summary */}
           <div className="space-y-4">
-            {/* Coupon */}
-            <div className="bg-white rounded-2xl shadow-card p-5">
-              <p className="font-semibold text-sm text-earth-dark mb-3 flex items-center gap-2">
-                <Tag className="w-4 h-4 text-brand-500" />
-                Coupon Code
-              </p>
-              {coupon ? (
-                <div className="flex items-center justify-between bg-brand-50 rounded-lg px-3 py-2">
-                  <div>
-                    <p className="text-sm font-semibold text-brand-700">{coupon.code}</p>
-                    <p className="text-xs text-brand-600">
-                      − {formatCurrency(couponDiscount)} saved
-                    </p>
-                  </div>
-                  <button onClick={removeCoupon} className="text-gray-400 hover:text-spice-600">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <div className="flex gap-2">
-                  <Input
-                    value={couponInput}
-                    onChange={(e) => { setCouponInput(e.target.value.toUpperCase()); setCouponError(null); }}
-                    placeholder="Enter code"
-                    className="flex-1 h-9 text-sm"
-                    error={couponError ?? undefined}
-                    onKeyDown={(e) => e.key === "Enter" && handleCouponApply()}
-                  />
-                  <Button size="sm" variant="outline" onClick={handleCouponApply} loading={couponLoading}>
-                    Apply
-                  </Button>
-                </div>
-              )}
-            </div>
+            <CouponCodeField layout="card" />
 
             {/* Price Breakdown */}
             <div className="bg-white rounded-2xl shadow-card p-5">

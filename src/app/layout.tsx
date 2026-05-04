@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { Providers } from "@/providers/providers";
 import { getSiteUrl } from "@/lib/site-url";
+import { DEFAULT_OG_IMAGE_PATH } from "@/lib/og-defaults";
 import { JsonLd } from "@/components/seo/json-ld";
 import { organizationSchema, websiteSchema } from "@/lib/schema";
 
@@ -70,9 +71,7 @@ export const metadata: Metadata = {
       "Born from a mother's kitchen in Bihar — premium handcrafted pickles, achars & masalas. 50,000+ happy customers. No preservatives, pure ingredients, FSSAI certified. Free shipping above ₹499.",
     images: [
       {
-        url: "/images/og-image.jpg",
-        width: 1200,
-        height: 630,
+        url: DEFAULT_OG_IMAGE_PATH,
         alt: "Magadh Recipe — आचार की असली पहचान | Premium Handcrafted Pickles from Bihar",
       },
     ],
@@ -81,7 +80,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Magadh Recipe — Premium Handcrafted Pickles from Bihar",
     description: "Born from a mother's kitchen — authentic pickles, achars & masalas. 50K+ happy customers. No preservatives. Free shipping above ₹499.",
-    images: ["/images/og-image.jpg"],
+    images: [DEFAULT_OG_IMAGE_PATH],
     creator: "@magadhrecipe",
   },
   robots: {

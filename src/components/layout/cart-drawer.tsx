@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 import { useCartStore } from "@/store/cart-store";
+import { CouponCodeField } from "@/components/storefront/coupon-code-field";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 import { FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
@@ -202,6 +203,8 @@ export function CartDrawer() {
         {/* Footer */}
         {items.length > 0 && (
           <div className="border-t border-gray-100 bg-cream-100 px-6 py-5 space-y-4">
+            <CouponCodeField layout="drawer" />
+
             {/* Price Summary */}
             <div className="space-y-2 text-sm">
               <div className="flex justify-between text-earth-700">

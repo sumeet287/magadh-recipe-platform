@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { storefrontListingWhere } from "@/lib/storefront-products";
 import { getSiteUrl } from "@/lib/site-url";
+import { DEFAULT_OG_IMAGE_PATH } from "@/lib/og-defaults";
 import { ProductDetailClient } from "./product-detail-client";
 import { JsonLd } from "@/components/seo/json-ld";
 import { breadcrumbSchema, faqSchema, type FaqItem } from "@/lib/schema";
@@ -74,18 +75,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const defaultVariant = pickPrimaryVariant(product.variants);
   const image = product.images.find((i) => i.isPrimary) ?? product.images[0];
   const canonicalPath = `/products/${slug}`;
+  const site = getSiteUrl();
   const ogImage = image?.url
     ? image.url.startsWith("http")
       ? image.url
-      : `${getSiteUrl()}${image.url.startsWith("/") ? "" : "/"}${image.url}`
-    : undefined;
+      : `${site}${image.url.startsWith("/") ? "" : "/"}${image.url}`
+    : `${site}${DEFAULT_OG_IMAGE_PATH}`;
+
+  const desc =
+    product.metaDesc ??
+    product.shortDescription ??
+    `Buy ${product.name} online. Authentic handcrafted ${product.category.name} from Bihar.`;
 
   return {
     title: product.metaTitle ?? `${product.name} — Magadh Recipe`,
-    description:
-      product.metaDesc ??
-      product.shortDescription ??
-      `Buy ${product.name} online. Authentic handcrafted ${product.category.name} from Bihar.`,
+    description: desc,
     alternates: {
       canonical: canonicalPath,
     },
@@ -93,8 +97,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       type: "website",
       url: canonicalPath,
       title: product.name,
-      description: product.shortDescription ?? "",
-      images: ogImage ? [{ url: ogImage, alt: product.name }] : [],
+      description: desc,
+      images: [{ url: ogImage, alt: product.name }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.name,
+      description: desc,
+      images: [ogImage],
     },
     other: {
       "product:price:amount": String(defaultVariant?.price ?? 0),

@@ -52,6 +52,12 @@ export async function POST(req: NextRequest) {
       if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
         throw new ValidationError("Coupon usage limit reached");
       }
+      const userUsageCount = await prisma.couponUsage.count({
+        where: { couponId: coupon.id, userId: session.user.id },
+      });
+      if (coupon.perUserLimit && userUsageCount >= coupon.perUserLimit) {
+        throw new ValidationError("You have already used this coupon");
+      }
     }
 
     let subtotal = 0;

@@ -35,29 +35,53 @@ export function verifyRazorpaySignature(
   razorpayPaymentId: string,
   signature: string
 ): boolean {
-  const secret = process.env.RAZORPAY_KEY_SECRET!;
-  const body = `${razorpayOrderId}|${razorpayPaymentId}`;
-  const expectedSignature = crypto
-    .createHmac("sha256", secret)
-    .update(body)
-    .digest("hex");
-  return crypto.timingSafeEqual(
-    Buffer.from(expectedSignature, "hex"),
-    Buffer.from(signature, "hex")
-  );
+  try {
+    const secret = process.env.RAZORPAY_KEY_SECRET;
+    if (!secret || typeof signature !== "string" || !signature.trim()) return false;
+
+    const body = `${razorpayOrderId}|${razorpayPaymentId}`;
+    const expectedSignature = crypto
+      .createHmac("sha256", secret)
+      .update(body)
+      .digest("hex");
+
+    const expHex = expectedSignature.trim().toLowerCase();
+    const sigHex = signature.trim().toLowerCase();
+    const expBuf = Buffer.from(expHex, "hex");
+    const sigBuf = Buffer.from(sigHex, "hex");
+    if (!expHex || !sigHex || expBuf.length !== sigBuf.length || expBuf.length === 0) {
+      return false;
+    }
+
+    return crypto.timingSafeEqual(expBuf, sigBuf);
+  } catch {
+    return false;
+  }
 }
 
 export function verifyRazorpayWebhook(
   body: string,
   signature: string
 ): boolean {
-  const secret = process.env.RAZORPAY_WEBHOOK_SECRET!;
-  const expectedSignature = crypto
-    .createHmac("sha256", secret)
-    .update(body)
-    .digest("hex");
-  return crypto.timingSafeEqual(
-    Buffer.from(expectedSignature, "hex"),
-    Buffer.from(signature, "hex")
-  );
+  try {
+    const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+    if (!secret || typeof signature !== "string" || !signature.trim()) return false;
+
+    const expectedSignature = crypto
+      .createHmac("sha256", secret)
+      .update(body)
+      .digest("hex");
+
+    const expHex = expectedSignature.trim().toLowerCase();
+    const sigHex = signature.trim().toLowerCase();
+    const expBuf = Buffer.from(expHex, "hex");
+    const sigBuf = Buffer.from(sigHex, "hex");
+    if (!expHex || !sigHex || expBuf.length !== sigBuf.length || expBuf.length === 0) {
+      return false;
+    }
+
+    return crypto.timingSafeEqual(expBuf, sigBuf);
+  } catch {
+    return false;
+  }
 }
