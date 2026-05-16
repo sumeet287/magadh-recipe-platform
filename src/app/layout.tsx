@@ -8,6 +8,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { DEFAULT_OG_IMAGE_PATH } from "@/lib/og-defaults";
 import { JsonLd } from "@/components/seo/json-ld";
 import { organizationSchema, websiteSchema } from "@/lib/schema";
+import { SiteAnalytics } from "@/components/analytics/site-analytics";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -113,6 +114,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${cormorant.variable} font-sans antialiased bg-cream-100 text-earth-dark`}
       >
+        <SiteAnalytics />
         <JsonLd data={[organizationSchema(), websiteSchema()]} id="site-root" />
         <Providers>
           {children}
