@@ -4,6 +4,11 @@
  *
  * Requires Login with Amazon app credentials + seller refresh token.
  * @see https://developer-docs.amazon.com/sp-api/docs/connecting-to-the-selling-partner-api
+ *
+ * Listing modes:
+ * - **Incremental (default)** — `LastUpdatedAfter` = now − lookbackDays. Good for cron + “pull latest”.
+ * - **Historical (Created)** — `CreatedAfter/CreatedBefore` over a long span (≤ ~2 years for most marketplaces
+ *   per Orders API docs) + exhausts pagination. Imports order headers; line items optional / capped separately.
  */
 
 import { SellingPartnerApiAuth } from "@sp-api-sdk/auth";
@@ -15,13 +20,59 @@ import type { Money, Order, OrderItem } from "@sp-api-sdk/orders-api-v0";
 import { prisma } from "@/lib/prisma";
 
 const DEFAULT_MARKETPLACE_IN = "A21TJRUUN4KGV";
+/** Window for cron / incremental “recent changes” pulls */
 const DEFAULT_LOOKBACK_DAYS = 21;
+/** Max list-result pages when env does not disable the cap (~100 orders/page) */
 const DEFAULT_MAX_LIST_PAGES = 8;
 const DEFAULT_MAX_ORDER_ITEM_FETCHES = 40;
+
+const TWO_MINUTES_MS = 2 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** India + most regions: Orders API exposes roughly the last ~2 years of orders */
+const DEFAULT_HISTORICAL_CREATED_DAYS_MAX = 720;
+/** Chunk to avoid brittle single huge windows — 0 disables chunking (one Created window) */
+const DEFAULT_HISTORICAL_CHUNK_DAYS = 90;
 
 function envInt(name: string, fallback: number): number {
   const v = Number.parseInt(process.env[name] ?? "", 10);
   return Number.isFinite(v) && v > 0 ? v : fallback;
+}
+
+/** `0` ⇒ one big Created window (no chunking). Any positive integer = chunk size in days. */
+function envHistoricalChunkDays(fallback: number): number {
+  const raw = process.env.AMAZON_ORDERS_HISTORICAL_CHUNK_DAYS?.trim();
+  if (raw === undefined || raw === "") return fallback;
+  const v = Number.parseInt(raw, 10);
+  return Number.isFinite(v) && v >= 0 ? v : fallback;
+}
+
+/** Default 0 ⇒ headers-first backfill (use `syncAmazonMissingMarketplaceLines` after). Set env to pull lines inline. */
+function envHistoricalMaxOrderItemFetches(): number {
+  const raw = process.env.AMAZON_ORDERS_HISTORICAL_MAX_ORDER_ITEM_FETCHES?.trim();
+  if (raw === undefined || raw === "") return 0;
+  const v = Number.parseInt(raw, 10);
+  return Number.isFinite(v) && v >= 0 ? v : 0;
+}
+
+/**
+ * Incremental pulls: bounded pages by default (`8`). Set `"0"` in env ⇒ exhaust `NextToken` (risk: long runs).
+ */
+function envIncrementalMaxListPages(): number | null {
+  const raw = process.env.AMAZON_ORDERS_SYNC_MAX_LIST_PAGES?.trim();
+  if (raw === undefined || raw === "") return DEFAULT_MAX_LIST_PAGES;
+  const v = Number.parseInt(raw, 10);
+  return v === 0 ? null : Number.isFinite(v) && v > 0 ? v : DEFAULT_MAX_LIST_PAGES;
+}
+
+/**
+ * Historical migration: exhaustive listing per Created window unless you cap it explicitly.
+ */
+function envHistoricalMaxListPages(): number | null {
+  const raw = process.env.AMAZON_ORDERS_HISTORICAL_MAX_LIST_PAGES?.trim();
+  if (raw === undefined || raw === "") return null;
+  const v = Number.parseInt(raw, 10);
+  return v === 0 ? null : Number.isFinite(v) && v > 0 ? v : null;
 }
 
 function parseMoney(m?: Money): { amount: number; currency: string } {
@@ -106,8 +157,13 @@ async function fetchAllOrderItems(client: OrdersApiClient, amazonOrderId: string
 export interface AmazonOrdersSyncResult {
   ok: boolean;
   error?: string;
-  /** ISO range start used for lastUpdatedAfter */
+  listingMode?: "lastUpdated" | "createdHistorical";
+  /** Highest-level window / filter description for debugging */
+  querySummary?: string;
+  /** Incremental listing */
   lastUpdatedAfter?: string;
+  historicalChunks?: number;
+
   ordersSeen: number;
   ordersUpserted: number;
   orderItemFetches: number;
@@ -115,80 +171,63 @@ export interface AmazonOrdersSyncResult {
   listPages: number;
 }
 
-/**
- * Syncs recently updated orders into the local DB.
- * Headers come from `getOrders`; line items are fetched for the most recently
- * updated subset only (rate limits + cron time budget).
- */
-export async function syncAmazonOrdersFromSpApi(overrides?: {
-  lookbackDays?: number;
-  maxListPages?: number;
-  maxOrderItemFetches?: number;
-}): Promise<AmazonOrdersSyncResult> {
-  if (!isAmazonSpApiConfigured()) {
-    return {
-      ok: false,
-      error:
-        "Missing LWA credentials: set LWA_CLIENT_ID, LWA_CLIENT_SECRET, and LWA_REFRESH_TOKEN (see .env.example).",
-      ordersSeen: 0,
-      ordersUpserted: 0,
-      orderItemFetches: 0,
-      lineRowsWritten: 0,
-      listPages: 0,
-    };
-  }
+type ListExtras =
+  | { lastUpdatedAfter: string; lastUpdatedBefore?: never; createdAfter?: never; createdBefore?: never }
+  | { createdAfter: string; createdBefore: string; lastUpdatedAfter?: never; lastUpdatedBefore?: never };
 
-  const lookbackDays = overrides?.lookbackDays ?? envInt("AMAZON_ORDERS_SYNC_LOOKBACK_DAYS", DEFAULT_LOOKBACK_DAYS);
-  const maxListPages = overrides?.maxListPages ?? envInt("AMAZON_ORDERS_SYNC_MAX_LIST_PAGES", DEFAULT_MAX_LIST_PAGES);
-  const maxOrderItemFetches =
-    overrides?.maxOrderItemFetches ??
-    envInt("AMAZON_ORDERS_SYNC_MAX_ORDER_ITEM_FETCHES", DEFAULT_MAX_ORDER_ITEM_FETCHES);
-
-  const lastUpdatedAfter = new Date(Date.now() - lookbackDays * 24 * 60 * 60 * 1000).toISOString();
-
-  const client = createOrdersClient();
+async function collectOrdersForListExtras(
+  client: OrdersApiClient,
+  extras: ListExtras,
+  maxListPages: number | null
+): Promise<{ orders: Order[]; listPages: number; error?: string }> {
   const collected: Order[] = [];
   let listPages = 0;
   let nextToken: string | undefined;
 
   try {
-    for (let page = 0; page < maxListPages; page++) {
+    for (;;) {
+      if (maxListPages !== null && listPages >= maxListPages) break;
+
       const { data } = await client.getOrders(
         {
           marketplaceIds: marketplaceIds(),
-          lastUpdatedAfter,
+          ...(extras.lastUpdatedAfter
+            ? { lastUpdatedAfter: extras.lastUpdatedAfter }
+            : { createdAfter: extras.createdAfter!, createdBefore: extras.createdBefore! }),
           maxResultsPerPage: 100,
           nextToken,
         },
         {}
       );
+
       listPages += 1;
       const orders = data.payload?.Orders ?? [];
       collected.push(...orders);
       nextToken = data.payload?.NextToken;
       if (!nextToken) break;
+      if (maxListPages !== null && listPages >= maxListPages) break;
     }
+    return { orders: collected, listPages };
   } catch (e) {
     return {
-      ok: false,
-      error: formatSpApiFailure(e),
-      lastUpdatedAfter,
-      ordersSeen: collected.length,
-      ordersUpserted: 0,
-      orderItemFetches: 0,
-      lineRowsWritten: 0,
+      orders: collected,
       listPages,
+      error: formatSpApiFailure(e),
     };
   }
+}
 
-  // Newest activity first — line-item detail is the heaviest call.
-  collected.sort(
-    (a, b) => new Date(b.LastUpdateDate).getTime() - new Date(a.LastUpdateDate).getTime()
-  );
+async function applyOrderWrites(
+  client: OrdersApiClient,
+  collected: Order[],
+  maxOrderItemFetches: number
+): Promise<Pick<AmazonOrdersSyncResult, "error" | "ordersUpserted" | "orderItemFetches" | "lineRowsWritten">> {
+  collected.sort((a, b) => new Date(b.LastUpdateDate).getTime() - new Date(a.LastUpdateDate).getTime());
 
-  const detailTargets = new Set(
-    collected.slice(0, maxOrderItemFetches).map((o) => o.AmazonOrderId)
-  );
+  const detailTargets =
+    maxOrderItemFetches <= 0
+      ? new Set<string>()
+      : new Set(collected.slice(0, maxOrderItemFetches).map((o) => o.AmazonOrderId));
 
   let ordersUpserted = 0;
   let orderItemFetches = 0;
@@ -243,26 +282,320 @@ export async function syncAmazonOrdersFromSpApi(overrides?: {
       lineRowsWritten += items.length;
     } catch (err) {
       return {
-        ok: false,
         error: err instanceof Error ? err.message : "Database error during Amazon order upsert",
-        lastUpdatedAfter,
-        ordersSeen: collected.length,
         ordersUpserted,
         orderItemFetches,
         lineRowsWritten,
+      };
+    }
+  }
+
+  return { ordersUpserted, orderItemFetches, lineRowsWritten };
+}
+
+/**
+ * Incremental listing (cron / “Pull latest”): orders **updated** recently.
+ * Historical totals in analytics only grow after you’ve imported older **created** windows.
+ */
+export async function syncAmazonOrdersFromSpApi(overrides?: {
+  lookbackDays?: number;
+  maxListPages?: number | null;
+  maxOrderItemFetches?: number;
+}): Promise<AmazonOrdersSyncResult> {
+  if (!isAmazonSpApiConfigured()) {
+    return {
+      ok: false,
+      listingMode: "lastUpdated",
+      error:
+        "Missing LWA credentials: set LWA_CLIENT_ID, LWA_CLIENT_SECRET, and LWA_REFRESH_TOKEN (see .env.example).",
+      ordersSeen: 0,
+      ordersUpserted: 0,
+      orderItemFetches: 0,
+      lineRowsWritten: 0,
+      listPages: 0,
+    };
+  }
+
+  const lookbackDays = overrides?.lookbackDays ?? envInt("AMAZON_ORDERS_SYNC_LOOKBACK_DAYS", DEFAULT_LOOKBACK_DAYS);
+  const maxListPages = overrides?.maxListPages ?? envIncrementalMaxListPages();
+  const maxOrderItemFetches =
+    overrides?.maxOrderItemFetches ?? envInt("AMAZON_ORDERS_SYNC_MAX_ORDER_ITEM_FETCHES", DEFAULT_MAX_ORDER_ITEM_FETCHES);
+
+  const lastUpdatedAfter = new Date(Date.now() - lookbackDays * DAY_MS).toISOString();
+  const client = createOrdersClient();
+
+  const { orders: collected, listPages, error: listErr } = await collectOrdersForListExtras(
+    client,
+    { lastUpdatedAfter },
+    maxListPages
+  );
+
+  if (listErr) {
+    return {
+      ok: false,
+      listingMode: "lastUpdated",
+      querySummary: `LastUpdatedAfter ≥ ${lastUpdatedAfter}`,
+      lastUpdatedAfter,
+      error: listErr,
+      ordersSeen: collected.length,
+      ordersUpserted: 0,
+      orderItemFetches: 0,
+      lineRowsWritten: 0,
+      listPages,
+    };
+  }
+
+  const writeResult = await applyOrderWrites(client, collected, maxOrderItemFetches);
+  if (writeResult.error) {
+    return {
+      ok: false,
+      listingMode: "lastUpdated",
+      lastUpdatedAfter,
+      ordersSeen: collected.length,
+      listPages,
+      ordersUpserted: writeResult.ordersUpserted,
+      orderItemFetches: writeResult.orderItemFetches,
+      lineRowsWritten: writeResult.lineRowsWritten,
+      error: writeResult.error,
+    };
+  }
+
+  return {
+    ok: true,
+    listingMode: "lastUpdated",
+    querySummary: `LastUpdated ≥ ${lookbackDays}d`,
+    lastUpdatedAfter,
+    ordersSeen: collected.length,
+    ordersUpserted: writeResult.ordersUpserted,
+    orderItemFetches: writeResult.orderItemFetches,
+    lineRowsWritten: writeResult.lineRowsWritten,
+    listPages,
+  };
+}
+
+/**
+ * One-time-ish migration: pulls order **headers** for orders **created** in the last N days
+ * by walking `CreatedAfter/CreatedBefore` windows and exhausting `NextToken` pages where possible.
+ * SP-API (non JP/AU/SG) exposes ~2 years of orders — default `historicalDays` is 720.
+ */
+export async function syncAmazonOrdersHistoricalCreatedHeaders(overrides?: {
+  historicalDays?: number;
+  chunkDays?: number;
+  /** `null` ⇒ follow full pagination per window */
+  maxListPages?: number | null;
+  /** Set 0 for headers-only (fast migration); recover lines via `syncAmazonMissingMarketplaceLines` later */
+  maxOrderItemFetches?: number;
+}): Promise<AmazonOrdersSyncResult> {
+  if (!isAmazonSpApiConfigured()) {
+    return {
+      ok: false,
+      listingMode: "createdHistorical",
+      error:
+        "Missing LWA credentials: set LWA_CLIENT_ID, LWA_CLIENT_SECRET, and LWA_REFRESH_TOKEN (see .env.example).",
+      ordersSeen: 0,
+      ordersUpserted: 0,
+      orderItemFetches: 0,
+      lineRowsWritten: 0,
+      listPages: 0,
+    };
+  }
+
+  const historicalDays =
+    overrides?.historicalDays ?? envInt("AMAZON_ORDERS_HISTORICAL_CREATED_DAYS", DEFAULT_HISTORICAL_CREATED_DAYS_MAX);
+  const chunkDays =
+    overrides?.chunkDays ?? envHistoricalChunkDays(DEFAULT_HISTORICAL_CHUNK_DAYS);
+  const maxListPages = overrides?.maxListPages ?? envHistoricalMaxListPages();
+  const maxOrderItemFetches = overrides?.maxOrderItemFetches ?? envHistoricalMaxOrderItemFetches();
+
+  const nowMinus2Min = Date.now() - TWO_MINUTES_MS;
+  const cutoffMs = Math.max(0, nowMinus2Min - historicalDays * DAY_MS);
+
+  const client = createOrdersClient();
+  const merged = new Map<string, Order>();
+
+  let listPagesSum = 0;
+  let chunks = 0;
+
+  if (chunkDays <= 0) {
+    chunks = 1;
+    const createdAfter = new Date(cutoffMs).toISOString();
+    const createdBefore = new Date(nowMinus2Min).toISOString();
+    const {
+      orders: chunkOrders,
+      listPages,
+      error: listErr,
+    } = await collectOrdersForListExtras(client, { createdAfter, createdBefore }, maxListPages);
+    listPagesSum += listPages;
+    if (listErr) {
+      return {
+        ok: false,
+        listingMode: "createdHistorical",
+        querySummary: `Created ${createdAfter} … ${createdBefore}`,
+        historicalChunks: chunks,
+        error: listErr,
+        ordersSeen: chunkOrders.length,
+        ordersUpserted: 0,
+        orderItemFetches: 0,
+        lineRowsWritten: 0,
+        listPages: listPagesSum,
+      };
+    }
+    for (const o of chunkOrders) merged.set(o.AmazonOrderId, o);
+  } else {
+    const chunkMs = chunkDays * DAY_MS;
+
+    let windowStartMs = cutoffMs;
+
+    while (windowStartMs < nowMinus2Min) {
+      const windowEndMs = Math.min(nowMinus2Min, windowStartMs + chunkMs);
+      const createdAfter = new Date(windowStartMs).toISOString();
+      const createdBefore = new Date(windowEndMs).toISOString();
+      chunks += 1;
+
+      const {
+        orders: chunkOrders,
         listPages,
+        error: listErr,
+      } = await collectOrdersForListExtras(client, { createdAfter, createdBefore }, maxListPages);
+
+      listPagesSum += listPages;
+
+      if (listErr) {
+        return {
+          ok: false,
+          listingMode: "createdHistorical",
+          querySummary: `Created chunk ${chunks} (${createdAfter} … ${createdBefore}); partial merge`,
+          historicalChunks: chunks,
+          error: listErr,
+          ordersSeen: merged.size,
+          ordersUpserted: 0,
+          orderItemFetches: 0,
+          lineRowsWritten: 0,
+          listPages: listPagesSum,
+        };
+      }
+
+      for (const o of chunkOrders) merged.set(o.AmazonOrderId, o);
+      windowStartMs = windowEndMs;
+      if (windowEndMs >= nowMinus2Min) break;
+    }
+  }
+
+  const collected = [...merged.values()];
+
+  const writeResult = await applyOrderWrites(client, collected, maxOrderItemFetches);
+  if (writeResult.error) {
+    return {
+      ok: false,
+      listingMode: "createdHistorical",
+      historicalChunks: chunks || 1,
+      ordersSeen: collected.length,
+      listPages: listPagesSum,
+      ordersUpserted: writeResult.ordersUpserted,
+      orderItemFetches: writeResult.orderItemFetches,
+      lineRowsWritten: writeResult.lineRowsWritten,
+      error: writeResult.error,
+    };
+  }
+
+  return {
+    ok: true,
+    listingMode: "createdHistorical",
+    querySummary: `${historicalDays}d created-history · chunks=${chunks || 1}`,
+    historicalChunks: chunks || 1,
+    ordersSeen: collected.length,
+    ordersUpserted: writeResult.ordersUpserted,
+    orderItemFetches: writeResult.orderItemFetches,
+    lineRowsWritten: writeResult.lineRowsWritten,
+    listPages: listPagesSum,
+  };
+}
+
+export interface AmazonMissingLinesResult {
+  ok: boolean;
+  error?: string;
+  ordersExamined: number;
+  ordersWithLinesFetched: number;
+  lineRowsWritten: number;
+}
+
+/**
+ * Runs `GetOrderItems` for marketplace orders that exist but have zero line rows
+ * (e.g. after a headers-first historical import).
+ */
+export async function syncAmazonMissingMarketplaceLines(overrides?: { limit?: number }): Promise<AmazonMissingLinesResult> {
+  if (!isAmazonSpApiConfigured()) {
+    return {
+      ok: false,
+      error:
+        "Missing LWA credentials: set LWA_CLIENT_ID, LWA_CLIENT_SECRET, and LWA_REFRESH_TOKEN (see .env.example).",
+      ordersExamined: 0,
+      ordersWithLinesFetched: 0,
+      lineRowsWritten: 0,
+    };
+  }
+
+  const limit =
+    overrides?.limit ?? envInt("AMAZON_ORDERS_SYNC_MISSING_LINES_BATCH", DEFAULT_MAX_ORDER_ITEM_FETCHES);
+
+  const client = createOrdersClient();
+
+  const needing = await prisma.amazonMarketplaceOrder.findMany({
+    where: { lines: { none: {} } },
+    select: {
+      id: true,
+      amazonOrderId: true,
+    },
+    orderBy: { purchaseDate: "desc" },
+    take: Math.max(1, limit),
+  });
+
+  let lineRowsWritten = 0;
+  let ordersWithLinesFetched = 0;
+
+  for (const row of needing) {
+    let items: OrderItem[] = [];
+    try {
+      items = await fetchAllOrderItems(client, row.amazonOrderId);
+      ordersWithLinesFetched += 1;
+    } catch {
+      continue;
+    }
+
+    try {
+      await prisma.$transaction(async (tx) => {
+        await tx.amazonMarketplaceOrderLine.deleteMany({ where: { amazonOrderDbId: row.id } });
+        if (items.length === 0) return;
+        await tx.amazonMarketplaceOrderLine.createMany({
+          data: items.map((li) => {
+            const price = parseMoney(li.ItemPrice);
+            return {
+              amazonOrderDbId: row.id,
+              sku: li.SellerSKU ?? null,
+              title: li.Title ?? null,
+              quantity: Math.max(0, li.QuantityOrdered ?? 0),
+              itemSubtotal: price.amount,
+            };
+          }),
+        });
+      });
+      lineRowsWritten += items.length;
+    } catch (e) {
+      return {
+        ok: false,
+        error: e instanceof Error ? e.message : "Database error importing Amazon lines",
+        ordersExamined: needing.length,
+        ordersWithLinesFetched,
+        lineRowsWritten,
       };
     }
   }
 
   return {
     ok: true,
-    lastUpdatedAfter,
-    ordersSeen: collected.length,
-    ordersUpserted,
-    orderItemFetches,
+    ordersExamined: needing.length,
+    ordersWithLinesFetched,
     lineRowsWritten,
-    listPages,
   };
 }
 
