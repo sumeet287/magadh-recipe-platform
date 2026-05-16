@@ -74,13 +74,7 @@ export function AmazonAnalyticsDashboard({
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <AmazonManualSyncButton />
-        <p className="text-[11px] text-gray-600 max-w-md leading-relaxed">
-          Uses your SP-API credentials. If the button returns 400, add <code className="text-gray-500">LWA_*</code> env vars — see{" "}
-          <code className="text-gray-500">.env.example</code>.
-        </p>
-      </div>
+      <AmazonManualSyncButton />
 
       {!hasSyncedData && (
         <div className="rounded-xl border border-amber-800/45 bg-amber-950/25 px-4 py-3 text-sm text-amber-100/90 leading-relaxed">

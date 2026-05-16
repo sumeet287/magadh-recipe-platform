@@ -7,15 +7,6 @@ import { Loader2, RefreshCw, History, ListTree } from "lucide-react";
 type SyncResponse = {
   ok?: boolean;
   error?: string;
-  listingMode?: string;
-  ordersSeen?: number;
-  ordersUpserted?: number;
-  lineRowsWritten?: number;
-  listPages?: number;
-  historicalChunks?: number;
-  querySummary?: string;
-  ordersExamined?: number;
-  ordersWithLinesFetched?: number;
 };
 
 export function AmazonManualSyncButton() {
@@ -36,18 +27,6 @@ export function AmazonManualSyncButton() {
       if (!res.ok || !data.ok) {
         setMsg(data.error ?? "Sync failed.");
         return;
-      }
-      if (mode === "lines") {
-        setMsg(
-          `Line items for ${data.ordersWithLinesFetched ?? 0}/${data.ordersExamined ?? 0} checked orders (${data.lineRowsWritten ?? 0} rows written). Refreshing…`
-        );
-      } else {
-        const seen = data.ordersSeen ?? 0;
-        const cap = mode === "historical" ? ` · ${data.historicalChunks ?? 1} created-date chunk(s)` : "";
-        const listNote = typeof data.listPages === "number" ? ` · ${data.listPages} Orders list page(s)` : "";
-        setMsg(
-          `Listing: ${seen} order(s) from Amazon API${cap}${listNote}. DB upserts: ${data.ordersUpserted ?? 0} orders · ${data.lineRowsWritten ?? 0} line rows. Refreshing…`
-        );
       }
       router.refresh();
     } catch {
@@ -111,24 +90,11 @@ export function AmazonManualSyncButton() {
           Fetch SKU lines (batch)
         </button>
       </div>
-      <p className="text-[10px] text-gray-600 leading-relaxed max-w-3xl">
-        &quot;All time&quot; on this dashboard is <strong className="text-gray-500">everything in your database</strong>, not live Amazon.
-        <span className="mx-1">·</span>
-        <strong className="text-gray-500">Pull latest</strong> only lists orders Amazon reports as{" "}
-        <em>recently updated</em> (~21 days by default — override with{" "}
-        <code className="text-gray-500">AMAZON_ORDERS_SYNC_LOOKBACK_DAYS</code>).{" "}
-        <strong className="text-gray-500">Import full history</strong> walks <em>Created</em> windows so older orders appear. SP-API (India){" "}
-        exposes roughly orders from the{" "}
-        <a
-          href="https://developer-docs.amazon.com/sp-api/reference/getorders-v0"
-          className="text-brand-400 hover:underline"
-          target="_blank"
-          rel="noreferrer"
-        >
-          last two years in the Orders API
-        </a>.
-      </p>
-      {msg && <p className="text-xs text-gray-500 max-w-xl">{msg}</p>}
+      {msg && (
+        <p className="text-xs text-red-400/95 border border-red-900/55 bg-red-950/35 rounded-lg px-3 py-2 max-w-xl" role="alert">
+          {msg}
+        </p>
+      )}
     </div>
   );
 }
