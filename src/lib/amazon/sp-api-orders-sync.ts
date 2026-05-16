@@ -45,11 +45,22 @@ function resolveRegion(): SellingPartnerRegion {
   return "eu";
 }
 
+function readRequiredLwaEnv(): { clientId: string; clientSecret: string; refreshToken: string } {
+  const clientId = process.env.LWA_CLIENT_ID?.trim();
+  const clientSecret = process.env.LWA_CLIENT_SECRET?.trim();
+  const refreshToken = process.env.LWA_REFRESH_TOKEN?.trim();
+  if (!clientId || !clientSecret || !refreshToken) {
+    throw new Error("LWA_CLIENT_ID, LWA_CLIENT_SECRET, and LWA_REFRESH_TOKEN must be set");
+  }
+  return { clientId, clientSecret, refreshToken };
+}
+
 function createOrdersClient(): OrdersApiClient {
+  const { clientId, clientSecret, refreshToken } = readRequiredLwaEnv();
   const auth = new SellingPartnerApiAuth({
-    clientId: process.env.LWA_CLIENT_ID,
-    clientSecret: process.env.LWA_CLIENT_SECRET,
-    refreshToken: process.env.LWA_REFRESH_TOKEN,
+    clientId,
+    clientSecret,
+    refreshToken,
   });
   return new OrdersApiClient({
     auth,

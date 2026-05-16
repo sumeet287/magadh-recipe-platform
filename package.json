@@ -18,7 +18,7 @@
     "db:update-stock": "tsx scripts/update-inventory-stocks.ts",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
-    "type-check": "tsc --noEmit",
+    "type-check": "prisma generate && tsc --noEmit",
     "postinstall": "prisma generate"
   },
   "dependencies": {
