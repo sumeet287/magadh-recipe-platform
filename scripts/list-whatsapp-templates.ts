@@ -29,9 +29,9 @@ async function main() {
     console.log(`• ${tpl.name} [${tpl.status}] (${tpl.language}) — category: ${tpl.category}`);
   }
 
-  const orderTpl = data.data?.find((t: { name: string }) => t.name === "order_notification");
+  const orderTpl = data.data?.find((t: { name: string }) => t.name === "order_notifications");
   console.log(
-    `\n→ 'order_notification' template: ${
+    `\n→ 'order_notifications' template: ${
       orderTpl ? `EXISTS, status=${orderTpl.status}` : "NOT FOUND — needs to be created"
     }`
   );

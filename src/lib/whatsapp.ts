@@ -12,7 +12,7 @@ const DEFAULT_TEMPLATE_LANGUAGE = process.env.WHATSAPP_TEMPLATE_LANGUAGE ?? "en"
 
 export const WHATSAPP_TEMPLATES = {
   orderNotification:
-    process.env.WHATSAPP_TEMPLATE_ORDER_NOTIFICATION ?? "order_notification",
+    process.env.WHATSAPP_TEMPLATE_ORDER_NOTIFICATION ?? "order_notifications",
   abandonedCheckoutCoupon:
     process.env.WHATSAPP_TEMPLATE_ABANDONED_CHECKOUT ?? "abandoned_checkout_coupon",
   marketingBroadcast:

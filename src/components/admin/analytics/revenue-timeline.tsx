@@ -1,8 +1,13 @@
 import { formatCurrency } from "@/lib/utils";
-import type { DailyPoint } from "@/lib/analytics";
+
+interface TimelineDatum {
+  date: string;
+  revenue: number;
+  orders: number;
+}
 
 interface Props {
-  data: DailyPoint[];
+  data: TimelineDatum[];
   metric?: "revenue" | "orders";
 }
 

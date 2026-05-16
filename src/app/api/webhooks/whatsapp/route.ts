@@ -2,22 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { normalizeWhatsappNumber } from "@/lib/whatsapp";
 
-/**
- * Meta WhatsApp Cloud API webhook.
- *
- * GET: signature handshake used by Meta during webhook configuration.
- * POST: incoming events. We handle two categories:
- *   1. Inbound text messages — specifically opt-out keywords ("STOP",
- *      "UNSUBSCRIBE", "OPT OUT"). If the phone maps to a known User we flip
- *      `marketingOptIn` off so future broadcasts skip them. This is required
- *      by Meta policy + Indian DLT-style compliance.
- *   2. Delivery status updates — used to update BroadcastRecipient entries
- *      ("sent" → confirmed by WhatsApp, "delivered", "read", "failed").
- *
- * Meta retries non-2xx responses, so we always return 200 unless payload is
- * unreadable. Individual event failures are logged but never fail the batch.
- */
-
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 

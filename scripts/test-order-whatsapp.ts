@@ -23,7 +23,7 @@ async function main() {
   const customerLine = `${shipping.recipientName}, ${shipping.phone}, ${shipping.city} ${shipping.state}`;
   const details = `${itemsStr} | ${customerLine}`.replace(/\s{2,}/g, " ");
 
-  console.log(`Sending 'order_notification' template to ${adminPhone}...`);
+  console.log(`Sending 'order_notifications' template to ${adminPhone}...`);
 
   const res = await fetch(`https://graph.facebook.com/v21.0/${phoneNumberId}/messages`, {
     method: "POST",
@@ -33,7 +33,7 @@ async function main() {
       to: adminPhone,
       type: "template",
       template: {
-        name: "order_notification",
+        name: "order_notifications",
         language: { code: "en" },
         components: [
           {

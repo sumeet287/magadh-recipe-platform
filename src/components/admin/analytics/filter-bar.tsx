@@ -11,6 +11,8 @@ interface Props {
   from?: string;
   to?: string;
   rangeLabel: string;
+  /** Preserved across preset changes (analytics channel). Defaults to storefront. */
+  channel?: "website" | "amazon";
 }
 
 function toInputDate(dateStr?: string) {
@@ -23,7 +25,7 @@ function toInputDate(dateStr?: string) {
   return `${y}-${m}-${day}`;
 }
 
-export function AnalyticsFilterBar({ activePreset, from, to, rangeLabel }: Props) {
+export function AnalyticsFilterBar({ activePreset, from, to, rangeLabel, channel = "website" }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -37,12 +39,14 @@ export function AnalyticsFilterBar({ activePreset, from, to, rangeLabel }: Props
       params.set("preset", preset);
       params.delete("from");
       params.delete("to");
+      if (channel === "amazon") params.set("channel", "amazon");
+      else params.delete("channel");
       setShowCustom(preset === "custom");
       startTransition(() => {
         router.push(`/admin/analytics?${params.toString()}`);
       });
     },
-    [router, searchParams]
+    [channel, router, searchParams]
   );
 
   const applyCustom = useCallback(() => {
@@ -51,10 +55,12 @@ export function AnalyticsFilterBar({ activePreset, from, to, rangeLabel }: Props
     params.set("preset", "custom");
     params.set("from", fromDate);
     params.set("to", toDate);
+    if (channel === "amazon") params.set("channel", "amazon");
+    else params.delete("channel");
     startTransition(() => {
       router.push(`/admin/analytics?${params.toString()}`);
     });
-  }, [fromDate, toDate, router, searchParams]);
+  }, [channel, fromDate, toDate, router, searchParams]);
 
   const refresh = useCallback(() => {
     startTransition(() => {

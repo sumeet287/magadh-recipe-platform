@@ -410,6 +410,43 @@ model BroadcastRecipient {
   @@map("broadcast_recipients")
 }
 
+// ==================== AMAZON MARKETPLACE (SP-API sync → analytics tab) ====================
+//
+// Rows are populated by a separate Selling Partner API sync job (cron/script), not storefront.
+// Charts on /admin/analytics?channel=amazon read exclusively from these tables.
+
+model AmazonMarketplaceOrder {
+  id                   String                         @id @default(cuid())
+  amazonOrderId        String                         @unique
+  purchaseDate         DateTime
+  orderStatus          String
+  orderCurrency        String                         @default("INR")
+  orderTotalBuyer      Float                          @default(0)
+  fulfillmentChannel String? // e.g. AFN (FBA) / MFN (FBM) from SP-API
+  shipCity             String?
+  shipState            String?
+  lastSyncedAt         DateTime                       @updatedAt
+  lines                AmazonMarketplaceOrderLine[]
+
+  @@index([purchaseDate])
+  @@index([orderStatus])
+  @@map("amazon_marketplace_orders")
+}
+
+model AmazonMarketplaceOrderLine {
+  id              String                   @id @default(cuid())
+  amazonOrderDbId String
+  sku             String?
+  title           String?
+  quantity        Int                     @default(1)
+  itemSubtotal    Float                   @default(0)
+  amazonOrder     AmazonMarketplaceOrder  @relation(fields: [amazonOrderDbId], references: [id], onDelete: Cascade)
+
+  @@index([amazonOrderDbId])
+  @@index([sku])
+  @@map("amazon_marketplace_order_lines")
+}
+
 // ==================== ORDERS ====================
 
 model Order {
