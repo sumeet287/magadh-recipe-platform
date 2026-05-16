@@ -14,6 +14,7 @@ import { useCartStore } from "@/store/cart-store";
 import { formatCurrency } from "@/lib/utils";
 import { addressShape, type CheckoutInput } from "@/lib/validations/order";
 import { INDIAN_STATES_AND_UTS } from "@/lib/constants";
+import { ga4CartPayload, pushShopEvent } from "@/lib/analytics/shop-events";
 import { z } from "zod";
 
 const addressFormSchema = z.object({ address: addressShape });
@@ -71,6 +72,8 @@ export default function CheckoutPage() {
   const [useNewAddress, setUseNewAddress] = useState(false);
   const checkoutSessionIdRef = useRef<string | null>(null);
   const heartbeatTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const beginCheckoutSentRef = useRef(false);
+  const prevCheckoutStepRef = useRef<Step>("address");
 
   const { register, handleSubmit, getValues, watch, formState: { errors } } = useForm<{ address: CheckoutInput["address"] }>({
     resolver: zodResolver(addressFormSchema),
@@ -181,6 +184,33 @@ export default function CheckoutPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchedAddress?.name, watchedAddress?.phone, selectedAddressId, session?.user?.phone]);
 
+  useEffect(() => {
+    if (items.length === 0 || beginCheckoutSentRef.current) return;
+    beginCheckoutSentRef.current = true;
+    pushShopEvent(
+      {
+        event: "begin_checkout",
+        ecommerce: ga4CartPayload(items, total, coupon?.code),
+      },
+      session ?? null
+    );
+  }, [coupon?.code, items, session, total]);
+
+  useEffect(() => {
+    if (items.length === 0) return;
+    if (step === "review" && prevCheckoutStepRef.current !== "review") {
+      pushShopEvent(
+        {
+          event: "add_shipping_info",
+          ecommerce: ga4CartPayload(items, total, coupon?.code),
+          shipping_tier: "delivery",
+        },
+        session ?? null
+      );
+    }
+    prevCheckoutStepRef.current = step;
+  }, [coupon?.code, items, session, step, total]);
+
   if (items.length === 0) {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center gap-4">
@@ -240,6 +270,13 @@ export default function CheckoutPage() {
     if (!orderRes.ok) {
       setError(orderData.message ?? "Failed to create order");
       setProcessing(false);
+      pushShopEvent(
+        {
+          event: "mr_order_create_failed",
+          mr_reason: typeof orderData.message === "string" ? orderData.message : "unknown",
+        },
+        session ?? null
+      );
       return;
     }
 
@@ -255,8 +292,24 @@ export default function CheckoutPage() {
     if (!razorRes.ok) {
       setError("Payment gateway error. Please try again.");
       setProcessing(false);
+      pushShopEvent(
+        {
+          event: "mr_payment_init_failed",
+          mr_reason: typeof razorData?.message === "string" ? razorData.message : "payment_order_error",
+        },
+        session ?? null
+      );
       return;
     }
+
+    pushShopEvent(
+      {
+        event: "add_payment_info",
+        ecommerce: ga4CartPayload(items, total, coupon?.code),
+        payment_method: "razorpay",
+      },
+      session ?? null
+    );
 
     const rzp = new window.Razorpay({
       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
@@ -282,6 +335,7 @@ export default function CheckoutPage() {
         } else {
           setError("Payment verification failed. Contact support.");
           setProcessing(false);
+          pushShopEvent({ event: "mr_payment_verify_failed" }, session ?? null);
         }
       },
       prefill: {
@@ -290,7 +344,21 @@ export default function CheckoutPage() {
         contact: addressData.phone,
       },
       theme: { color: "#f97316" },
-      modal: { ondismiss: () => setProcessing(false) },
+      modal: {
+        ondismiss: () => {
+          setProcessing(false);
+          pushShopEvent(
+            {
+              event: "mr_payment_modal_dismiss",
+              mr_gateway: "razorpay",
+              ...(checkoutSessionIdRef.current
+                ? { mr_checkout_session_id: checkoutSessionIdRef.current }
+                : {}),
+            },
+            session ?? null
+          );
+        },
+      },
     });
     rzp.open();
   };

@@ -10,6 +10,8 @@ import { useWishlistStore } from "@/store/wishlist-store";
 import { useUIStore } from "@/store/ui-store";
 import { Badge, VegIndicator } from "@/components/ui/badge";
 import type { ProductCardData } from "@/types";
+import { useSession } from "next-auth/react";
+import { ga4ItemFromCardAdd, pushShopEvent } from "@/lib/analytics/shop-events";
 
 interface ProductCardProps {
   product: ProductCardData;
@@ -47,6 +49,7 @@ export function ProductCard({ product, className, compact = false }: ProductCard
   const { addItem, setOpen } = useCartStore();
   const { toggleWishlist, isInWishlist } = useWishlistStore();
   const { addToast, addRecentlyViewed } = useUIStore();
+  const { data: session } = useSession();
 
   const selectedVariant = product.variants[selectedVariantIdx];
   const primaryImage = product.images.find((img) => img.isPrimary) ?? product.images[0];
@@ -88,6 +91,21 @@ export function ProductCard({ product, className, compact = false }: ProductCard
       message: `${product.name} added to cart!`,
     });
     setOpen(true);
+
+    const ga = ga4ItemFromCardAdd(product, selectedVariantIdx, 1);
+    if (ga) {
+      pushShopEvent(
+        {
+          event: "add_to_cart",
+          ecommerce: {
+            currency: "INR",
+            value: ga.price ?? selectedVariant.price,
+            items: [ga],
+          },
+        },
+        session ?? null
+      );
+    }
   };
 
   const handleWishlist = (e: React.MouseEvent) => {

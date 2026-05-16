@@ -15,6 +15,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { breadcrumbSchema } from "@/lib/schema";
 import { LatestStories } from "@/components/storefront/latest-stories";
 import { DEFAULT_OG_IMAGE_PATH } from "@/lib/og-defaults";
+import { HomeShopBeacon } from "@/components/analytics/home-shop-beacon";
 
 const IngredientReveal = dynamic(() => import("@/components/storefront/ingredient-reveal").then(m => m.IngredientReveal));
 const ProcessStory = dynamic(() => import("@/components/storefront/process-story").then(m => m.ProcessStory));
@@ -303,6 +304,7 @@ export default async function HomePage() {
   return (
     <>
       <StructuredData />
+      <HomeShopBeacon />
 
       {/* Hero */}
       <HeroBanner />

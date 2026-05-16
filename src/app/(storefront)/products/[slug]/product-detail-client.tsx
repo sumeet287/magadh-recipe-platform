@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import {
@@ -29,6 +29,7 @@ import { cn, formatCurrency, calculateDiscount, isValidPincode } from "@/lib/uti
 import { FSSAI_REGISTRATION_NUMBER } from "@/lib/constants";
 import type { ProductCardData } from "@/types";
 import type { Product, ProductVariant, ProductImage, Category, Review, User } from "@prisma/client";
+import { ga4ItemFromDetailAdd, pushShopEvent } from "@/lib/analytics/shop-events";
 
 type ProductWithDetails = Product & {
   category: Category;
@@ -73,6 +74,23 @@ export function ProductDetailClient({ product, relatedProducts, avgRating }: Pro
   const isOutOfStock = !selectedVariant || selectedVariant.stock <= 0;
   const isLowStock = !isOutOfStock && selectedVariant.stock <= selectedVariant.lowStockAlert;
 
+  useEffect(() => {
+    if (!selectedVariant || selectedVariant.stock <= 0) return;
+    const line = ga4ItemFromDetailAdd(product, selectedVariant, quantity);
+    if (!line) return;
+    pushShopEvent(
+      {
+        event: "view_item",
+        ecommerce: {
+          currency: "INR",
+          value: Math.round(selectedVariant.price * quantity * 100) / 100,
+          items: [line],
+        },
+      },
+      session ?? null
+    );
+  }, [product.id, quantity, selectedVariant, session]);
+
   // Rating distribution
   const ratingDist = [5, 4, 3, 2, 1].map((star) => {
     const count = product.reviews.filter((r) => r.rating === star).length;
@@ -112,10 +130,31 @@ export function ProductDetailClient({ product, relatedProducts, avgRating }: Pro
 
     addToast({ type: "success", message: `Added ${product.name} to cart!` });
     setOpen(true);
+
+    const line = ga4ItemFromDetailAdd(product, selectedVariant, quantity);
+    if (line) {
+      pushShopEvent(
+        {
+          event: "add_to_cart",
+          ecommerce: {
+            currency: "INR",
+            value: Math.round(selectedVariant.price * quantity * 100) / 100,
+            items: [line],
+          },
+        },
+        session ?? null
+      );
+    }
   };
 
   const handleBuyNow = () => {
     handleAddToCart();
+    pushShopEvent(
+      {
+        event: "mr_buy_now",
+      },
+      session ?? null
+    );
     // Navigate to checkout
     window.location.href = "/checkout";
   };

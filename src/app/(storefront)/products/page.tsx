@@ -11,7 +11,9 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { ga4ListingItemsFromCards, pushShopEvent } from "@/lib/analytics/shop-events";
 import { ProductGrid } from "@/components/product/product-grid";
 import { Pagination } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
@@ -848,6 +850,7 @@ function FilterSidebar({
 function ProductsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session } = useSession();
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const listingQueryKey = searchParams.toString();
@@ -942,6 +945,34 @@ function ProductsContent() {
 
   const currentSort = params.sort ?? "featured";
   const currentPage = Number(params.page ?? 1);
+
+  useEffect(() => {
+    if (isPending) return;
+    const listName = categoryTitle ?? "All Products";
+    const listId =
+      listingQueryKey.length > 0
+        ? `listing:${listingQueryKey.slice(0, 160)}`
+        : `listing:all_products:page:${currentPage}:sort:${currentSort}`;
+    pushShopEvent(
+      {
+        event: "view_item_list",
+        ecommerce: {
+          item_list_id: listId,
+          item_list_name: listName,
+          items: ga4ListingItemsFromCards(products, { listId, listName }),
+        },
+      },
+      session ?? null
+    );
+  }, [
+    categoryTitle,
+    currentPage,
+    currentSort,
+    isPending,
+    listingQueryKey,
+    products,
+    session,
+  ]);
 
   return (
     <div>

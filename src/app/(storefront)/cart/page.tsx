@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { CouponCodeField } from "@/components/storefront/coupon-code-field";
 import { useCartStore } from "@/store/cart-store";
 import { formatCurrency } from "@/lib/utils";
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
+import { ga4CartPayload, pushShopEvent } from "@/lib/analytics/shop-events";
 
 export default function CartPage() {
   const {
@@ -20,6 +23,17 @@ export default function CartPage() {
     updateQuantity,
     removeItem,
   } = useCartStore();
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    pushShopEvent(
+      {
+        event: "view_cart",
+        ecommerce: ga4CartPayload(items, total, coupon?.code),
+      },
+      session ?? null
+    );
+  }, [coupon?.code, items, session, total]);
 
   if (items.length === 0) {
     return (
