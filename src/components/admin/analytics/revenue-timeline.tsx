@@ -16,6 +16,9 @@ function formatDateLabel(iso: string) {
   return d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 }
 
+/** `h-40` (10rem); use px heights for bars — % height breaks inside flex (`items-end`) columns without an explicit chart column height */
+const CHART_INNER_HEIGHT_PX = 160;
+
 export function RevenueTimeline({ data, metric = "revenue" }: Props) {
   const values = data.map((d) => (metric === "revenue" ? d.revenue : d.orders));
   const max = Math.max(1, ...values);
@@ -41,10 +44,14 @@ export function RevenueTimeline({ data, metric = "revenue" }: Props) {
       </div>
 
       <div className="mt-5">
-        <div className="flex items-end gap-[2px] h-40">
-          {data.map((d, i) => {
-            const v = metric === "revenue" ? d.revenue : d.orders;
-            const pct = (v / max) * 100;
+        <div className="flex gap-[2px] h-40 shrink-0" role="presentation">
+          {data.map((d) => {
+            const vRaw = metric === "revenue" ? d.revenue : d.orders;
+            const v = Number.isFinite(vRaw) ? vRaw : 0;
+            const barPx = Math.min(
+              CHART_INNER_HEIGHT_PX,
+              Math.max(v > 0 ? 3 : 0, (v / max) * CHART_INNER_HEIGHT_PX)
+            );
             const title =
               metric === "revenue"
                 ? `${formatDateLabel(d.date)} · ${formatCurrency(d.revenue)} · ${d.orders} orders`
@@ -53,11 +60,11 @@ export function RevenueTimeline({ data, metric = "revenue" }: Props) {
               <div
                 key={d.date}
                 title={title}
-                className="flex-1 min-w-[3px] group relative"
+                className="flex-1 min-w-[3px] min-h-0 h-full flex flex-col justify-end overflow-hidden rounded-t-sm group relative"
               >
                 <div
-                  className="w-full rounded-t-sm bg-brand-600 group-hover:bg-brand-400 transition-colors"
-                  style={{ height: `${Math.max(pct, v > 0 ? 2 : 0)}%` }}
+                  className="w-full shrink-0 rounded-t-sm bg-brand-600 group-hover:bg-brand-400 transition-colors"
+                  style={{ height: `${barPx}px` }}
                 />
               </div>
             );

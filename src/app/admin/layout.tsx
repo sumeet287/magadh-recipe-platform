@@ -63,9 +63,9 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   }
 
   return (
-    <div className="min-h-screen flex bg-gray-950">
+    <div className="min-h-screen flex bg-gray-950 overflow-x-hidden">
       {/* Sidebar */}
-      <aside className="hidden lg:flex flex-col w-60 bg-gray-900 border-r border-gray-800 fixed top-0 left-0 h-full z-40">
+      <aside className="hidden lg:flex flex-col w-60 shrink-0 bg-gray-900 border-r border-gray-800 fixed top-0 left-0 h-full z-40">
         {/* Logo */}
         <div className="px-5 py-4 border-b border-gray-800">
           <Link href="/admin" className="flex items-center gap-2.5">
@@ -122,8 +122,8 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       </aside>
 
       {/* Main */}
-      <div className="lg:pl-60 flex-1 flex flex-col min-h-screen">
-        <header className="sticky top-0 z-30 bg-gray-900/95 backdrop-blur border-b border-gray-800 px-6 py-3 flex items-center justify-between">
+      <div className="lg:pl-60 flex-1 flex flex-col min-h-screen min-w-0">
+        <header className="sticky top-0 z-30 shrink-0 bg-gray-900/95 backdrop-blur border-b border-gray-800 px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-1 text-xs text-gray-500">
             <Link href="/admin" className="hover:text-gray-300">Admin</Link>
             <ChevronRight className="w-3 h-3" />
@@ -132,7 +132,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             View Store →
           </Link>
         </header>
-        <main className="flex-1 p-6">{children}</main>
+        <main className="flex-1 min-w-0 p-6">{children}</main>
       </div>
     </div>
   );
