@@ -94,7 +94,7 @@ export function ProductDetailClient({ product, relatedProducts, avgRating }: Pro
         },
         session ?? null
       );
-    }, 0);
+    }, 120);
 
     return () => {
       cancelled = true;

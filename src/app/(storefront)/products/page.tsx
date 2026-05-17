@@ -968,7 +968,7 @@ function ProductsContent() {
         },
         session ?? null
       );
-    }, 0);
+    }, 120);
 
     return () => {
       cancelled = true;
