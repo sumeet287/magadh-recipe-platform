@@ -52,7 +52,7 @@ interface Props {
 }
 
 export function ProductDetailClient({ product, relatedProducts, avgRating }: Props) {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [selectedVariantIdx, setSelectedVariantIdx] = useState(() =>
     initialVariantIndex(product.variants)
   );
@@ -75,21 +75,32 @@ export function ProductDetailClient({ product, relatedProducts, avgRating }: Pro
   const isLowStock = !isOutOfStock && selectedVariant.stock <= selectedVariant.lowStockAlert;
 
   useEffect(() => {
+    if (status === "loading") return;
     if (!selectedVariant || selectedVariant.stock <= 0) return;
     const line = ga4ItemFromDetailAdd(product, selectedVariant, quantity);
     if (!line) return;
-    pushShopEvent(
-      {
-        event: "view_item",
-        ecommerce: {
-          currency: "INR",
-          value: Math.round(selectedVariant.price * quantity * 100) / 100,
-          items: [line],
+
+    let cancelled = false;
+    const t = window.setTimeout(() => {
+      if (cancelled) return;
+      pushShopEvent(
+        {
+          event: "view_item",
+          ecommerce: {
+            currency: "INR",
+            value: Math.round(selectedVariant.price * quantity * 100) / 100,
+            items: [line],
+          },
         },
-      },
-      session ?? null
-    );
-  }, [product.id, quantity, selectedVariant, session]);
+        session ?? null
+      );
+    }, 0);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
+  }, [product.id, quantity, selectedVariant, session, status]);
 
   // Rating distribution
   const ratingDist = [5, 4, 3, 2, 1].map((star) => {

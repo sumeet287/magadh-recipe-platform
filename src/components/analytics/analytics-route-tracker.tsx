@@ -2,7 +2,7 @@
 
 import { sendGAEvent, sendGTMEvent } from "@next/third-parties/google";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 function routeIgnorePrefixes(): string[] {
   const raw =
@@ -21,12 +21,17 @@ interface Props {
 }
 
 /**
+ * Skip first synthetic SPA message so it doesn't double-count with the full page_load hit.
+ * Module-level so React Strict Mode remounts don't reset the guard and double-fire.
+ */
+let virtualPageViewBootSkipped = false;
+
+/**
  * Sends a synthetic page-view on Next.js soft navigations only (skipped on first paint — full load hits GTM/GA tags).
  */
 export function AnalyticsRouteTracker({ analyticsMode }: Props) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const skippedFirstSoftNav = useRef(false);
 
   useEffect(() => {
     const prefixes = routeIgnorePrefixes();
@@ -38,30 +43,38 @@ export function AnalyticsRouteTracker({ analyticsMode }: Props) {
       return;
     }
 
-    if (!skippedFirstSoftNav.current) {
-      skippedFirstSoftNav.current = true;
-      return;
-    }
+    /**
+     * Debounce: pathname + searchParams can update in quick succession; Strict Mode runs effects twice in dev.
+     * One timer coalesces to a single virtual_page_view per navigation.
+     */
+    const t = window.setTimeout(() => {
+      if (typeof window === "undefined") return;
 
-    if (typeof window === "undefined") return;
+      if (!virtualPageViewBootSkipped) {
+        virtualPageViewBootSkipped = true;
+        return;
+      }
 
-    const pageLocation = `${window.location.origin}${base}${qs}`;
+      const pageLocation = `${window.location.origin}${base}${qs}`;
 
-    if (analyticsMode === "gtm") {
-      sendGTMEvent({
-        event: "virtual_page_view",
-        page_path: base,
+      if (analyticsMode === "gtm") {
+        sendGTMEvent({
+          event: "virtual_page_view",
+          page_path: base,
+          page_location: pageLocation,
+          page_title: document.title,
+        });
+        return;
+      }
+
+      sendGAEvent("event", "page_view", {
+        page_path: `${base}${qs}`,
         page_location: pageLocation,
         page_title: document.title,
       });
-      return;
-    }
+    }, 50);
 
-    sendGAEvent("event", "page_view", {
-      page_path: `${base}${qs}`,
-      page_location: pageLocation,
-      page_title: document.title,
-    });
+    return () => window.clearTimeout(t);
   }, [pathname, searchParams, analyticsMode]);
 
   return null;
